@@ -73,3 +73,5 @@ target/
 .python-version
 
 .idea
+
+.mypy_cache

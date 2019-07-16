@@ -1,4 +1,4 @@
-MASTER]
+[MASTER]
 # jobs=0 means 'use all CPUs'
 jobs=0
 
@@ -22,6 +22,7 @@ disable =
   too-few-public-methods,
   bad-continuation,
   useless-object-inheritance,
+  redefined-outer-name
 
 
 [REPORTS]

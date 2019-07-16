@@ -249,13 +249,3 @@ def test_feature():
     create_file("cassettes/test_b/test_feature.yaml", ip_cassette)
     result = testdir.runpytest()
     result.assert_outcomes(passed=2)
-
-
-# Write docstring
-# Write docs
-# Cache for cassettes? How much speed will it give?
-# Separation between kwargs for VCR and use_cassette?
-# Good defaults for ignore localhost, vault?
-# Adding checks mechanism?
-# custom kwargs for VCR - json cassettes?
-
