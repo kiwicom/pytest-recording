@@ -1,0 +1,13 @@
+[run]
+branch = True
+parallel = True
+source = pytest_recording
+
+[paths]
+source =
+   src/pytest_recording
+   .tox/*/lib/python*/site-packages/pytest_recording
+
+[report]
+show_missing = true
+precision = 2
