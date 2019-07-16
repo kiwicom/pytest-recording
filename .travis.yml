@@ -18,16 +18,16 @@ matrix:
       env: TOX_ENV=black
     - stage: tests
       python: 2.7
-      env: TOX_ENV=py27-tests
+      env: TOX_ENV=py27
     - stage: tests
       python: 3.5
-      env: TOX_ENV=py35-tests
+      env: TOX_ENV=py35
     - stage: tests
       python: 3.6
-      env: TOX_ENV=py36-tests
+      env: TOX_ENV=py36
     - stage: tests
       python: 3.7
-      env: TOX_ENV=py37-tests
+      env: TOX_ENV=py37
 
 install:
   - pip install tox codecov
