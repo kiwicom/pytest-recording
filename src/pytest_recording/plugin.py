@@ -28,6 +28,12 @@ def record_mode(request):
 
 
 @pytest.fixture
+def vcr_config():
+    """A shareable configuration for VCR.use_cassette call."""
+    return {}
+
+
+@pytest.fixture
 def vcr_markers(request):
     """All markers applied to the certain test together with cassette names associated with each marker."""
     markers = []
@@ -50,10 +56,11 @@ def vcr_markers(request):
 
 
 @pytest.fixture(autouse=True)
-def _vcr(vcr_markers, vcr_cassette_dir, record_mode):
+def _vcr(request, vcr_markers, vcr_cassette_dir, record_mode):
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
     if vcr_markers:
-        with make_cassette(vcr_cassette_dir, record_mode, vcr_markers):
+        config = request.getfixturevalue("vcr_config")
+        with make_cassette(vcr_cassette_dir, record_mode, vcr_markers, config):
             yield
     else:
         yield

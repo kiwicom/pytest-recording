@@ -1,3 +1,4 @@
+from copy import deepcopy
 from itertools import chain, starmap
 
 import attr
@@ -36,7 +37,7 @@ class CombinedPersister(FilesystemPersister):
         return starmap(unpack, zip(*all_content))
 
 
-def make_cassette(vcr_cassette_dir, record_mode, markers):
+def make_cassette(vcr_cassette_dir, record_mode, markers, config):
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
     vcr = VCR(
         path_transformer=VCR.ensure_suffix(".yaml"), cassette_library_dir=vcr_cassette_dir, record_mode=record_mode
@@ -45,7 +46,7 @@ def make_cassette(vcr_cassette_dir, record_mode, markers):
     extra_paths = get_extra_paths(closest_marker_paths[1:], markers[1:])
     persister = CombinedPersister(extra_paths)
     vcr.register_persister(persister)
-    return vcr.use_cassette(closest_marker_paths[0], **merge_kwargs(markers))
+    return vcr.use_cassette(closest_marker_paths[0], **merge_kwargs(config, markers))
 
 
 def get_extra_paths(paths, markers):
@@ -53,9 +54,9 @@ def get_extra_paths(paths, markers):
     return chain(paths, *(marker[0] for marker in markers if marker[0] is not None))
 
 
-def merge_kwargs(markers):
+def merge_kwargs(config, markers):
     """Merge all kwargs into a single dictionary to pass to `vcr.use_cassette`."""
-    kwargs = {}
+    kwargs = deepcopy(config)
     for _, marker in reversed(markers):
         if marker is not None:
             kwargs.update(marker.kwargs)

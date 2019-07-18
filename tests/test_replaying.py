@@ -1,3 +1,5 @@
+import pytest
+
 from pytest_recording._vcr import load_cassette
 
 
@@ -217,6 +219,35 @@ def test_own():
         )
     )
     create_file("cassettes/test_own_mark/test_own.yaml", ip_cassette)
+    # Then it should use a cassette with a default name
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+
+
+@pytest.mark.parametrize("scope", ("function", "module", "session"))
+def test_global_config(testdir, get_response_cassette, scope):
+    # When a test doesn't have its own mark
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+
+@pytest.fixture(scope="{}")
+def vcr_config():
+    return {{"before_record_request": before_request}}
+
+def before_request(request):
+    raise ValueError("Before")
+
+@pytest.mark.vcr("{}")
+def test_own():
+    with pytest.raises(ValueError):
+        requests.get("http://httpbin.org/get")
+    """.format(
+            scope, get_response_cassette
+        )
+    )
     # Then it should use a cassette with a default name
     result = testdir.runpytest()
     result.assert_outcomes(passed=1)
