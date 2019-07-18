@@ -8,7 +8,7 @@ upgrade-requirements:  ## Upgrade requirements to latest versions (use UPGRADE_A
 
 test:
 	ARCHFLAGS="-arch x86_64" pip install -r ./requirements.txt
-	pytest test -v
+	pytest tests -v
 
 tox-test:
 	tox -p all
@@ -17,7 +17,7 @@ pylint:
 	tox -e pylint
 
 black:
-	black -l 120 src/pytest_recording docs test setup.py
+	black -l 120 src/pytest_recording docs tests setup.py
 
 mypy:
 	mypy --config-file ./mypy.ini src/pytest_recording
