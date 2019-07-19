@@ -6,7 +6,7 @@ from vcr import VCR
 from vcr.persisters.filesystem import FilesystemPersister
 from vcr.serialize import deserialize
 
-from .utils import unpack, unique
+from .utils import unique, unpack
 
 
 def load_cassette(cassette_path, serializer):
