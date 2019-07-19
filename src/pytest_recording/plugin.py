@@ -5,6 +5,8 @@ import pytest
 
 from ._vcr import make_cassette
 
+RECORD_MODES = ("once", "new_episodes", "none", "all")
+
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "vcr: Mark the test as using VCR.py.")
@@ -16,7 +18,7 @@ def pytest_addoption(parser):
         "--record-mode",
         action="store",
         default="none",
-        choices=["once", "new_episodes", "none", "all"],
+        choices=RECORD_MODES,
         help='VCR.py record mode. Default to "none".',
     )
 
