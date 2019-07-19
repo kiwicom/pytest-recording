@@ -1,3 +1,5 @@
+import string
+
 import pytest
 
 
@@ -8,21 +10,30 @@ def test_cassette_recording(testdir):
         import requests
 
         @pytest.mark.vcr
-        def test_with_network(httpbin):
+        def test_{}(httpbin):
             assert requests.get(httpbin.url + "/get").status_code == 200
+
+        @pytest.mark.vcr
+        class TestSomething:
+            def test_with_network(self, httpbin):
+                assert requests.get(httpbin.url + "/get").status_code == 200
 
         @pytest.mark.vcr
         def test_without_network():
             pass
-    """
+    """.format(
+            string.ascii_letters
+        )
     )
 
     # If recording is enabled
     result = testdir.runpytest("--record-mode=all")
-    result.assert_outcomes(passed=2)
+    result.assert_outcomes(passed=3)
 
     # Then tests that use network will create cassettes
-    cassette_path = testdir.tmpdir.join("cassettes/test_cassette_recording/test_with_network.yaml")
+    cassette_path = testdir.tmpdir.join("cassettes/test_cassette_recording/test_{}.yaml".format(string.ascii_letters))
+    assert cassette_path.size()
+    cassette_path = testdir.tmpdir.join("cassettes/test_cassette_recording/TestSomething.test_with_network.yaml")
     assert cassette_path.size()
 
     # And tests that do not use network will not create any cassettes
