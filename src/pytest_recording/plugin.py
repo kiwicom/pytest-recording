@@ -47,11 +47,11 @@ def vcr_markers(request):
         else:
             # Only the closest marker could have a name generated from the given test
             if idx == 0 and marker in request.node.own_markers:
-                name = (request.getfixturevalue("default_cassette_name"),)
+                names = (request.getfixturevalue("default_cassette_name"),)
             else:
                 # Otherwise markers don't have any associated cassettes names
-                name = None
-            markers.append((name, marker))
+                names = ()
+            markers.append((names, marker))
     return markers
 
 
@@ -80,11 +80,14 @@ def vcr_cassette_dir(request):
 
 @pytest.fixture
 def default_cassette_name(request):
-    test_class = request.cls
+    return get_default_cassette_name(request.cls, request.node.name)
+
+
+def get_default_cassette_name(test_class, test_name):
     if test_class:
-        cassette_name = "{}.{}".format(test_class.__name__, request.node.name)
+        cassette_name = "{}.{}".format(test_class.__name__, test_name)
     else:
-        cassette_name = request.node.name
+        cassette_name = test_name
     # The cassette name should not contain characters that are forbidden in a file name
     # In this case there is a possibility to have a collision if there will be names with different
     # forbidden chars but the same resulting string.
