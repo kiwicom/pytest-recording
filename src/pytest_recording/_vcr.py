@@ -51,7 +51,7 @@ def make_cassette(vcr_cassette_dir, record_mode, markers, config):
 
 def get_extra_paths(paths, markers):
     """All extra paths from the closest mark and all paths from the other applied marks."""
-    return chain(paths, *(marker[0] for marker in markers if marker[0] is not None))
+    return chain(paths, *(marker[0] for marker in markers))
 
 
 def merge_kwargs(config, markers):
