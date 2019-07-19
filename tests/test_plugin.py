@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 import pytest
 
+from pytest_recording.plugin import RECORD_MODES
 
-@pytest.mark.parametrize("args, expected", ((("--record-mode=all",), "all"), ((), "none")))
+
+@pytest.mark.parametrize(
+    "args, expected", [(("--record-mode={}".format(mode),), mode) for mode in RECORD_MODES] + [((), "none")]
+)
 def test_record_mode(testdir, args, expected):
     testdir.makepyfile(
         """
