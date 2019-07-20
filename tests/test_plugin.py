@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import pytest
-
 from pytest_recording.plugin import RECORD_MODES
 
 
