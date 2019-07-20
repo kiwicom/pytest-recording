@@ -279,3 +279,23 @@ def test_feature():
     create_file("cassettes/test_b/test_feature.yaml", ip_cassette)
     result = testdir.runpytest()
     result.assert_outcomes(passed=2)
+
+
+def test_global_mark(testdir, create_file, get_cassette):
+    # When only global vcr mark is applied without parameters
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+pytestmark = [pytest.mark.vcr]
+
+
+def test_feature():
+    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+    """
+    )
+    # Then tests without own marks should use test function names for cassettes
+    create_file("cassettes/test_global_mark/test_feature.yaml", get_cassette)
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
