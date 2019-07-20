@@ -45,9 +45,8 @@ def vcr_markers(request):
 
 def _process_closest_mark(request, all_marks):
     """The closest mark to the test function is special."""
-    try:
-        closest_mark = next(all_marks)
-
+    closest_mark = next(all_marks, None)
+    if closest_mark is not None:
         # When the closest mark is not on the test function itself
         # Then a cassette with default name should be added for recording
         if closest_mark not in request.node.own_markers:
@@ -60,9 +59,6 @@ def _process_closest_mark(request, all_marks):
         else:
             names = closest_mark.args
         yield names, closest_mark
-    except StopIteration:
-        # No pytest.mark.vcr at all
-        pass
 
 
 @pytest.fixture(autouse=True)
