@@ -129,6 +129,28 @@ def test_custom_path_with_kwargs():
     result.assert_outcomes(passed=2)
 
 
+def test_single_kwargs(testdir):
+    # When the closest vcr mark contains kwargs
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+def before_request(request):
+    raise ValueError("Before")
+
+@pytest.mark.vcr(before_record_request=before_request)
+def test_single_kwargs():
+    with pytest.raises(ValueError, match="Before"):
+        requests.get("http://httpbin.org/get")
+
+    """
+    )
+    # Then the VCR instance associated with the test function should get these kwargs
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+
+
 def test_multiple_cassettes_in_mark(testdir, get_response_cassette, ip_response_cassette):
     # When multiple cassettes are specified in pytest.mark.vcr
     testdir.makepyfile(

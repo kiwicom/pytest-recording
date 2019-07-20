@@ -5,7 +5,7 @@ import os
 import pytest
 
 from . import network
-from ._vcr import make_cassette
+from ._vcr import use_cassette
 
 RECORD_MODES = ("once", "new_episodes", "none", "all")
 
@@ -89,7 +89,7 @@ def _vcr(request, vcr_markers, vcr_cassette_dir, record_mode):
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
     if vcr_markers:
         config = request.getfixturevalue("vcr_config")
-        with make_cassette(vcr_cassette_dir, record_mode, vcr_markers, config):
+        with use_cassette(vcr_cassette_dir, record_mode, vcr_markers, config):
             yield
     else:
         yield

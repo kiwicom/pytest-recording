@@ -37,21 +37,16 @@ class CombinedPersister(FilesystemPersister):
         return starmap(unpack, zip(*all_content))
 
 
-def make_cassette(vcr_cassette_dir, record_mode, markers, config):
+def use_cassette(vcr_cassette_dir, record_mode, markers, config):
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
     vcr = VCR(
         path_transformer=VCR.ensure_suffix(".yaml"), cassette_library_dir=vcr_cassette_dir, record_mode=record_mode
     )
-    closest_marker_paths, _ = markers[0]
-    extra_paths = get_extra_paths(closest_marker_paths[1:], markers[1:])
+    # flatten the paths
+    extra_paths = chain(*(marker[0] for marker in markers))
     persister = CombinedPersister(extra_paths)
     vcr.register_persister(persister)
-    return vcr.use_cassette(closest_marker_paths[0], **merge_kwargs(config, markers))
-
-
-def get_extra_paths(paths, markers):
-    """All extra paths from the closest mark and all paths from the other applied marks."""
-    return chain(paths, *(marker[0] for marker in markers))
+    return vcr.use_cassette(markers[0][0][0], **merge_kwargs(config, markers))
 
 
 def merge_kwargs(config, markers):
