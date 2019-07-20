@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- A pytest mark to block all network requests, except for VCR recording.
+
 `0.2.0`_ - 2019-07-18
 ---------------------
 

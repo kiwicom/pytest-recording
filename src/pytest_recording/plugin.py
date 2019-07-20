@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-import os
 from itertools import chain
+import os
 
 import pytest
 
+from . import network
 from ._vcr import make_cassette
 
 RECORD_MODES = ("once", "new_episodes", "none", "all")
@@ -11,6 +12,12 @@ RECORD_MODES = ("once", "new_episodes", "none", "all")
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "vcr: Mark the test as using VCR.py.")
+    config.addinivalue_line("markers", "block_network: Block network access except for VCR recording.")
+    network.install_pycurl_wrapper()
+
+
+def pytest_unconfigure():
+    network.uninstall_pycurl_wrapper()
 
 
 def pytest_addoption(parser):
@@ -21,6 +28,9 @@ def pytest_addoption(parser):
         default="none",
         choices=RECORD_MODES,
         help='VCR.py record mode. Default to "none".',
+    )
+    group.addoption(
+        "--block-network", action="store_true", default=False, help="Block network access except for VCR recording."
     )
 
 
@@ -59,6 +69,19 @@ def _process_closest_mark(request, all_marks):
         else:
             names = closest_mark.args
         yield names, closest_mark
+
+
+@pytest.fixture(autouse=True)
+def block_network(request, record_mode):
+    """Block network access in tests except for "none" VCR recording mode."""
+    marker = request.node.get_closest_marker(name="block_network")
+    # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
+    default_block = marker or request.config.getoption("--block-network")
+    if default_block and (not request.getfixturevalue("vcr_markers") or record_mode == "none"):
+        with network.block():
+            yield
+    else:
+        yield
 
 
 @pytest.fixture(autouse=True)

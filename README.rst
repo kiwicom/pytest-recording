@@ -30,6 +30,47 @@ Usage
     def test_single():
         assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
 
+Blocking network access
+~~~~~~~~~~~~~~~~~~~~~~~
+
+To have more confidence that your tests will not go over the wire, you can block it with ``pytest.mark.block_network`` mark:
+
+.. code:: python
+
+    import pytest
+    import requests
+
+    @pytest.mark.block_network
+    def test_multiple():
+        assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+
+    ...
+    # in case of access
+    RuntimeError: Network is disabled
+
+Besides marks, the network access could be blocked globally with ``--block-network`` command-line option.
+
+However, if VCR.py recording is enabled then, the network is not blocked for tests, that have ``pytest.mark.vcr``.
+
+Example:
+
+.. code:: python
+
+    import pytest
+    import requests
+
+    @pytest.mark.vcr
+    def test_multiple():
+        assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+
+Run ``pytest``:
+
+.. code:: bash
+
+    $ pytest --record-mode=all --block-network tests/
+
+The network blocking feature supports ``socket``-based transports and ``pycurl``.
+
 Python support
 --------------
 
