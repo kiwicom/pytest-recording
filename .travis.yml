@@ -8,6 +8,15 @@ stages:
   - linters
   - tests
 
+addons:
+  apt:
+    packages:
+      - libgnutls-dev
+
+env:
+  global:
+    - PYCURL_SSL_LIBRARY=gnutls
+
 matrix:
   include:
     - stage: linters
@@ -28,6 +37,9 @@ matrix:
     - stage: tests
       python: 3.7
       env: TOX_ENV=py37
+    - stage: tests
+      python: 3.7
+      env: TOX_ENV=no_pycurl
 
 install:
   - pip install tox codecov
