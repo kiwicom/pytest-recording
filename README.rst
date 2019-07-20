@@ -12,6 +12,7 @@ Features
 
 - Straightforward ``pytest.mark.vcr``, that reflects ``VCR.use_cassettes`` API;
 - Combining multiple VCR cassettes;
+- Network access blocking.
 
 Usage
 -----
@@ -29,6 +30,52 @@ Usage
     # cassettes/test_single.yaml will be used
     def test_single():
         assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+
+Configuration
+~~~~~~~~~~~~~
+
+The recording configuration could be provided with ``vcr_config`` fixture, which could be any scope - ``session``,
+``package``, ``module`` or ``function``. It should return a dictionary that will be passed directly to ``VCR.use_cassettes``
+under the hood.
+
+.. code:: python
+
+    import pytest
+
+    @pytest.fixture(scope="module")
+    def vcr_config():
+        return {"filter_headers": ["authorization"]}
+
+For more granular control you need to pass these keyword arguments to individual ``pytest.mark.vcr`` marks, and in this case
+all arguments will be merged into a single dictionary with the following priority (low -> high):
+
+- ``vcr_config`` fixture
+- all marks from the most broad scope ("session") to the most narrow one ("function")
+
+Example:
+
+.. code:: python
+
+    import pytest
+
+    pytestmark = [pytest.mark.vcr(ignore_localhost=True)
+
+    @pytest.fixture(scope="module")
+    def vcr_config():
+        return {"filter_headers": ["authorization"]}
+
+    @pytest.mark.vcr(filter_headers=[])
+    def test_one():
+        ...
+
+    @pytest.mark.vcr(filter_query_parameters=["api_key"])
+    def test_two():
+        ...
+
+Resulting VCR configs for each test:
+
+- ``test_one`` - ``{"ignore_localhost": True, "filter_headers": []}``
+- ``test_two`` - ``{"ignore_localhost": True, "filter_headers": ["authorization"], "filter_query_parameters": ["api_key"]}``
 
 Blocking network access
 ~~~~~~~~~~~~~~~~~~~~~~~
