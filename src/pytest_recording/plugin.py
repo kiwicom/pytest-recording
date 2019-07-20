@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from itertools import chain
 
 import pytest
 
@@ -38,23 +39,30 @@ def vcr_config():
 @pytest.fixture
 def vcr_markers(request):
     """All markers applied to the certain test together with cassette names associated with each marker."""
-    markers = []
-    for idx, marker in enumerate(request.node.iter_markers(name="vcr")):
-        if idx == 0:
-            if marker not in request.node.own_markers:
-                markers.append(((request.getfixturevalue("default_cassette_name"),), None))
-        if marker.args:
-            # All arguments given to the `pytest.mark.vcr` are cassettes names
-            markers.append((marker.args, marker))
+    all_markers = request.node.iter_markers(name="vcr")
+    return list(chain(_process_closest_mark(request, all_markers), ((marker.args, marker) for marker in all_markers)))
+
+
+def _process_closest_mark(request, all_marks):
+    """The closest mark to the test function is special."""
+    try:
+        closest_mark = next(all_marks)
+
+        # When the closest mark is not on the test function itself
+        # Then a cassette with default name should be added for recording
+        if closest_mark not in request.node.own_markers:
+            yield (request.getfixturevalue("default_cassette_name"),), None
+
+        # When no custom cassette name specified
+        # Then default name should be used
+        if not closest_mark.args:
+            names = (request.getfixturevalue("default_cassette_name"),)
         else:
-            # Only the closest marker could have a name generated from the given test
-            if idx == 0 and marker in request.node.own_markers:
-                names = (request.getfixturevalue("default_cassette_name"),)
-            else:
-                # Otherwise markers don't have any associated cassettes names
-                names = ()
-            markers.append((names, marker))
-    return markers
+            names = closest_mark.args
+        yield names, closest_mark
+    except StopIteration:
+        # No pytest.mark.vcr at all
+        pass
 
 
 @pytest.fixture(autouse=True)
