@@ -27,8 +27,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/0.3.0...HEAD
-.. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/0.2.0...0.3.0
-.. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/0.1.0...0.2.0
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.3.0...HEAD
+.. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
+.. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
 .. _#2: https://github.com/kiwicom/pytest-recording/issues/2
