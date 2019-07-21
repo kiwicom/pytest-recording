@@ -58,7 +58,7 @@ Example:
 
     import pytest
 
-    pytestmark = [pytest.mark.vcr(ignore_localhost=True)
+    pytestmark = [pytest.mark.vcr(ignore_localhost=True)]
 
     @pytest.fixture(scope="module")
     def vcr_config():
