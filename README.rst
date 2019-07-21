@@ -121,7 +121,10 @@ The network blocking feature supports ``socket``-based transports and ``pycurl``
 Python support
 --------------
 
-Pytest-recording supports Python 2.7, 3.5, 3.6, 3.7 and 3.8.
+Pytest-recording supports:
+
+- CPython 2.7, 3.5, 3.6, 3.7 and 3.8.
+- PyPy 7 (2.7 & 3.6)
 
 License
 -------

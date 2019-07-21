@@ -42,6 +42,14 @@ matrix:
       dist: xenial
       env: TOX_ENV=py38
     - stage: tests
+      python: pypy
+      dist: xenial
+      env: TOX_ENV=pypy
+    - stage: tests
+      python: pypy3
+      dist: xenial
+      env: TOX_ENV=pypy3
+    - stage: tests
       python: 3.7
       env: TOX_ENV=no_pycurl
 
