@@ -154,7 +154,8 @@ def test_multiple_marks(testdir, code):
 
 def test_kwargs_overriding(testdir):
     # Example from the docs
-    testdir.makepyfile("""
+    testdir.makepyfile(
+        """
 import pytest
 
 pytestmark = [pytest.mark.vcr(ignore_localhost=True)]
@@ -196,7 +197,8 @@ def test_two(vcr):
         query=(("api_key", "secret"),)
     )
     assert vcr._before_record_request(request) is None
-    """)
+    """
+    )
 
     # Different kwargs should be merged properly
     result = testdir.runpytest()
