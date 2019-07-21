@@ -85,12 +85,12 @@ def block_network(request, record_mode):
 
 
 @pytest.fixture(autouse=True)
-def _vcr(request, vcr_markers, vcr_cassette_dir, record_mode):
+def vcr(request, vcr_markers, vcr_cassette_dir, record_mode):
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
     if vcr_markers:
         config = request.getfixturevalue("vcr_config")
-        with use_cassette(vcr_cassette_dir, record_mode, vcr_markers, config):
-            yield
+        with use_cassette(vcr_cassette_dir, record_mode, vcr_markers, config) as cassette:
+            yield cassette
     else:
         yield
 
