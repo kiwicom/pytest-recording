@@ -150,3 +150,54 @@ def test_multiple_marks(testdir, code):
     # And only the closest cassette is writable
     assert second_cassette.size()
     assert not first_cassette.exists()
+
+
+def test_kwargs_overriding(testdir):
+    # Example from the docs
+    testdir.makepyfile("""
+import pytest
+
+pytestmark = [pytest.mark.vcr(ignore_localhost=True)]
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {"filter_headers": ["authorization"]}
+
+def make_request(**kwargs):
+    return type("Request", (), kwargs)
+
+@pytest.mark.vcr(filter_headers=[])
+def test_one(vcr):
+    # Headers should be untouched
+    request = make_request(headers={"authorization": "something"})
+    assert vcr._before_record_request(request).headers == {"authorization": "something"}
+
+    # Check `ignore_localhost`
+    request = make_request(host="127.0.0.1")
+    assert vcr._before_record_request(request) is None
+
+
+@pytest.mark.vcr(filter_query_parameters=["api_key"])
+def test_two(vcr):
+    request = make_request(
+        uri="https://www.example.com?api_key=secret",
+        headers={"authorization": "something"}, 
+        query=(("api_key", "secret"),)
+    )
+    processed = vcr._before_record_request(request)
+    assert processed.headers == {}
+    assert processed.uri == "https://www.example.com"
+    
+    # Check `ignore_localhost`
+    request = make_request(
+        uri="http://127.0.0.1", 
+        host="127.0.0.1", 
+        headers={"authorization": "something"}, 
+        query=(("api_key", "secret"),)
+    )
+    assert vcr._before_record_request(request) is None
+    """)
+
+    # Different kwargs should be merged properly
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=2)
