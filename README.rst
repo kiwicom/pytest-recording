@@ -3,8 +3,6 @@ pytest-recording
 
 |codecov| |Build| |Version| |Python versions| |License|
 
-**WIP**
-
 A pytest plugin that allows to record network interactions via VCR.py.
 
 Features
