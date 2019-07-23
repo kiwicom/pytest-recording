@@ -25,7 +25,7 @@ Usage
         assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
         assert requests.get("http://httpbin.org/ip").text == "IP CONTENT"
 
-    # cassettes/test_single.yaml will be used
+    # cassettes/{module_name}/test_single.yaml will be used
     def test_single():
         assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
 
