@@ -78,7 +78,7 @@ def block_network(request, record_mode):
     # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
     default_block = marker or request.config.getoption("--block-network")
     if default_block and (not request.getfixturevalue("vcr_markers") or record_mode == "none"):
-        with network.block():
+        with network.blocking_context():
             yield
     else:
         yield

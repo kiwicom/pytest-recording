@@ -91,20 +91,28 @@ def network_guard(*args, **kwargs):
     raise RuntimeError("Network is disabled")
 
 
-@contextmanager
 def block():
+    block_socket()
+    # NOTE: Applying socket blocking makes curl hangs - it should be carefully patched
+    block_pycurl()
+
+
+def unblock():
+    unblock_pycurl()
+    unblock_socket()
+
+
+@contextmanager
+def blocking_context():
     """Block connections via socket and pycurl.
 
     NOTE:
         Only connections to remotes are blocked in `socket`.
         Local servers are not touched since it could interfere with live servers needed for tests (e.g. pytest-httpbin)
     """
-    block_socket()
-    # NOTE: Applying socket blocking makes curl hangs - it should be carefully patched
-    block_pycurl()
+    block()
     try:
         yield
     finally:
         # an error could happen somewhere else when this ctx manager is on `yield`
-        unblock_pycurl()
-        unblock_socket()
+        unblock()
