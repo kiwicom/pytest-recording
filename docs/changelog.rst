@@ -6,6 +6,12 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- ``network.block`` / ``network.unblock`` functions for manual network blocking manipulations. `#8`_
+
+
 `0.3.0`_ - 2019-07-20
 ---------------------
 
@@ -31,4 +37,5 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#8: https://github.com/kiwicom/pytest-recording/issues/8
 .. _#2: https://github.com/kiwicom/pytest-recording/issues/2

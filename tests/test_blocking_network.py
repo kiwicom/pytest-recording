@@ -219,11 +219,11 @@ def test_critical_error(testdir):
     testdir.makepyfile(
         """
 import socket
-from pytest_recording.network import block
+from pytest_recording.network import blocking_context
 
 def test_critical_error():
     try:
-        with block():
+        with blocking_context():
             assert socket.socket.connect.__name__ == "network_guard"
             assert socket.socket.connect_ex.__name__ == "network_guard"
             raise ValueError
