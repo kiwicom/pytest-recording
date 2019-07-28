@@ -6,11 +6,13 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.3.1`_ - 2019-07-28
+---------------------
+
 Added
 ~~~~~
 
 - ``network.block`` / ``network.unblock`` functions for manual network blocking manipulations. `#8`_
-
 
 `0.3.0`_ - 2019-07-20
 ---------------------
