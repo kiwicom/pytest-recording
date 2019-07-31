@@ -1,3 +1,4 @@
+import json
 import string
 
 import pytest
@@ -112,6 +113,43 @@ def test_network(httpbin, value):
     assert not testdir.tmpdir.join("cassettes/test_forbidden_characters/test_network[").exists()
     cassette_path = testdir.tmpdir.join("cassettes/test_forbidden_characters/test_network[-A].yaml")
     assert cassette_path.size()
+
+
+def test_json_serializer(testdir):
+    custom_cassette_path = testdir.tmpdir.join("custom.json")
+    # When the `serializer` config option is set to "json"
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+pytestmark = [pytest.mark.vcr()]
+
+@pytest.mark.vcr(serializer="json")
+def test_network(httpbin):
+    assert requests.get(httpbin.url + "/ip").status_code == 200
+
+@pytest.mark.vcr("{}", serializer="json")
+def test_custom_name(httpbin):
+    assert requests.get(httpbin.url + "/ip").status_code == 200
+    """.format(
+            custom_cassette_path
+        )
+    )
+
+    result = testdir.runpytest("--record-mode=all", "-s")
+    result.assert_outcomes(passed=2)
+
+    # Then the created cassette should have "json" extension
+    cassette_path = testdir.tmpdir.join("cassettes/test_json_serializer/test_network.json")
+    assert cassette_path.size()
+
+    # and contain a valid JSON
+    data = cassette_path.read_text("utf8")
+    json.loads(data)
+
+    # and a custom cassette is created with "json" extension
+    assert custom_cassette_path.size()
 
 
 @pytest.mark.parametrize(

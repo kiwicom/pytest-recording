@@ -39,14 +39,22 @@ class CombinedPersister(FilesystemPersister):
 
 def use_cassette(vcr_cassette_dir, record_mode, markers, config):
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
-    vcr = VCR(
-        path_transformer=VCR.ensure_suffix(".yaml"), cassette_library_dir=vcr_cassette_dir, record_mode=record_mode
-    )
+    merged_config = merge_kwargs(config, markers)
+    path_transformer = get_path_transformer(merged_config)
+    vcr = VCR(path_transformer=path_transformer, cassette_library_dir=vcr_cassette_dir, record_mode=record_mode)
     # flatten the paths
     extra_paths = chain(*(marker[0] for marker in markers))
     persister = CombinedPersister(extra_paths)
     vcr.register_persister(persister)
-    return vcr.use_cassette(markers[0][0][0], **merge_kwargs(config, markers))
+    return vcr.use_cassette(markers[0][0][0], **merged_config)
+
+
+def get_path_transformer(config):
+    if "serializer" in config:
+        suffix = ".{}".format(config["serializer"])
+    else:
+        suffix = ".yaml"
+    return VCR.ensure_suffix(suffix)
 
 
 def merge_kwargs(config, markers):

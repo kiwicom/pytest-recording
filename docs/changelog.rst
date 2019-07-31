@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Fixed
+~~~~~
+
+- Do not add "yaml" extension to cassettes if JSON serializer is used. `#10`_
+
 `0.3.1`_ - 2019-07-28
 ---------------------
 
@@ -39,5 +44,6 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#10: https://github.com/kiwicom/pytest-recording/issues/10
 .. _#8: https://github.com/kiwicom/pytest-recording/issues/8
 .. _#2: https://github.com/kiwicom/pytest-recording/issues/2
