@@ -4,13 +4,15 @@ import os
 
 import pytest
 
-from . import network
+from . import mutations, network
+from ._compat import Iterable
 from ._vcr import use_cassette
 
 RECORD_MODES = ("once", "new_episodes", "none", "all")
 
 
 def pytest_configure(config):
+    # TODO. register mutation marker
     config.addinivalue_line("markers", "vcr: Mark the test as using VCR.py.")
     config.addinivalue_line("markers", "block_network: Block network access except for VCR recording.")
     network.install_pycurl_wrapper()
@@ -84,15 +86,53 @@ def block_network(request, record_mode):
         yield
 
 
+@pytest.fixture()
+def mutation():
+    """Default mutation applied to all cassettes if no `vcr_mutations` is specified.
+
+    Should be None by default. But, could be used to apply the same mutations for all cassettes in a certain context.
+    """
+    return
+
+
 @pytest.fixture(autouse=True)
 def vcr(request, vcr_markers, vcr_cassette_dir, record_mode):
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
     if vcr_markers:
         config = request.getfixturevalue("vcr_config")
-        with use_cassette(vcr_cassette_dir, record_mode, vcr_markers, config) as cassette:
+        mutation = request.getfixturevalue("mutation")
+        with use_cassette(vcr_cassette_dir, record_mode, vcr_markers, config, mutation) as cassette:
             yield cassette
     else:
         yield
+
+
+def pytest_generate_tests(metafunc):
+    """Generate tests if VCR mutations are applied."""
+    if should_apply_mutations(metafunc):
+        marker = metafunc.definition.get_closest_marker("vcr_mutations")
+        if not marker:
+            # No mutations applied
+            return
+        if not marker.kwargs:
+            targets = mutations.DEFAULT
+        elif not (len(marker.kwargs) == 1 and "mutations" in marker.kwargs):
+            pytest.fail("Some error message")
+        else:
+            targets = marker.kwargs["mutations"]
+            if isinstance(targets, Iterable):
+                targets = mutations.core.MutationGroup(targets)
+
+        metafunc.parametrize("mutation", targets.generate())
+
+
+def should_apply_mutations(metafunc):
+    """To perform mutations on a test we need:
+
+    - `none` record mode;
+    - `pytest.mark.vcr` applied to the test.
+    """
+    return metafunc.config.getoption("--record-mode") == "none" and list(metafunc.definition.iter_markers(name="vcr"))
 
 
 @pytest.fixture(scope="module")

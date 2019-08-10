@@ -9,13 +9,17 @@ from vcr.serialize import deserialize
 from .utils import unique, unpack
 
 
-def load_cassette(cassette_path, serializer):
+def load_cassette(cassette_path, serializer, mutation):
     try:
         with open(cassette_path) as f:
             cassette_content = f.read()
     except IOError:
         return [], []
-    return deserialize(cassette_content, serializer)
+    requests, cassettes = deserialize(cassette_content, serializer)
+    if mutation is not None:
+        for cassette in cassettes:
+            mutation.apply(cassette)
+    return requests, cassettes
 
 
 @attr.s(slots=True)
@@ -23,11 +27,12 @@ class CombinedPersister(FilesystemPersister):
     """Load extra cassettes, but saves only the first one."""
 
     extra_paths = attr.ib()
+    mutation = attr.ib()
 
     def load_cassette(self, cassette_path, serializer):
         all_paths = chain.from_iterable(((cassette_path,), self.extra_paths))
         # Pairs of 2 lists per cassettes:
-        all_content = (load_cassette(path, serializer) for path in unique(all_paths))
+        all_content = (load_cassette(path, serializer, self.mutation) for path in unique(all_paths))
         # Two iterators from all pairs from above: all requests, all responses
         # Notes.
         # 1. It is possible to do it with accumulators, for loops and `extend` calls,
@@ -37,14 +42,14 @@ class CombinedPersister(FilesystemPersister):
         return starmap(unpack, zip(*all_content))
 
 
-def use_cassette(vcr_cassette_dir, record_mode, markers, config):
+def use_cassette(vcr_cassette_dir, record_mode, markers, config, mutation):
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
     merged_config = merge_kwargs(config, markers)
     path_transformer = get_path_transformer(merged_config)
     vcr = VCR(path_transformer=path_transformer, cassette_library_dir=vcr_cassette_dir, record_mode=record_mode)
     # flatten the paths
     extra_paths = chain(*(marker[0] for marker in markers))
-    persister = CombinedPersister(extra_paths)
+    persister = CombinedPersister(extra_paths, mutation)
     vcr.register_persister(persister)
     return vcr.use_cassette(markers[0][0][0], **merged_config)
 

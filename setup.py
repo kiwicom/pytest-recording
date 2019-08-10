@@ -10,7 +10,7 @@ from setuptools import find_packages, setup
 install_requires = ["vcrpy>=2.0.1", "attrs"]
 
 if sys.version_info[0] == 2:
-    install_requires.append("pytest>=3.5.0,<5.0")
+    install_requires.extend(["pytest>=3.5.0,<5.0", "funcsigs>=1.0.2"])
 else:
     install_requires.append("pytest>=3.5.0")
 
