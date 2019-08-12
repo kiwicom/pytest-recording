@@ -22,11 +22,11 @@ interactions:
     method: GET
     uri: http://httpbin.org{}
   response:
-    body: {{string: !!python/unicode "{}"}}
+    body: {{string: '{}'}}
     headers: {{}}
     status: {{code: 200, message: OK}}"""
-GET_CASSETTE = CASSETTE_TEMPLATE.format("/get", "GET CONTENT")
-IP_CASSETTE = CASSETTE_TEMPLATE.format("/ip", "IP CONTENT")
+GET_CASSETTE = CASSETTE_TEMPLATE.format("/get", '{"get": true}')
+IP_CASSETTE = CASSETTE_TEMPLATE.format("/ip", '{"ip": true}')
 
 
 @pytest.fixture

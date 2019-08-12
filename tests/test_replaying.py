@@ -30,8 +30,8 @@ import requests
 @pytest.mark.vcr("{}")
 @pytest.mark.vcr("{}")
 def test_combined():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
-    assert requests.get("http://httpbin.org/ip").text == "IP CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
+    assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
 
 def test_no_vcr(httpbin):
     assert requests.get(httpbin.url + "/headers").status_code == 200
@@ -55,11 +55,11 @@ pytestmark = pytest.mark.vcr("{}")
 
 @pytest.mark.vcr("{}")
 def test_combined():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
-    assert requests.get("http://httpbin.org/ip").text == "IP CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
+    assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
 
 def test_single_cassette():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
         requests.get("http://httpbin.org/ip")
         """.format(
@@ -83,7 +83,7 @@ pytestmark = pytest.mark.vcr()
 
 @pytest.mark.vcr("{}")
 def test_combined():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
 """.format(
             get_response_cassette
         )
@@ -160,8 +160,8 @@ import requests
 
 @pytest.mark.vcr("{}", "{}")
 def test_custom_path():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
-    assert requests.get("http://httpbin.org/ip").text == "IP CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
+    assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
     """.format(
             get_response_cassette, ip_response_cassette
         )
@@ -184,7 +184,7 @@ pytestmark = [pytest.mark.vcr(CASSETTE)]
 
 @pytest.mark.vcr(CASSETTE, CASSETTE)
 def test_custom_path():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     """.format(
             get_response_cassette
         )
@@ -211,8 +211,8 @@ class TestSomething:
 
     @pytest.mark.vcr()
     def test_custom_path(self):
-        assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
-        assert requests.get("http://httpbin.org/ip").text == "IP CONTENT"
+        assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
+        assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
     """.format(
             get_response_cassette, ip_response_cassette
         )
@@ -233,8 +233,8 @@ pytestmark = [pytest.mark.vcr("{}")]
 
 
 def test_own():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
-    assert requests.get("http://httpbin.org/ip").text == "IP CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
+    assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
     """.format(
             get_response_cassette
         )
@@ -283,7 +283,7 @@ import requests
 
 @pytest.mark.vcr
 def test_feature():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
     """
     )
     testdir.makepyfile(
@@ -293,7 +293,7 @@ import requests
 
 @pytest.mark.vcr
 def test_feature():
-    assert requests.get("http://httpbin.org/ip").text == "IP CONTENT"
+    assert requests.get("http://httpbin.org/ip").text == '{"ip": true}'
     """
     )
     # Then cassettes should not collide with each other, they should be separate
@@ -314,7 +314,7 @@ pytestmark = [pytest.mark.vcr]
 
 
 def test_feature():
-    assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
     """
     )
     # Then tests without own marks should use test function names for cassettes

@@ -22,13 +22,13 @@ Usage
 
     @pytest.mark.vcr("/path/to/ip.yaml", "/path/to/get.yaml")
     def test_multiple():
-        assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
-        assert requests.get("http://httpbin.org/ip").text == "IP CONTENT"
+        assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+        assert requests.get("http://httpbin.org/ip").text == '{"ip": true}'
 
     # cassettes/{module_name}/test_single.yaml will be used
     @pytest.mark.vcr
     def test_single():
-        assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+        assert requests.get("http://httpbin.org/get").text == '{"get": true}'
 
 Configuration
 ~~~~~~~~~~~~~
@@ -88,7 +88,7 @@ To have more confidence that your tests will not go over the wire, you can block
 
     @pytest.mark.block_network
     def test_multiple():
-        assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+        assert requests.get("http://httpbin.org/get").text == '{"get": true}'
 
     ...
     # in case of access
@@ -107,7 +107,7 @@ Example:
 
     @pytest.mark.vcr
     def test_multiple():
-        assert requests.get("http://httpbin.org/get").text == "GET CONTENT"
+        assert requests.get("http://httpbin.org/get").text == '{"get": true}'
 
 Run ``pytest``:
 
