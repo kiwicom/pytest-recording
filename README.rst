@@ -117,6 +117,33 @@ Run ``pytest``:
 
 The network blocking feature supports ``socket``-based transports and ``pycurl``.
 
+Cassettes mutation
+~~~~~~~~~~~~~~~~~~
+
+With static cassettes, the responses are stored and expected, but how to test unexpected behavior of a remote service?
+What if it will respond with plain text instead of JSON? unexpected status code? missing field or wrong value in JSON?
+
+If you already have cassettes recorded, then mutation testing could help you to test these unusual scenarios.
+To enable it you need to add ``pytest.mark.vcr_mutations`` to your test and specify ``mutators`` keyword argument:
+
+.. code:: python
+
+    from pytest_recording import mutations
+
+    def make_call():
+        response = requests.get("http://httpbin.org/get")
+        ...
+
+    @pytest.mark.vcr_mutations(
+        mutations=mutations.Body()
+    )
+    def test_malformed_body(mutation):
+        with pytest.raises(MalformedBodyError):
+            make_call()
+
+
+It will generate N(???) mutations for the cassettes and will run that test.
+
 Contributing
 ------------
 

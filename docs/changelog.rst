@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- Add cassettes mutation support. `#13`_
+
 `0.3.2`_ - 2019-08-01
 ---------------------
 
@@ -49,6 +54,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#13: https://github.com/kiwicom/pytest-recording/issues/13
 .. _#10: https://github.com/kiwicom/pytest-recording/issues/10
 .. _#8: https://github.com/kiwicom/pytest-recording/issues/8
 .. _#2: https://github.com/kiwicom/pytest-recording/issues/2
