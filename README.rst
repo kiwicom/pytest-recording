@@ -117,6 +117,22 @@ Run ``pytest``:
 
 The network blocking feature supports ``socket``-based transports and ``pycurl``.
 
+Contributing
+------------
+
+To run the tests:
+
+.. code:: bash
+
+    $ tox -p all
+
+If you have troubles with installing ``pycurl`` with ``tox``, you could try to pass ``CPPFLAGS`` and ``LDFLAGS``
+with the ``tox`` command:
+
+.. code:: bash
+
+    $  CPPFLAGS="-I/usr/local/opt/openssl/include" LDFLAGS="-L/usr/local/opt/openssl/lib" tox -p all
+
 Python support
 --------------
 
