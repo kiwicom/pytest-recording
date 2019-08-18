@@ -321,3 +321,23 @@ def test_feature():
     create_file("cassettes/test_global_mark/test_feature.yaml", get_cassette)
     result = testdir.runpytest()
     result.assert_outcomes(passed=1)
+
+
+def test_assertions_rewrite(testdir, create_file, get_cassette):
+    # When a response match is not found
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+pytestmark = [pytest.mark.vcr]
+
+def test_feature():
+    assert requests.post("http://httpbin.org/get?a=1").text == "GET CONTENT"
+    """
+    )
+    create_file("cassettes/test_assertions_rewrite/test_feature.yaml", get_cassette)
+    result = testdir.runpytest()
+    result.assert_outcomes(failed=1)
+    # Then assertions should be rewritten
+    result.stdout.fnmatch_lines(["*assert 'POST' == 'GET'", "*Left contains one more item: ('a', '1')"])

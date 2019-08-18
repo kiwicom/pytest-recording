@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- Pytest assertion rewriting for not matched requests.
+
 `0.3.2`_ - 2019-08-01
 ---------------------
 
