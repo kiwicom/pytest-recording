@@ -28,6 +28,7 @@ setup(
     maintainer="Dmitry Dygalo",
     maintainer_email="dmitry.dygalo@kiwi.com",
     url="https://github.com/kiwicom/pytest-recording",
+    license="MIT",
     description="A pytest plugin that allows to record network interactions via VCR.py",
     long_description=read("README.rst"),
     long_description_content_type="text/x-rst",
