@@ -11,6 +11,11 @@ RECORD_MODES = ("once", "new_episodes", "none", "all")
 
 
 def pytest_configure(config):
+    if config.pluginmanager.has_plugin("vcr"):
+        raise RuntimeError(
+            "`pytest-recording` is incompatible with `pytest-vcr`. "
+            "Please, uninstall `pytest-vcr` in order to use `pytest-recording`."
+        )
     config.addinivalue_line("markers", "vcr: Mark the test as using VCR.py.")
     config.addinivalue_line("markers", "block_network: Block network access except for VCR recording.")
     network.install_pycurl_wrapper()
