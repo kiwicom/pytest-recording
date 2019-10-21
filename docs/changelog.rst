@@ -6,10 +6,13 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.3.4`_ - 2019-10-21
+---------------------
+
 Added
 ~~~~~
 
-- An error is raised if `pytest-vcr` is installed. `pytest-recording` is not compatible with it. `#20`_
+- An error is raised if ``pytest-vcr`` is installed. ``pytest-recording`` is not compatible with it. `#20`_
 
 `0.3.3`_ - 2019-08-18
 ---------------------
@@ -56,7 +59,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.3.3...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.3.4...HEAD
+.. _0.3.4: https://github.com/kiwicom/pytest-recording/compare/v0.3.3...v0.3.4
 .. _0.3.3: https://github.com/kiwicom/pytest-recording/compare/v0.3.2...v0.3.3
 .. _0.3.2: https://github.com/kiwicom/pytest-recording/compare/v0.3.1...v0.3.2
 .. _0.3.1: https://github.com/kiwicom/pytest-recording/compare/v0.3.0...v0.3.1
