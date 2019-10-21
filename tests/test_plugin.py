@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import pytest
-from pytest_recording.plugin import RECORD_MODES
 from pluggy.manager import PluginManager
+
+from pytest_recording.plugin import RECORD_MODES
 
 
 @pytest.mark.parametrize(

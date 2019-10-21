@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from itertools import chain
 import os
+from itertools import chain
 
 import pytest
 

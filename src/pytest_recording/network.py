@@ -1,6 +1,6 @@
-from contextlib import contextmanager
 import socket
 import sys
+from contextlib import contextmanager
 
 import attr
 
