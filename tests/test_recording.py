@@ -220,18 +220,18 @@ def test_one(vcr):
 def test_two(vcr):
     request = make_request(
         uri="https://www.example.com?api_key=secret",
-        headers={"authorization": "something"}, 
+        headers={"authorization": "something"},
         query=(("api_key", "secret"),)
     )
     processed = vcr._before_record_request(request)
     assert processed.headers == {}
     assert processed.uri == "https://www.example.com"
-    
+
     # Check `ignore_localhost`
     request = make_request(
-        uri="http://127.0.0.1", 
-        host="127.0.0.1", 
-        headers={"authorization": "something"}, 
+        uri="http://127.0.0.1",
+        host="127.0.0.1",
+        headers={"authorization": "something"},
         query=(("api_key", "secret"),)
     )
     assert vcr._before_record_request(request) is None
