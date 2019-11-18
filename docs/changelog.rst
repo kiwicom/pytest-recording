@@ -6,6 +6,14 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.3.5`_ - 2019-11-18
+---------------------
+
+Fixed
+~~~~~
+
+- Packaging issue in `0.3.4`_
+
 `0.3.4`_ - 2019-10-21
 ---------------------
 
@@ -59,7 +67,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.3.4...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.3.5...HEAD
+.. _0.3.5: https://github.com/kiwicom/pytest-recording/compare/v0.3.4...v0.3.5
 .. _0.3.4: https://github.com/kiwicom/pytest-recording/compare/v0.3.3...v0.3.4
 .. _0.3.3: https://github.com/kiwicom/pytest-recording/compare/v0.3.2...v0.3.3
 .. _0.3.2: https://github.com/kiwicom/pytest-recording/compare/v0.3.1...v0.3.2
