@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Fixed
+~~~~~
+
+- Setting attributes on ``pycurl.Curl`` instances
+
 `0.3.4`_ - 2019-10-21
 ---------------------
 
