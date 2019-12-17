@@ -6,6 +6,9 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.3.6`_ - 2019-12-17
+---------------------
+
 Fixed
 ~~~~~
 
@@ -72,7 +75,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.3.4...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.3.6...HEAD
+.. _0.3.6: https://github.com/kiwicom/pytest-recording/compare/v0.3.4...v0.3.6
 .. _0.3.5: https://github.com/kiwicom/pytest-recording/compare/v0.3.4...v0.3.4
 .. _0.3.4: https://github.com/kiwicom/pytest-recording/compare/v0.3.3...v0.3.4
 .. _0.3.3: https://github.com/kiwicom/pytest-recording/compare/v0.3.2...v0.3.3
