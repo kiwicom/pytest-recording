@@ -20,7 +20,15 @@ try:
             if _disable_pycurl and item == "perform":
                 raise RuntimeError("Network is disabled")
             handle = object.__getattribute__(self, "handle")
+            if item == "handle":
+                return handle
             return getattr(handle, item)
+
+        def __setattr__(self, key, value):
+            if key == "handle":
+                object.__setattr__(self, key, value)
+            else:
+                setattr(self.handle, key, value)
 
 
 except ImportError:

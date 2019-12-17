@@ -195,6 +195,16 @@ def test_work(httpbin):
 
 
 @pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
+def test_pycurl_setattr():
+    # When pycurl is used for network access
+    # And an attribute is set on an instance
+    curl = pycurl.Curl()
+    curl.attr = 42
+    # Then it should be proxied to the original Curl instance itself
+    assert curl.handle.attr == 42
+
+
+@pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
 def test_sys_modules(testdir):
     # When pycurl is patched
     testdir.makepyfile(
