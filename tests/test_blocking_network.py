@@ -101,6 +101,28 @@ def test_no_vcr_mark(httpbin):
     result.assert_outcomes(passed=2)
 
 
+def test_block_network_with_whitelist(testdir):
+    testdir.makepyfile(
+        """
+import socket
+import pytest
+import requests
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
+def test_a(httpbin):
+    response = requests.get(httpbin.url + "/ip")
+    assert response.status_code == 200
+    with pytest.raises(RuntimeError, match="^Network is disabled$"):
+        requests.get("http://example.com")
+    assert socket.socket.connect.__name__ == "network_guard"
+    assert socket.socket.connect_ex.__name__ == "network_guard"
+    """
+    )
+
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+
+
 def test_block_network_via_cmd(testdir):
     # When `--block-network` option is passed to CMD
     testdir.makepyfile(
@@ -127,6 +149,27 @@ def test_no_vcr_mark(httpbin):
     result = testdir.runpytest("--block-network")
     # Then all network interactions in all tests should be blocked
     result.assert_outcomes(passed=2)
+
+
+def test_block_network_via_cmd_with_whitelist(testdir):
+    testdir.makepyfile(
+        """
+import socket
+import pytest
+import requests
+
+def test_a(httpbin):
+    response = requests.get(httpbin.url + "/ip")
+    assert response.status_code == 200
+    with pytest.raises(RuntimeError, match="^Network is disabled$"):
+        requests.get("http://example.com")    
+    assert socket.socket.connect.__name__ == "network_guard"
+    assert socket.socket.connect_ex.__name__ == "network_guard"
+    """
+    )
+    result = testdir.runpytest("--block-network", "--allowed-hosts=127.0.0.*,127.0.1.1")
+    # Then all network interactions in all tests should be blocked
+    result.assert_outcomes(passed=1)
 
 
 def test_block_network_via_cmd_with_recording(testdir):
@@ -190,6 +233,44 @@ def test_work(httpbin):
     )
 
     result = testdir.runpytest()
+    # It should be blocked as well
+    result.assert_outcomes(passed=2)
+
+
+@pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
+def test_pycurl_whitelist(testdir):
+    # When pycurl is used for network access
+    testdir.makepyfile(
+        r"""
+import sys
+import pytest
+import pycurl
+from io import BytesIO
+
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
+def test_allowed(httpbin):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, httpbin.url + "/ip")
+    c.setopt(c.WRITEDATA, buffer)
+    c.perform()
+    c.close()
+    assert buffer.getvalue() == b'{"origin":"127.0.0.1"}\n'
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
+def test_blocked(httpbin):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, "http://example.com")
+    c.setopt(c.WRITEDATA, buffer)
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        c.perform()
+    c.close()
+    """
+    )
+
+    result = testdir.runpytest("-s")
     # It should be blocked as well
     result.assert_outcomes(passed=2)
 

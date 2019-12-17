@@ -1,6 +1,12 @@
+import re
 import socket
 import sys
 from contextlib import contextmanager
+
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 
 import attr
 
@@ -15,13 +21,20 @@ try:
         """
 
         handle = attr.ib(factory=pycurl.Curl)
+        url = None
 
         def __getattribute__(self, item):
-            if _disable_pycurl and item == "perform":
-                raise RuntimeError("Network is disabled")
             handle = object.__getattribute__(self, "handle")
+            if _disable_pycurl and item == "perform":
+                if _allowed_hosts is not None:
+                    combined = "(" + ")|(".join(_allowed_hosts) + ")"
+                    if re.match(combined, urlparse(self.url).hostname):
+                        return getattr(handle, item)
+                raise RuntimeError("Network is disabled")
             if item == "handle":
                 return handle
+            if item == "setopt":
+                return object.__getattribute__(self, "setopt")
             return getattr(handle, item)
 
         def __setattr__(self, key, value):
@@ -29,6 +42,11 @@ try:
                 object.__setattr__(self, key, value)
             else:
                 setattr(self.handle, key, value)
+
+        def setopt(self, option, value):
+            if option == pycurl.URL:
+                self.url = value
+            self.handle.setopt(option, value)
 
 
 except ImportError:
@@ -42,6 +60,7 @@ _original_connect_ex = socket.socket.connect_ex
 
 # Global switch for pycurl disabling
 _disable_pycurl = False
+_allowed_hosts = None
 
 
 @attr.s(slots=True, hash=True)
@@ -75,19 +94,23 @@ def uninstall_pycurl_wrapper():
     sys.modules["pycurl"] = pycurl
 
 
-def block_pycurl():
+def block_pycurl(allowed_hosts=None):
     global _disable_pycurl  # pylint: disable=global-statement
+    global _allowed_hosts  # pylint: disable=global-statement
     _disable_pycurl = True
+    _allowed_hosts = allowed_hosts
 
 
 def unblock_pycurl():
     global _disable_pycurl  # pylint: disable=global-statement
+    global _allowed_hosts  # pylint: disable=global-statement
     _disable_pycurl = False
+    _allowed_hosts = None
 
 
-def block_socket():
-    socket.socket.connect = network_guard
-    socket.socket.connect_ex = network_guard
+def block_socket(allowed_hosts=None):
+    socket.socket.connect = make_network_guard(_original_connect, allowed_hosts=allowed_hosts)
+    socket.socket.connect_ex = make_network_guard(_original_connect_ex, allowed_hosts=allowed_hosts)
 
 
 def unblock_socket():
@@ -95,14 +118,22 @@ def unblock_socket():
     socket.socket.connect_ex = _original_connect_ex
 
 
-def network_guard(*args, **kwargs):
-    raise RuntimeError("Network is disabled")
+def make_network_guard(original_func, allowed_hosts=None):
+    def network_guard(*args, **kwargs):
+        if allowed_hosts:
+            # Make a regex that matches if any of our regexes match.
+            combined = "(" + ")|(".join(allowed_hosts) + ")"
+            if re.match(combined, args[1][0]):
+                return original_func(*args, **kwargs)
+        raise RuntimeError("Network is disabled")
+
+    return network_guard
 
 
-def block():
-    block_socket()
+def block(allowed_hosts=None):
+    block_socket(allowed_hosts=allowed_hosts)
     # NOTE: Applying socket blocking makes curl hangs - it should be carefully patched
-    block_pycurl()
+    block_pycurl(allowed_hosts=allowed_hosts)
 
 
 def unblock():
@@ -111,14 +142,14 @@ def unblock():
 
 
 @contextmanager
-def blocking_context():
+def blocking_context(allowed_hosts=None):
     """Block connections via socket and pycurl.
 
     NOTE:
         Only connections to remotes are blocked in `socket`.
         Local servers are not touched since it could interfere with live servers needed for tests (e.g. pytest-httpbin)
     """
-    block()
+    block(allowed_hosts=allowed_hosts)
     try:
         yield
     finally:

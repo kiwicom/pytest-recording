@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- Ability to list allowed hosts for `block_network` `#7`_
+
 `0.3.6`_ - 2019-12-17
 ---------------------
 
@@ -88,4 +93,5 @@ Added
 .. _#20: https://github.com/kiwicom/pytest-recording/issues/20
 .. _#10: https://github.com/kiwicom/pytest-recording/issues/10
 .. _#8: https://github.com/kiwicom/pytest-recording/issues/8
+.. _#7: https://github.com/kiwicom/pytest-recording/issues/7
 .. _#2: https://github.com/kiwicom/pytest-recording/issues/2
