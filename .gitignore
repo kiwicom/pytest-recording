@@ -75,3 +75,5 @@ target/
 .idea
 
 .mypy_cache
+
+*.dist-info
