@@ -73,6 +73,61 @@ def test_no_blocking(httpbin):
     result.assert_outcomes(passed=1)
 
 
+def test_unix_socket(testdir):
+    testdir.makepyfile(
+        """
+from socket import socket, AF_UNIX, SOCK_STREAM
+import pytest
+
+def call(socket_name):
+    s = socket(AF_UNIX, SOCK_STREAM)
+    try:
+        return s.connect(socket_name)
+    finally:
+        s.close()
+
+@pytest.mark.block_network(allowed_hosts=["./allowed_socket"])
+def test_allowed():
+    # Error from actual socket call, that means it was not blocked
+    with pytest.raises(IOError):
+        call("./allowed_socket")
+
+@pytest.mark.block_network(allowed_hosts=["./allowed_socket"])
+def test_blocked():
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        call("./blocked_socket")
+    """
+    )
+
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=2)
+
+
+def test_other_socket(testdir):
+    # When not AF_UNIX, AF_INET or AF_INET6 socket is used
+    testdir.makepyfile(
+        """
+from socket import socket, AF_NETLINK, SOCK_RAW
+import pytest
+
+def call():
+    s = socket(AF_NETLINK, SOCK_RAW)
+    try:
+        return s.connect((0, 0))
+    finally:
+        s.close()
+
+@pytest.mark.block_network(allowed_hosts=["./allowed_socket", "127.0.0.1", "0"])
+def test_blocked():
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        call()
+    """
+    )
+    # Then socket.socket.connect call is blocked, even if resource name is in the allowed list
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+
+
 def test_block_network(testdir):
     # When record is disabled
     testdir.makepyfile(
