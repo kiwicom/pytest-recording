@@ -18,6 +18,9 @@ def pytest_configure(config):
         )
     config.addinivalue_line("markers", "vcr: Mark the test as using VCR.py.")
     config.addinivalue_line("markers", "block_network: Block network access except for VCR recording.")
+    config.addinivalue_line(
+        "markers", "allowed_hosts: List of regexes to match hosts to where connection must be allowed"
+    )
     network.install_pycurl_wrapper()
 
 
@@ -36,6 +39,12 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--block-network", action="store_true", default=False, help="Block network access except for VCR recording."
+    )
+    group.addoption(
+        "--allowed-hosts",
+        action="store",
+        default=None,
+        help="List of regexes, separated by coma, to match hosts to where connection must be allowed.",
     )
 
 
@@ -82,8 +91,11 @@ def block_network(request, record_mode):
     marker = request.node.get_closest_marker(name="block_network")
     # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
     default_block = marker or request.config.getoption("--block-network")
+    allowed_hosts = getattr(marker, "kwargs", {}).get("allowed_hosts") or request.config.getoption("--allowed-hosts")
+    if isinstance(allowed_hosts, str):
+        allowed_hosts = allowed_hosts.split(",")
     if default_block and (not request.getfixturevalue("vcr_markers") or record_mode == "none"):
-        with network.blocking_context():
+        with network.blocking_context(allowed_hosts=allowed_hosts):
             yield
     else:
         yield

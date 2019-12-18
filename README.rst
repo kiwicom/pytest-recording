@@ -117,6 +117,25 @@ Run ``pytest``:
 
 The network blocking feature supports ``socket``-based transports and ``pycurl``.
 
+It is possible to allow access to specified hosts during network blocking:
+
+.. code:: python
+
+    import pytest
+    import requests
+
+    @pytest.mark.block_network(allowed_hosts=["httpbin.*"]
+    def test_access():
+        assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+        with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+            requests.get("http://example.com")
+
+Or via command line option:
+
+.. code:: bash
+
+    $ pytest --record-mode=all --block-network --allowed-hosts=httpbin.*,localhost tests/
+
 Contributing
 ------------
 
