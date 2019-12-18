@@ -26,10 +26,9 @@ try:
         def __getattribute__(self, item):
             handle = object.__getattribute__(self, "handle")
             if _disable_pycurl and item == "perform":
-                if _allowed_hosts is not None:
-                    combined = "(" + ")|(".join(_allowed_hosts) + ")"
-                    if re.match(combined, urlparse(self.url).hostname):
-                        return getattr(handle, item)
+                host = urlparse(self.url).hostname
+                if not host or is_host_in_allowed_hosts(host, _allowed_hosts):
+                    return getattr(handle, item)
                 raise RuntimeError("Network is disabled")
             if item == "handle":
                 return handle
@@ -119,12 +118,14 @@ def unblock_socket():
 
 
 def make_network_guard(original_func, allowed_hosts=None):
-    def network_guard(*args, **kwargs):
-        if allowed_hosts:
-            # Make a regex that matches if any of our regexes match.
-            combined = "(" + ")|(".join(allowed_hosts) + ")"
-            if re.match(combined, args[1][0]):
-                return original_func(*args, **kwargs)
+    def network_guard(self, address, *args, **kwargs):
+        host = ""
+        if self.family in (socket.AF_INET, socket.AF_INET6):
+            host = address[0]
+        elif self.family == socket.AF_UNIX:
+            host = address
+        if is_host_in_allowed_hosts(host, allowed_hosts):
+            return original_func(self, address, *args, **kwargs)
         raise RuntimeError("Network is disabled")
 
     return network_guard
@@ -155,3 +156,11 @@ def blocking_context(allowed_hosts=None):
     finally:
         # an error could happen somewhere else when this ctx manager is on `yield`
         unblock()
+
+
+def is_host_in_allowed_hosts(host, allowed_hosts):
+    """Match provided host to a list of host regexps."""
+    if allowed_hosts is not None:
+        combined = "(" + ")|(".join(allowed_hosts) + ")"
+        return re.match(combined, host)
+    return False
