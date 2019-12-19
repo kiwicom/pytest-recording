@@ -22,7 +22,7 @@ def read(fname):
 
 setup(
     name="pytest-recording",
-    version="0.3.6",
+    version="0.4.0",
     author="Dmitry Dygalo",
     author_email="dmitry.dygalo@kiwi.com",
     maintainer="Dmitry Dygalo",
