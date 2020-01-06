@@ -1,0 +1,4 @@
+line-length:
+  line_length: 120
+MD034: false  # allow bare urls
+MD040: false  # text in ``` is not always code
