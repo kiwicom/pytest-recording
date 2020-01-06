@@ -194,7 +194,8 @@ def test_custom_path():
     mocked_load_cassette = mocker.patch("pytest_recording._vcr.load_cassette", wraps=load_cassette)
     result = testdir.runpytest()
     result.assert_outcomes(passed=1)
-    assert mocked_load_cassette.call_count == 1
+    # Default one + extra one
+    assert mocked_load_cassette.call_count == 2
 
 
 def test_class_mark(testdir, get_response_cassette, ip_response_cassette):
@@ -333,7 +334,7 @@ import requests
 pytestmark = [pytest.mark.vcr]
 
 def test_feature():
-    assert requests.post("http://httpbin.org/get?a=1").text == "GET CONTENT"
+    assert requests.post("http://httpbin.org/get?a=1").text == "{'get': true}"
     """
     )
     create_file("cassettes/test_assertions_rewrite/test_feature.yaml", get_cassette)
@@ -341,3 +342,25 @@ def test_feature():
     result.assert_outcomes(failed=1)
     # Then assertions should be rewritten
     result.stdout.fnmatch_lines(["*assert 'POST' == 'GET'", "*Left contains one more item: ('a', '1')"])
+
+
+def test_default_cassette_always_exist(testdir, create_file, ip_cassette, get_response_cassette):
+    # When any test with VCR mark is performed
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+
+@pytest.mark.vcr("{}")
+def test_feature():
+    assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
+    assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
+    """.format(
+            get_response_cassette
+        )
+    )
+    # Then the default cassette should always be used together with the extra one
+    create_file("cassettes/test_default_cassette_always_exist/test_feature.yaml", ip_cassette)
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
