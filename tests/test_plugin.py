@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import pytest
-from pluggy.manager import PluginManager
-
 from pytest_recording.plugin import RECORD_MODES
 
 
