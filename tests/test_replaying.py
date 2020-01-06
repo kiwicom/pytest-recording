@@ -1,5 +1,4 @@
 import pytest
-
 from pytest_recording._vcr import load_cassette
 
 

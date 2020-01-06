@@ -3,12 +3,13 @@ import socket
 import sys
 from contextlib import contextmanager
 
+import attr
+
 try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
 
-import attr
 
 try:
     import pycurl
@@ -146,9 +147,10 @@ def unblock():
 def blocking_context(allowed_hosts=None):
     """Block connections via socket and pycurl.
 
-    NOTE:
+    Note:
         Only connections to remotes are blocked in `socket`.
         Local servers are not touched since it could interfere with live servers needed for tests (e.g. pytest-httpbin)
+
     """
     block(allowed_hosts=allowed_hosts)
     try:

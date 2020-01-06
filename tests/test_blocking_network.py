@@ -159,7 +159,7 @@ def test_no_vcr_mark(httpbin):
 @pytest.mark.parametrize(
     "marker, cmd_options",
     (
-        pytest.param('@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])', "", id="block_marker",),
+        pytest.param('@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])', "", id="block_marker"),
         pytest.param("", ("--block-network", "--allowed-hosts=127.0.0.*,127.0.1.1"), id="block_cmd"),
     ),
 )
