@@ -44,7 +44,7 @@ def test_cassette_recording(testdir):
 
 def test_custom_cassette_name(testdir):
     # When a custom cassette name is passed to pytest.mark.vcr
-    cassette = testdir.tmpdir.join("custom.yaml")
+    cassette = testdir.tmpdir.join("cassettes/test_custom_cassette_name/test_with_network.yaml")
     testdir.makepyfile(
         """
         import pytest
@@ -53,7 +53,6 @@ def test_custom_cassette_name(testdir):
         @pytest.mark.vcr("{}")
         def test_with_network(httpbin):
             assert requests.get(httpbin.url + "/get").status_code == 200
-
     """.format(
             cassette
         )
@@ -62,7 +61,8 @@ def test_custom_cassette_name(testdir):
     result = testdir.runpytest("--record-mode=all")
     result.assert_outcomes(passed=1)
 
-    # Then tests with custom cassette names specified will create appropriate  cassettes
+    # Then tests with custom cassette names specified will create appropriate cassettes
+    # And writing will happen to the default cassette
     assert cassette.size()
 
 
@@ -148,8 +148,8 @@ def test_custom_name(httpbin):
     data = cassette_path.read_text("utf8")
     json.loads(data)
 
-    # and a custom cassette is created with "json" extension
-    assert custom_cassette_path.size()
+    # and a custom cassette is not created
+    assert not custom_cassette_path.exists()
 
 
 @pytest.mark.parametrize(
@@ -185,8 +185,9 @@ def test_multiple_marks(testdir, code):
     result = testdir.runpytest("--record-mode=all")
     result.assert_outcomes(passed=1)
 
-    # And only the closest cassette is writable
-    assert second_cassette.size()
+    # And only the default cassette is writable
+    assert testdir.tmpdir.join("cassettes/test_multiple_marks/test_with_network.yaml").size()
+    assert not second_cassette.exists()
     assert not first_cassette.exists()
 
 

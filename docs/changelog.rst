@@ -6,6 +6,15 @@ Changelog
 `Unreleased`_
 -------------
 
+Changed
+~~~~~~~
+
+- Default cassette (usually named as the test function name) always exists. This changes the behavior in two ways.
+  Firstly, recording will happen only to the default cassette and will not happen to any cassette passed as an argument to ``pytest.mark.vcr``
+  Secondly, it will allow "shared" + "specific" usage pattern, when the default cassette contains data relevant only to
+  the specific test and the custom one contains shared data, which is currently only possible with specifying full paths
+  to both cassettes in ``pytest.mark.vcr``.
+
 `0.4.0`_ - 2019-12-19
 ---------------------
 

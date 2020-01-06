@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from itertools import chain
 
 import pytest
 
@@ -63,26 +62,7 @@ def vcr_config():
 @pytest.fixture
 def vcr_markers(request):
     """All markers applied to the certain test together with cassette names associated with each marker."""
-    all_markers = request.node.iter_markers(name="vcr")
-    return list(chain(_process_closest_mark(request, all_markers), ((marker.args, marker) for marker in all_markers)))
-
-
-def _process_closest_mark(request, all_marks):
-    """The closest mark to the test function is special."""
-    closest_mark = next(all_marks, None)
-    if closest_mark is not None:
-        # When the closest mark is not on the test function itself
-        # Then a cassette with default name should be added for recording
-        if closest_mark not in request.node.own_markers:
-            yield (request.getfixturevalue("default_cassette_name"),), None
-
-        # When no custom cassette name specified
-        # Then default name should be used
-        if not closest_mark.args:
-            names = (request.getfixturevalue("default_cassette_name"),)
-        else:
-            names = closest_mark.args
-        yield names, closest_mark
+    return list(request.node.iter_markers(name="vcr"))
 
 
 @pytest.fixture(autouse=True)
@@ -106,7 +86,8 @@ def vcr(request, vcr_markers, vcr_cassette_dir, record_mode):
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
     if vcr_markers:
         config = request.getfixturevalue("vcr_config")
-        with use_cassette(vcr_cassette_dir, record_mode, vcr_markers, config) as cassette:
+        default_cassette = request.getfixturevalue("default_cassette_name")
+        with use_cassette(default_cassette, vcr_cassette_dir, record_mode, vcr_markers, config) as cassette:
             yield cassette
     else:
         yield
