@@ -61,6 +61,5 @@ def merge_kwargs(config, markers):
     """Merge all kwargs into a single dictionary to pass to `vcr.use_cassette`."""
     kwargs = deepcopy(config)
     for marker in reversed(markers):
-        if marker is not None:
-            kwargs.update(marker.kwargs)
+        kwargs.update(marker.kwargs)
     return kwargs
