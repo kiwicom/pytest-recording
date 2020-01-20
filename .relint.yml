@@ -19,6 +19,6 @@
     - ^(?!.*conftest).*\.py$
 
 - name: Use relative imports
-  pattern: "import schemathesis|from schemathesis"
+  pattern: "import pytest_recording|from pytest_recording"
   filename:
     - "src/**.py"
