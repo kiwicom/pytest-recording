@@ -364,3 +364,24 @@ def test_feature():
     create_file("cassettes/test_default_cassette_always_exist/test_feature.yaml", ip_cassette)
     result = testdir.runpytest()
     result.assert_outcomes(passed=1)
+
+
+def test_relative_cassette_path(testdir, create_file, ip_cassette, get_cassette):
+    # When a relative path is used in `pytest.mark.vcr`
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+
+@pytest.mark.vcr("ip_cassette.yaml")
+def test_feature():
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+    assert requests.get("http://httpbin.org/ip").text == '{"ip": true}'
+    """
+    )
+    create_file("cassettes/test_relative_cassette_path/test_feature.yaml", get_cassette)
+    create_file("cassettes/test_relative_cassette_path/ip_cassette.yaml", ip_cassette)
+    result = testdir.runpytest()
+    # Then it should be properly loaded and used
+    result.assert_outcomes(passed=1)

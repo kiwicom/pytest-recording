@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 from itertools import chain, starmap
 
@@ -42,8 +43,17 @@ def use_cassette(default_cassette, vcr_cassette_dir, record_mode, markers, confi
     merged_config = merge_kwargs(config, markers)
     path_transformer = get_path_transformer(merged_config)
     vcr = VCR(path_transformer=path_transformer, cassette_library_dir=vcr_cassette_dir, record_mode=record_mode)
-    # flatten the paths
-    extra_paths = chain(*(marker.args for marker in markers))
+
+    def extra_path_transformer(path):
+        """Paths in extras can be handled as relative and as absolute.
+
+        Relative paths will be checked in `vcr_cassette_dir`.
+        """
+        if not os.path.isabs(path):
+            return os.path.join(vcr_cassette_dir, path)
+        return path
+
+    extra_paths = [extra_path_transformer(path) for marker in markers for path in marker.args]
     persister = CombinedPersister(extra_paths)
     vcr.register_persister(persister)
     return vcr.use_cassette(default_cassette, **merged_config)
