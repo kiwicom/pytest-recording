@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Changed
+~~~~~~~
+
+- Restore undocumented ability to use relative paths in ``pytest.mark.vcr``. `#34`_
+
 `0.5.0`_ - 2020-01-09
 ---------------------
 
@@ -107,6 +112,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#34: https://github.com/kiwicom/pytest-recording/issues/34
 .. _#20: https://github.com/kiwicom/pytest-recording/issues/20
 .. _#10: https://github.com/kiwicom/pytest-recording/issues/10
 .. _#8: https://github.com/kiwicom/pytest-recording/issues/8
