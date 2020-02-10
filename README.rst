@@ -114,7 +114,7 @@ Run ``pytest``:
 
 .. code:: bash
 
-    $ pytest --record-mode=all --block-network tests/
+    $ pytest --record-mode=once --block-network tests/
 
 The network blocking feature supports ``socket``-based transports and ``pycurl``.
 
@@ -135,7 +135,7 @@ Or via command line option:
 
 .. code:: bash
 
-    $ pytest --record-mode=all --block-network --allowed-hosts=httpbin.*,localhost tests/
+    $ pytest --record-mode=once --block-network --allowed-hosts=httpbin.*,localhost tests/
 
 Contributing
 ------------
