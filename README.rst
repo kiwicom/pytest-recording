@@ -125,7 +125,7 @@ It is possible to allow access to specified hosts during network blocking:
     import pytest
     import requests
 
-    @pytest.mark.block_network(allowed_hosts=["httpbin.*"]
+    @pytest.mark.block_network(allowed_hosts=["httpbin.*"])
     def test_access():
         assert requests.get("http://httpbin.org/get").text == '{"get": true}'
         with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
