@@ -42,6 +42,49 @@ def test_cassette_recording(testdir):
     assert not cassette_path.exists()
 
 
+def test_cassette_recording_rewrite(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.vcr
+        def test_{}(httpbin):
+            assert requests.get(httpbin.url + "/uuid").status_code == 200
+
+        @pytest.mark.vcr
+        class TestSomething:
+            def test_with_network(self, httpbin):
+                assert requests.get(httpbin.url + "/uuid").status_code == 200
+    """.format(
+            string.ascii_letters
+        )
+    )
+
+    # If recording is enabled
+    result = testdir.runpytest("--record-mode=rewrite")
+    result.assert_outcomes(passed=2)
+
+    # Then tests that use network will create cassettes
+    test_function_cassette_path = testdir.tmpdir.join(
+        "cassettes/test_cassette_recording_rewrite/test_{}.yaml".format(string.ascii_letters)
+    )
+    test_function_size = test_function_cassette_path.size()
+    assert test_function_size
+    test_class_cassette_path = testdir.tmpdir.join(
+        "cassettes/test_cassette_recording_rewrite/TestSomething.test_with_network.yaml"
+    )
+    test_class_size = test_class_cassette_path.size()
+    assert test_class_size
+
+    # Second run will pass as well
+    result = testdir.runpytest("--record-mode=rewrite")
+    result.assert_outcomes(passed=2)
+    # And cassete size has not changed
+    assert test_function_cassette_path.size() == test_function_size
+    assert test_class_cassette_path.size() == test_class_size
+
+
 def test_custom_cassette_name(testdir):
     # When a custom cassette name is passed to pytest.mark.vcr
     cassette = testdir.tmpdir.join("cassettes/test_custom_cassette_name/test_with_network.yaml")
@@ -64,6 +107,37 @@ def test_custom_cassette_name(testdir):
     # Then tests with custom cassette names specified will create appropriate cassettes
     # And writing will happen to the default cassette
     assert cassette.size()
+
+
+def test_custom_cassette_name_rewrite(testdir):
+    # When a custom cassette name is passed to pytest.mark.vcr
+    cassette = testdir.tmpdir.join("cassettes/test_custom_cassette_name_rewrite/test_with_network.yaml")
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.vcr("{}")
+        def test_with_network(httpbin):
+            assert requests.get(httpbin.url + "/uuid").status_code == 200
+    """.format(
+            cassette
+        )
+    )
+
+    result = testdir.runpytest("--record-mode=rewrite")
+    result.assert_outcomes(passed=1)
+
+    # Then tests with custom cassette names specified will create appropriate cassettes
+    # And writing will happen to the default cassette
+    cassette_size = cassette.size()
+    assert cassette_size
+
+    # Second run will pass as well
+    result = testdir.runpytest("--record-mode=rewrite")
+    result.assert_outcomes(passed=1)
+    # And cassette size is the same
+    assert cassette.size() == cassette_size
 
 
 def test_default_cassette_recording(testdir, ip_response_cassette):

@@ -6,7 +6,7 @@ import pytest
 from . import network
 from ._vcr import use_cassette
 
-RECORD_MODES = ("once", "new_episodes", "none", "all")
+RECORD_MODES = ("once", "new_episodes", "none", "all", "rewrite")
 
 
 def pytest_configure(config):
