@@ -42,6 +42,13 @@ def use_cassette(default_cassette, vcr_cassette_dir, record_mode, markers, confi
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
     merged_config = merge_kwargs(config, markers)
     path_transformer = get_path_transformer(merged_config)
+    if record_mode == "rewrite" or merged_config.get("record_mode") == "rewrite":
+        path = path_transformer(os.path.join(vcr_cassette_dir, default_cassette))
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+        record_mode = "new_episodes"
     vcr = VCR(path_transformer=path_transformer, cassette_library_dir=vcr_cassette_dir, record_mode=record_mode)
 
     def extra_path_transformer(path):

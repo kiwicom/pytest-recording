@@ -77,6 +77,30 @@ Resulting VCR configs for each test:
 - ``test_one`` - ``{"ignore_localhost": True, "filter_headers": []}``
 - ``test_two`` - ``{"ignore_localhost": True, "filter_headers": ["authorization"], "filter_query_parameters": ["api_key"]}``
 
+
+`rewrite` record mode
+~~~~~~~~~~~~~~~~~~~~~
+
+
+It possible to rewrite cassette from scratch,
+and not to to append as it is done with ``all`` record mode in current ``VCR.py`` implementation.
+
+However, it will rewrite only default first cassette, any extra cassettes provided will not be touched.
+
+.. code:: python
+
+    import pytest
+
+    @pytest.fixture(scope="module")
+    def vcr_config():
+        return {"record_mode": "rewrite"}
+
+Or via command line option:
+
+.. code:: bash
+    $ pytest --record-mode=rewrite tests/
+
+
 Blocking network access
 ~~~~~~~~~~~~~~~~~~~~~~~
 

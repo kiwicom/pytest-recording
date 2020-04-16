@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- New ``rewrite`` mode that removes cassette before recording. `#37`_
+
 `0.6.0`_ - 2020-01-23
 ---------------------
 
@@ -116,6 +121,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#37: https://github.com/kiwicom/pytest-recording/issues/37
 .. _#34: https://github.com/kiwicom/pytest-recording/issues/34
 .. _#20: https://github.com/kiwicom/pytest-recording/issues/20
 .. _#10: https://github.com/kiwicom/pytest-recording/issues/10
