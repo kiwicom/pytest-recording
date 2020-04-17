@@ -2,6 +2,7 @@ import json
 import string
 
 import pytest
+import yaml
 
 
 def test_cassette_recording(testdir):
@@ -49,16 +50,14 @@ def test_cassette_recording_rewrite(testdir):
         import requests
 
         @pytest.mark.vcr
-        def test_{}(httpbin):
+        def test_with_network(httpbin):
             assert requests.get(httpbin.url + "/uuid").status_code == 200
 
         @pytest.mark.vcr
         class TestSomething:
             def test_with_network(self, httpbin):
                 assert requests.get(httpbin.url + "/uuid").status_code == 200
-    """.format(
-            string.ascii_letters
-        )
+    """
     )
 
     # If recording is enabled
@@ -67,22 +66,38 @@ def test_cassette_recording_rewrite(testdir):
 
     # Then tests that use network will create cassettes
     test_function_cassette_path = testdir.tmpdir.join(
-        "cassettes/test_cassette_recording_rewrite/test_{}.yaml".format(string.ascii_letters)
+        "cassettes/test_cassette_recording_rewrite/test_with_network.yaml"
     )
     test_function_size = test_function_cassette_path.size()
     assert test_function_size
+    # Cassette should contain uuid as response
+    with open(str(test_function_cassette_path)) as cassette:
+        cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
+        test_function_cassette_uuid = cassette["interactions"][0]["response"]["body"]["string"]
+
     test_class_cassette_path = testdir.tmpdir.join(
         "cassettes/test_cassette_recording_rewrite/TestSomething.test_with_network.yaml"
     )
     test_class_size = test_class_cassette_path.size()
     assert test_class_size
+    with open(str(test_class_cassette_path)) as cassette:
+        cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
+        test_class_cassette_uuid = cassette["interactions"][0]["response"]["body"]["string"]
 
     # Second run will pass as well
     result = testdir.runpytest("--record-mode=rewrite")
     result.assert_outcomes(passed=2)
-    # And cassete size has not changed
+    # And cassette size has not changed
     assert test_function_cassette_path.size() == test_function_size
+    # But uuid is different
+    with open(str(test_function_cassette_path)) as cassette:
+        cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
+        assert test_function_cassette_uuid != cassette["interactions"][0]["response"]["body"]["string"]
+
     assert test_class_cassette_path.size() == test_class_size
+    with open(str(test_class_cassette_path)) as cassette:
+        cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
+        assert test_class_cassette_uuid != cassette["interactions"][0]["response"]["body"]["string"]
 
 
 def test_custom_cassette_name(testdir):
@@ -132,12 +147,19 @@ def test_custom_cassette_name_rewrite(testdir):
     # And writing will happen to the default cassette
     cassette_size = cassette.size()
     assert cassette_size
+    with open(str(cassette)) as file:
+        file = yaml.load(file, Loader=yaml.BaseLoader)
+        uuid = file["interactions"][0]["response"]["body"]["string"]
 
     # Second run will pass as well
     result = testdir.runpytest("--record-mode=rewrite")
     result.assert_outcomes(passed=1)
     # And cassette size is the same
     assert cassette.size() == cassette_size
+    # But uuid in response is different
+    with open(str(cassette)) as file:
+        file = yaml.load(file, Loader=yaml.BaseLoader)
+        assert uuid != file["interactions"][0]["response"]["body"]["string"]
 
 
 def test_default_cassette_recording(testdir, ip_response_cassette):
