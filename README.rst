@@ -98,6 +98,7 @@ However, it will rewrite only default first cassette, any extra cassettes provid
 Or via command line option:
 
 .. code:: bash
+
     $ pytest --record-mode=rewrite tests/
 
 
