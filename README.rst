@@ -78,14 +78,14 @@ Resulting VCR configs for each test:
 - ``test_two`` - ``{"ignore_localhost": True, "filter_headers": ["authorization"], "filter_query_parameters": ["api_key"]}``
 
 
-`rewrite` record mode
+Rewrite record mode
 ~~~~~~~~~~~~~~~~~~~~~
 
 
 It possible to rewrite cassette from scratch,
-and not to to append as it is done with ``all`` record mode in current ``VCR.py`` implementation.
+and not to append as it is done with ``all`` record mode in current ``VCR.py`` implementation.
 
-However, it will rewrite only default first cassette, any extra cassettes provided will not be touched.
+However, it will rewrite only the default first cassette, any extra cassettes provided will not be touched.
 
 .. code:: python
 
