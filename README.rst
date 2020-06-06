@@ -77,10 +77,22 @@ Resulting VCR configs for each test:
 - ``test_one`` - ``{"ignore_localhost": True, "filter_headers": []}``
 - ``test_two`` - ``{"ignore_localhost": True, "filter_headers": ["authorization"], "filter_query_parameters": ["api_key"]}``
 
+You can get access to the used ``VCR`` instance via ``pytest_recording_configure`` hook. It might be useful for registering
+custom matchers, persisters, etc:
+
+.. code:: python
+
+    # conftest.py
+
+    def jurassic_matcher(r1, r2):
+        assert r1.uri == r2.uri and "JURASSIC PARK" in r1.body, \
+            "required string (JURASSIC PARK) not found in request body"
+
+    def pytest_recording_configure(config, vcr):
+        vcr.register_matcher("jurassic", jurassic_matcher)
 
 Rewrite record mode
-~~~~~~~~~~~~~~~~~~~~~
-
+~~~~~~~~~~~~~~~~~~~
 
 It possible to rewrite cassette from scratch,
 and not to append as it is done with ``all`` record mode in current ``VCR.py`` implementation.
@@ -100,7 +112,6 @@ Or via command line option:
 .. code:: bash
 
     $ pytest --record-mode=rewrite tests/
-
 
 Blocking network access
 ~~~~~~~~~~~~~~~~~~~~~~~

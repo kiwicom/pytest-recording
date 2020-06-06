@@ -38,7 +38,8 @@ class CombinedPersister(FilesystemPersister):
         return starmap(unpack, zip(*all_content))
 
 
-def use_cassette(default_cassette, vcr_cassette_dir, record_mode, markers, config):
+# pylint: disable=too-many-arguments
+def use_cassette(default_cassette, vcr_cassette_dir, record_mode, markers, config, pytestconfig):
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
     merged_config = merge_kwargs(config, markers)
     path_transformer = get_path_transformer(merged_config)
@@ -63,6 +64,7 @@ def use_cassette(default_cassette, vcr_cassette_dir, record_mode, markers, confi
     extra_paths = [extra_path_transformer(path) for marker in markers for path in marker.args]
     persister = CombinedPersister(extra_paths)
     vcr.register_persister(persister)
+    pytestconfig.hook.pytest_recording_configure(config=pytestconfig, vcr=vcr)
     return vcr.use_cassette(default_cassette, **merged_config)
 
 
