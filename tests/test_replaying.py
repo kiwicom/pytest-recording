@@ -385,3 +385,23 @@ def test_feature():
     result = testdir.runpytest()
     # Then it should be properly loaded and used
     result.assert_outcomes(passed=1)
+
+
+def test_recording_configure_hook(testdir):
+    testdir.makeconftest(
+        """
+def pytest_recording_configure(config, vcr):
+    print("HOOK IS CALLED")
+        """
+    )
+    testdir.makepyfile(
+        """
+import pytest
+
+@pytest.mark.vcr
+def test_feature():
+    pass
+    """
+    )
+    result = testdir.runpytest("-s")
+    assert "test_recording_configure_hook.py HOOK IS CALLED" in result.outlines

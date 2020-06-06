@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- New ``pytest_recording_configure`` hook that can be used for registering custom matchers, persisters, etc. `#45`_
+
 `0.7.0`_ - 2020-04-18
 ---------------------
 
@@ -125,6 +130,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#45: https://github.com/kiwicom/pytest-recording/issues/45
 .. _#37: https://github.com/kiwicom/pytest-recording/issues/37
 .. _#34: https://github.com/kiwicom/pytest-recording/issues/34
 .. _#20: https://github.com/kiwicom/pytest-recording/issues/20

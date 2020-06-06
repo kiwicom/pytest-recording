@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from . import network
+from . import hooks, network
 from ._vcr import use_cassette
 
 RECORD_MODES = ("once", "new_episodes", "none", "all", "rewrite")
@@ -47,6 +47,10 @@ def pytest_addoption(parser):
     )
 
 
+def pytest_addhooks(pluginmanager):
+    pluginmanager.add_hookspecs(hooks)
+
+
 @pytest.fixture(scope="session")
 def record_mode(request):
     """When recording is disabled the VCR recording mode should be "none" to prevent network access."""
@@ -82,12 +86,14 @@ def block_network(request, record_mode):
 
 
 @pytest.fixture(autouse=True)
-def vcr(request, vcr_markers, vcr_cassette_dir, record_mode):
+def vcr(request, vcr_markers, vcr_cassette_dir, record_mode, pytestconfig):
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
     if vcr_markers:
         config = request.getfixturevalue("vcr_config")
         default_cassette = request.getfixturevalue("default_cassette_name")
-        with use_cassette(default_cassette, vcr_cassette_dir, record_mode, vcr_markers, config) as cassette:
+        with use_cassette(
+            default_cassette, vcr_cassette_dir, record_mode, vcr_markers, config, pytestconfig
+        ) as cassette:
             yield cassette
     else:
         yield
