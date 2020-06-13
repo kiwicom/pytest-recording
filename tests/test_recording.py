@@ -43,6 +43,46 @@ def test_cassette_recording(testdir):
     assert not cassette_path.exists()
 
 
+def test_record_mode_in_mark(testdir):
+    # See GH-47
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.vcr(record_mode="once")
+        def test_record_mode(httpbin):
+            assert requests.get(httpbin.url + "/get").status_code == 200
+    """
+    )
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join("cassettes/test_record_mode_in_mark/test_record_mode.yaml")
+    assert cassette_path.size()
+
+
+def test_record_mode_in_config(testdir):
+    # See GH-47
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.fixture(scope="module")
+        def vcr_config():
+            return {"record_mode": "once"}
+
+        @pytest.mark.vcr
+        def test_record_mode(httpbin):
+            assert requests.get(httpbin.url + "/get").status_code == 200
+    """
+    )
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join("cassettes/test_record_mode_in_config/test_record_mode.yaml")
+    assert cassette_path.size()
+
+
 def test_cassette_recording_rewrite(testdir):
     testdir.makepyfile(
         """
