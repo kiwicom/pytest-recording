@@ -149,11 +149,24 @@ def test_with_vcr_mark(httpbin):
 def test_no_vcr_mark(httpbin):
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
         requests.get(httpbin.url + "/ip")
+
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.2"])
+def test_no_vcr_mark_bytes():
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((b"127.0.0.1", 80))
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.2"])
+def test_no_vcr_mark_bytearray():
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((bytearray(b"127.0.0.1"), 80))
     """
     )
 
-    result = testdir.runpytest()
-    result.assert_outcomes(passed=2)
+    result = testdir.runpytest("-s")
+    result.assert_outcomes(passed=4)
 
 
 @pytest.mark.parametrize(
