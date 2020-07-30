@@ -2,14 +2,9 @@ import re
 import socket
 import sys
 from contextlib import contextmanager
+from urllib.parse import urlparse
 
 import attr
-
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse
-
 
 try:
     import pycurl
