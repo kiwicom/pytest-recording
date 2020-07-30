@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Fixed
+~~~~~
+
+- ``TypeError`` when using network blocking with address as ``bytes`` or ``bytearray``. `#55`_
+
 Removed
 ~~~~~~~
 
@@ -148,6 +153,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#55: https://github.com/kiwicom/pytest-recording/issues/55
 .. _#53: https://github.com/kiwicom/pytest-recording/issues/53
 .. _#47: https://github.com/kiwicom/pytest-recording/issues/47
 .. _#45: https://github.com/kiwicom/pytest-recording/issues/45

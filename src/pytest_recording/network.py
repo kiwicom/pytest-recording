@@ -155,9 +155,15 @@ def blocking_context(allowed_hosts=None):
         unblock()
 
 
+def to_string(value):
+    if isinstance(value, (bytes, bytearray)):
+        return value.decode()
+    return value
+
+
 def is_host_in_allowed_hosts(host, allowed_hosts):
     """Match provided host to a list of host regexps."""
     if allowed_hosts is not None:
         combined = "(" + ")|(".join(allowed_hosts) + ")"
-        return re.match(combined, host)
+        return re.match(combined, to_string(host))
     return False
