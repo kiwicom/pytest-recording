@@ -50,10 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tox_job: [py27, py35, py36, py37, py38, no_pycurl, pypy, pypy3]
+        tox_job: [py35, py36, py37, py38, no_pycurl, pypy3]
         include:
-          - tox_job: py27
-            python: 2.7
           - tox_job: py35
             python: 3.5
           - tox_job: py36
@@ -64,8 +62,6 @@ jobs:
             python: 3.8
           - tox_job: no_pycurl
             python: 3.8
-          - tox_job: pypy
-            python: pypy2
           - tox_job: pypy3
             python: pypy3
 

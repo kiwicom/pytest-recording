@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Removed
+~~~~~~~
+
+- Python 2 support. `#53`_
+
 `0.8.1`_ - 2020-06-13
 ---------------------
 
@@ -143,6 +148,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#53: https://github.com/kiwicom/pytest-recording/issues/53
 .. _#47: https://github.com/kiwicom/pytest-recording/issues/47
 .. _#45: https://github.com/kiwicom/pytest-recording/issues/45
 .. _#37: https://github.com/kiwicom/pytest-recording/issues/37

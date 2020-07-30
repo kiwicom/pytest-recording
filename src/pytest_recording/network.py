@@ -15,7 +15,7 @@ try:
     import pycurl
 
     @attr.s(slots=True)
-    class Curl(object):
+    class Curl:
         """Proxy to real pycurl.Curl.
 
         If `perform` is called then it will raise an error if network is disabled via `disable`
@@ -64,7 +64,7 @@ _allowed_hosts = None
 
 
 @attr.s(slots=True, hash=True)
-class PyCurlWrapper(object):
+class PyCurlWrapper:
     """Imitate pycurl module."""
 
     def __getattribute__(self, item):
