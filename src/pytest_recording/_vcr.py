@@ -14,7 +14,7 @@ def load_cassette(cassette_path, serializer):
     try:
         with open(cassette_path) as f:
             cassette_content = f.read()
-    except IOError:
+    except OSError:
         return [], []
     return deserialize(cassette_content, serializer)
 
