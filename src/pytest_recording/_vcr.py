@@ -1,16 +1,23 @@
 import os
 from copy import deepcopy
 from itertools import chain, starmap
+from types import ModuleType
+from typing import Any, Callable, Dict, List, Tuple
 
 import attr
+from _pytest.config import Config
+from _pytest.mark.structures import Mark
 from vcr import VCR
+from vcr.cassette import CassetteContextDecorator
 from vcr.persisters.filesystem import FilesystemPersister
 from vcr.serialize import deserialize
 
 from .utils import unique, unpack
 
+ConfigType = Dict[str, Any]
 
-def load_cassette(cassette_path, serializer):
+
+def load_cassette(cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
     try:
         with open(cassette_path) as f:
             cassette_content = f.read()
@@ -23,9 +30,9 @@ def load_cassette(cassette_path, serializer):
 class CombinedPersister(FilesystemPersister):
     """Load extra cassettes, but saves only the first one."""
 
-    extra_paths = attr.ib()
+    extra_paths = attr.ib(type=List[str])
 
-    def load_cassette(self, cassette_path, serializer):
+    def load_cassette(self, cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
         all_paths = chain.from_iterable(((cassette_path,), self.extra_paths))
         # Pairs of 2 lists per cassettes:
         all_content = (load_cassette(path, serializer) for path in unique(all_paths))
@@ -43,7 +50,14 @@ class CombinedPersister(FilesystemPersister):
 
 
 # pylint: disable=too-many-arguments
-def use_cassette(default_cassette, vcr_cassette_dir, record_mode, markers, config, pytestconfig):
+def use_cassette(
+    default_cassette: str,
+    vcr_cassette_dir: str,
+    record_mode: str,
+    markers: List[Mark],
+    config: ConfigType,
+    pytestconfig: Config,
+) -> CassetteContextDecorator:
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
     merged_config = merge_kwargs(config, markers)
     if "record_mode" in merged_config:
@@ -58,7 +72,7 @@ def use_cassette(default_cassette, vcr_cassette_dir, record_mode, markers, confi
         record_mode = "new_episodes"
     vcr = VCR(path_transformer=path_transformer, cassette_library_dir=vcr_cassette_dir, record_mode=record_mode)
 
-    def extra_path_transformer(path):
+    def extra_path_transformer(path: str) -> str:
         """Paths in extras can be handled as relative and as absolute.
 
         Relative paths will be checked in `vcr_cassette_dir`.
@@ -74,7 +88,7 @@ def use_cassette(default_cassette, vcr_cassette_dir, record_mode, markers, confi
     return vcr.use_cassette(default_cassette, **merged_config)
 
 
-def get_path_transformer(config):
+def get_path_transformer(config: ConfigType) -> Callable:
     if "serializer" in config:
         suffix = ".{}".format(config["serializer"])
     else:
@@ -82,7 +96,7 @@ def get_path_transformer(config):
     return VCR.ensure_suffix(suffix)
 
 
-def merge_kwargs(config, markers):
+def merge_kwargs(config: ConfigType, markers: List[Mark]) -> ConfigType:
     """Merge all kwargs into a single dictionary to pass to `vcr.use_cassette`."""
     kwargs = deepcopy(config)
     for marker in reversed(markers):

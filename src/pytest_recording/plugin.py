@@ -1,6 +1,12 @@
 import os
+from typing import Any, Dict, Iterator, List, Optional
 
 import pytest
+from _pytest.config import Config, PytestPluginManager
+from _pytest.config.argparsing import Parser
+from _pytest.fixtures import SubRequest
+from _pytest.mark.structures import Mark
+from vcr.cassette import Cassette
 
 from . import hooks, network
 from ._vcr import use_cassette
@@ -8,7 +14,7 @@ from ._vcr import use_cassette
 RECORD_MODES = ("once", "new_episodes", "none", "all", "rewrite")
 
 
-def pytest_configure(config):
+def pytest_configure(config: Config) -> None:
     if config.pluginmanager.has_plugin("vcr"):
         raise RuntimeError(
             "`pytest-recording` is incompatible with `pytest-vcr`. "
@@ -22,11 +28,11 @@ def pytest_configure(config):
     network.install_pycurl_wrapper()
 
 
-def pytest_unconfigure():
+def pytest_unconfigure() -> None:
     network.uninstall_pycurl_wrapper()
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: Parser) -> None:
     group = parser.getgroup("recording")
     group.addoption(
         "--record-mode",
@@ -46,30 +52,30 @@ def pytest_addoption(parser):
     )
 
 
-def pytest_addhooks(pluginmanager):
+def pytest_addhooks(pluginmanager: PytestPluginManager) -> None:
     pluginmanager.add_hookspecs(hooks)
 
 
-@pytest.fixture(scope="session")
-def record_mode(request):
+@pytest.fixture(scope="session")  # type: ignore
+def record_mode(request: SubRequest) -> str:
     """When recording is disabled the VCR recording mode should be "none" to prevent network access."""
     return request.config.getoption("--record-mode")
 
 
-@pytest.fixture
-def vcr_config():
+@pytest.fixture  # type: ignore
+def vcr_config() -> Dict:
     """A shareable configuration for VCR.use_cassette call."""
     return {}
 
 
-@pytest.fixture
-def vcr_markers(request):
+@pytest.fixture  # type: ignore
+def vcr_markers(request: SubRequest) -> List[Mark]:
     """All markers applied to the certain test together with cassette names associated with each marker."""
     return list(request.node.iter_markers(name="vcr"))
 
 
-@pytest.fixture(autouse=True)
-def block_network(request, record_mode):
+@pytest.fixture(autouse=True)  # type: ignore
+def block_network(request: SubRequest, record_mode: str) -> Iterator[None]:
     """Block network access in tests except for "none" VCR recording mode."""
     marker = request.node.get_closest_marker(name="block_network")
     # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
@@ -84,8 +90,10 @@ def block_network(request, record_mode):
         yield
 
 
-@pytest.fixture(autouse=True)
-def vcr(request, vcr_markers, vcr_cassette_dir, record_mode, pytestconfig):
+@pytest.fixture(autouse=True)  # type: ignore
+def vcr(
+    request: SubRequest, vcr_markers: List[Mark], vcr_cassette_dir: str, record_mode: str, pytestconfig: Config
+) -> Iterator[Optional[Cassette]]:
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
     if vcr_markers:
         config = request.getfixturevalue("vcr_config")
@@ -95,11 +103,11 @@ def vcr(request, vcr_markers, vcr_cassette_dir, record_mode, pytestconfig):
         ) as cassette:
             yield cassette
     else:
-        yield
+        yield None
 
 
-@pytest.fixture(scope="module")
-def vcr_cassette_dir(request):
+@pytest.fixture(scope="module")  # type: ignore
+def vcr_cassette_dir(request: SubRequest) -> str:
     """Each test module has its own cassettes directory to avoid name collisions.
 
     For example each test module could have test function with the same names:
@@ -110,12 +118,12 @@ def vcr_cassette_dir(request):
     return os.path.join(module.dirname, "cassettes", module.purebasename)
 
 
-@pytest.fixture
-def default_cassette_name(request):
+@pytest.fixture  # type: ignore
+def default_cassette_name(request: SubRequest) -> str:
     return get_default_cassette_name(request.cls, request.node.name)
 
 
-def get_default_cassette_name(test_class, test_name):
+def get_default_cassette_name(test_class: Any, test_name: str) -> str:
     if test_class:
         cassette_name = "{}.{}".format(test_class.__name__, test_name)
     else:
