@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- Type annotations to the plugin's internals.
+
 Fixed
 ~~~~~
 

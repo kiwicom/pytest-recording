@@ -8,4 +8,4 @@ line_length = 120
 multi_line_output = 3
 default_sectiont = "THIRDPARTY"
 include_trailing_comma = true
-known_third_party = ["attr", "pytest", "pytest_recording", "setuptools", "vcr", "yaml"]
+known_third_party = ["_pytest", "attr", "pytest", "pytest_recording", "setuptools", "vcr", "yaml"]

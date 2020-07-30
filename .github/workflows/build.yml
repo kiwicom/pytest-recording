@@ -28,7 +28,7 @@ jobs:
           python-version: 3.7
 
       - run: pip install pre-commit
-      - run: SKIP=pylint pre-commit run --all-files
+      - run: SKIP=pylint,mypy pre-commit run --all-files
 
   pylint:
     name: Pylint
@@ -44,6 +44,21 @@ jobs:
 
       - run: pip install pre-commit
       - run: pre-commit run pylint --all-files
+
+  mypy:
+    name: Mypy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+
+      - run: pip install pre-commit
+      - run: pre-commit run mypy --all-files
 
   tests:
     name: tests_${{ matrix.tox_job }}
