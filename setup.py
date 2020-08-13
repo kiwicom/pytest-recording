@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import codecs
 import os
 
@@ -18,9 +16,9 @@ setup(
     name="pytest-recording",
     version="0.8.1",
     author="Dmitry Dygalo",
-    author_email="dmitry.dygalo@kiwi.com",
+    author_email="dadygalo@gmail.com",
     maintainer="Dmitry Dygalo",
-    maintainer_email="dmitry.dygalo@kiwi.com",
+    maintainer_email="dadygalo@gmail.com",
     url="https://github.com/kiwicom/pytest-recording",
     license="MIT",
     description="A pytest plugin that allows you recording of network interactions via VCR.py",
