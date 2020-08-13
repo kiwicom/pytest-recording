@@ -27,7 +27,7 @@ install:
 
 build:
 	pip install wheel
-	python setup.py bdist_wheel --universal
+	python setup.py bdist_wheel
 
 release: build
 	pip install twine
