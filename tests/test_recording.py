@@ -236,19 +236,21 @@ import requests
 
 pytestmark = [pytest.mark.vcr()]
 
-@pytest.mark.parametrize("value", ("/A",))
+@pytest.mark.parametrize("value", ("/A", "../foo", "/foo/../bar", "foo/../../bar"))
 def test_network(httpbin, value):
     assert requests.get(httpbin.url + "/ip").status_code == 200
     """
     )
 
     result = testdir.runpytest("--record-mode=all")
-    result.assert_outcomes(passed=1)
+    result.assert_outcomes(passed=4)
 
     # Then those characters should be replaced
     assert not testdir.tmpdir.join("cassettes/test_forbidden_characters/test_network[").exists()
     cassette_path = testdir.tmpdir.join("cassettes/test_forbidden_characters/test_network[-A].yaml")
     assert cassette_path.size()
+    cassettes_dir = testdir.tmpdir.join("cassettes/test_forbidden_characters")
+    assert len(cassettes_dir.listdir()) == 4
 
 
 def test_json_serializer(testdir):
