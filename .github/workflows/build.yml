@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tox_job: [py35, py36, py37, py38, no_pycurl, pypy3]
+        tox_job: [py35, py36, py37, py38, no_pycurl]
         include:
           - tox_job: py35
             python: 3.5
@@ -77,8 +77,6 @@ jobs:
             python: 3.8
           - tox_job: no_pycurl
             python: 3.8
-          - tox_job: pypy3
-            python: pypy3
 
     steps:
       - uses: actions/checkout@v1
@@ -103,6 +101,6 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1.0.2
         with:
-          token: ${{secrets.CODECOV_TOKEN}}
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
           flags: unittests
