@@ -57,6 +57,13 @@ Submitting Pull Requests
 #. Write an entry to `changelog.rst <https://github.com/kiwicom/pytest-recording/blob/master/docs/changelog.rst>`_
 #. Format your commit message according to the Conventional Commits `specification <https://www.conventionalcommits.org/en/>`_
 
+If you have troubles with installing ``pycurl`` with ``tox``, you could try to pass ``CPPFLAGS`` and ``LDFLAGS``
+with the ``tox`` command:
+
+.. code:: bash
+
+    $  CPPFLAGS="-I/usr/local/opt/openssl/include" LDFLAGS="-L/usr/local/opt/openssl/lib" tox -p all
+
 For each pull request, we aim to review it as soon as possible.
 If you wait a few days without a reply, please feel free to ping the thread by adding a new comment.
 

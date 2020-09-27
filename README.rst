@@ -3,7 +3,7 @@ pytest-recording
 
 |codecov| |Build| |Version| |Python versions| |License|
 
-A pytest plugin that allows to record network interactions via VCR.py.
+A pytest plugin that records network interactions in your tests via VCR.py.
 
 Features
 --------
@@ -34,8 +34,8 @@ Usage
 Configuration
 ~~~~~~~~~~~~~
 
-The recording configuration could be provided with ``vcr_config`` fixture, which could be any scope - ``session``,
-``package``, ``module`` or ``function``. It should return a dictionary that will be passed directly to ``VCR.use_cassettes``
+You can provide the recording configuration with the ``vcr_config`` fixture, which could be any scope - ``session``,
+``package``, ``module``, or ``function``. It should return a dictionary that will be passed directly to ``VCR.use_cassettes``
 under the hood.
 
 .. code:: python
@@ -78,7 +78,7 @@ Resulting VCR configs for each test:
 - ``test_two`` - ``{"ignore_localhost": True, "filter_headers": ["authorization"], "filter_query_parameters": ["api_key"]}``
 
 You can get access to the used ``VCR`` instance via ``pytest_recording_configure`` hook. It might be useful for registering
-custom matchers, persisters, etc:
+custom matchers, persisters, etc.:
 
 .. code:: python
 
@@ -94,10 +94,9 @@ custom matchers, persisters, etc:
 Rewrite record mode
 ~~~~~~~~~~~~~~~~~~~
 
-It possible to rewrite cassette from scratch,
-and not to append as it is done with ``all`` record mode in current ``VCR.py`` implementation.
+It is possible to rewrite a cassette from scratch and not extend it with new entries as it works now with the ``all`` record mode from VCR.py.
 
-However, it will rewrite only the default first cassette, any extra cassettes provided will not be touched.
+However, it will rewrite only the default cassette and won't touch extra cassettes.
 
 .. code:: python
 
@@ -107,7 +106,7 @@ However, it will rewrite only the default first cassette, any extra cassettes pr
     def vcr_config():
         return {"record_mode": "rewrite"}
 
-Or via command line option:
+Or via command-line option:
 
 .. code:: bash
 
@@ -133,7 +132,7 @@ To have more confidence that your tests will not go over the wire, you can block
 
 Besides marks, the network access could be blocked globally with ``--block-network`` command-line option.
 
-However, if VCR.py recording is enabled then, the network is not blocked for tests, that have ``pytest.mark.vcr``.
+However, if VCR.py recording is enabled, the network is not blocked for tests with ``pytest.mark.vcr``.
 
 Example:
 
@@ -167,7 +166,7 @@ It is possible to allow access to specified hosts during network blocking:
         with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
             requests.get("http://example.com")
 
-Or via command line option:
+Or via command-line option:
 
 .. code:: bash
 
@@ -182,19 +181,14 @@ To run the tests:
 
     $ tox -p all
 
-If you have troubles with installing ``pycurl`` with ``tox``, you could try to pass ``CPPFLAGS`` and ``LDFLAGS``
-with the ``tox`` command:
-
-.. code:: bash
-
-    $  CPPFLAGS="-I/usr/local/opt/openssl/include" LDFLAGS="-L/usr/local/opt/openssl/lib" tox -p all
+For more information, take a look at `our contributing guide <https://github.com/kiwicom/pytest-recording/blob/master/CONTRIBUTING.rst>`_
 
 Python support
 --------------
 
 Pytest-recording supports:
 
-- CPython 3.5, 3.6, 3.7 and 3.8.
+- CPython 3.5, 3.6, 3.7, and 3.8.
 - PyPy 7 (3.6)
 
 License
