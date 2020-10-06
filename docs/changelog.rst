@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- The ``pytest.mark.default_cassette`` marker that overrides the default cassette name.
+
 `0.9.0`_ - 2020-08-13
 ---------------------
 
