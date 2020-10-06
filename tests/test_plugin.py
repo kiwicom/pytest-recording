@@ -46,3 +46,22 @@ def test_pytest_vcr_incompatibility(testdir, mocker):
         "Please, uninstall `pytest-vcr` in order to use `pytest-recording`." in result.errlines
     )
     assert result.ret == 3
+
+
+def test_default_cassette_marker(testdir):
+    # When the `default_cassette` marker is defined
+    testdir.makepyfile(
+        """
+        import pytest
+
+        CASSETTE_NAME = "foo.yaml"
+
+        @pytest.mark.default_cassette(CASSETTE_NAME)
+        def test_marker(default_cassette_name):
+            assert default_cassette_name == CASSETTE_NAME
+        """
+    )
+    # Then the default_cassette_name fixture should be overridden
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+    assert result.ret == 0

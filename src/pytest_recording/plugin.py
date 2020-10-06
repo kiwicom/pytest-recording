@@ -22,6 +22,7 @@ def pytest_configure(config: Config) -> None:
         )
     config.addinivalue_line("markers", "vcr: Mark the test as using VCR.py.")
     config.addinivalue_line("markers", "block_network: Block network access except for VCR recording.")
+    config.addinivalue_line("markers", "default_cassette: Override the default cassette name..")
     config.addinivalue_line(
         "markers", "allowed_hosts: List of regexes to match hosts to where connection must be allowed"
     )
@@ -120,6 +121,12 @@ def vcr_cassette_dir(request: SubRequest) -> str:
 
 @pytest.fixture  # type: ignore
 def default_cassette_name(request: SubRequest) -> str:
+    marker = request.node.get_closest_marker("default_cassette")
+    if marker is not None:
+        assert marker.args, (
+            "You should pass the cassette name as an argument " "to the `pytest.mark.default_cassette` marker"
+        )
+        return marker.args[0]
     return get_default_cassette_name(request.cls, request.node.name)
 
 
