@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tox_job: [py35, py36, py37, py38, no_pycurl]
+        tox_job: [py35, py36, py37, py38, py39, no_pycurl]
         include:
           - tox_job: py35
             python: 3.5
@@ -75,6 +75,8 @@ jobs:
             python: 3.7
           - tox_job: py38
             python: 3.8
+          - tox_job: py39
+            python: 3.9
           - tox_job: no_pycurl
             python: 3.8
 
@@ -83,7 +85,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
 
