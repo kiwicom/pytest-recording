@@ -178,6 +178,11 @@ Or via command-line option:
 
     $ pytest --record-mode=once --block-network --allowed-hosts=httpbin.*,localhost tests/
 
+Additional resources
+--------------------
+
+Looking for more examples? Check out `this article <https://code.kiwi.com/pytest-cassettes-forget-about-mocks-or-live-requests-a9336e1caee6>`_ about ``pytest-recording``.
+
 Contributing
 ------------
 
@@ -194,7 +199,7 @@ Python support
 
 Pytest-recording supports:
 
-- CPython 3.5, 3.6, 3.7, and 3.8.
+- CPython 3.5, 3.6, 3.7, 3.8 and 3.9.
 - PyPy 7 (3.6)
 
 License
