@@ -43,6 +43,27 @@ def test_cassette_recording(testdir):
     assert not cassette_path.exists()
 
 
+def test_disable_recording(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.vcr
+        def test_(httpbin):
+            assert requests.get(httpbin.url + "/get").status_code == 200
+    """
+    )
+
+    # If recording is disabled
+    result = testdir.runpytest("--disable-recording")
+    result.assert_outcomes(passed=1)
+
+    # Then there should be no cassettes
+    cassette_path = testdir.tmpdir.join("cassettes/test_disable_recording/test_.yaml")
+    assert not cassette_path.exists()
+
+
 def test_record_mode_in_mark(testdir):
     # See GH-47
     testdir.makepyfile(

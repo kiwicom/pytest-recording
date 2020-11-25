@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Added
+~~~~~
+
+- ``--disable-recording`` CLI option to completely disable the VCR.py integration. `#64`_
+
 `0.10.0`_ - 2020-10-06
 ----------------------
 
@@ -171,6 +176,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#64: https://github.com/kiwicom/pytest-recording/issues/64
 .. _#55: https://github.com/kiwicom/pytest-recording/issues/55
 .. _#53: https://github.com/kiwicom/pytest-recording/issues/53
 .. _#47: https://github.com/kiwicom/pytest-recording/issues/47
