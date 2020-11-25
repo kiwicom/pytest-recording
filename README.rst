@@ -97,6 +97,8 @@ custom matchers, persisters, etc.:
     def pytest_recording_configure(config, vcr):
         vcr.register_matcher("jurassic", jurassic_matcher)
 
+You can disable the VCR.py integration entirely by passing the ``--disable-recording`` CLI option.
+
 Rewrite record mode
 ~~~~~~~~~~~~~~~~~~~
 

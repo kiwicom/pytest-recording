@@ -51,6 +51,12 @@ def pytest_addoption(parser: Parser) -> None:
         default=None,
         help="List of regexes, separated by comma, to match hosts to where connection must be allowed.",
     )
+    group.addoption(
+        "--disable-recording",
+        action="store_true",
+        default=False,
+        help="Disable VCR.py integration.",
+    )
 
 
 def pytest_addhooks(pluginmanager: PytestPluginManager) -> None:
@@ -61,6 +67,12 @@ def pytest_addhooks(pluginmanager: PytestPluginManager) -> None:
 def record_mode(request: SubRequest) -> str:
     """When recording is disabled the VCR recording mode should be "none" to prevent network access."""
     return request.config.getoption("--record-mode")
+
+
+@pytest.fixture(scope="session")  # type: ignore
+def disable_recording(request: SubRequest) -> bool:
+    """Disable VCR.py integration."""
+    return request.config.getoption("--disable-recording")
 
 
 @pytest.fixture  # type: ignore
@@ -92,11 +104,18 @@ def block_network(request: SubRequest, record_mode: str) -> Iterator[None]:
 
 
 @pytest.fixture(autouse=True)  # type: ignore
-def vcr(
-    request: SubRequest, vcr_markers: List[Mark], vcr_cassette_dir: str, record_mode: str, pytestconfig: Config
+def vcr(  # pylint: disable=too-many-arguments
+    request: SubRequest,
+    vcr_markers: List[Mark],
+    vcr_cassette_dir: str,
+    record_mode: str,
+    disable_recording: bool,
+    pytestconfig: Config,
 ) -> Iterator[Optional[Cassette]]:
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
-    if vcr_markers:
+    if disable_recording:
+        yield None
+    elif vcr_markers:
         config = request.getfixturevalue("vcr_config")
         default_cassette = request.getfixturevalue("default_cassette_name")
         with use_cassette(
