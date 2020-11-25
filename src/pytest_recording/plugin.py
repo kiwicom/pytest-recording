@@ -49,7 +49,7 @@ def pytest_addoption(parser: Parser) -> None:
         "--allowed-hosts",
         action="store",
         default=None,
-        help="List of regexes, separated by coma, to match hosts to where connection must be allowed.",
+        help="List of regexes, separated by comma, to match hosts to where connection must be allowed.",
     )
 
 
