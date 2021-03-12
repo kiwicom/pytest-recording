@@ -10,7 +10,8 @@ Features
 
 - Straightforward ``pytest.mark.vcr``, that reflects ``VCR.use_cassettes`` API;
 - Combining multiple VCR cassettes;
-- Network access blocking.
+- Network access blocking;
+- The ``rewrite`` recording mode that rewrites cassettes from scratch.
 
 Usage
 -----
@@ -36,6 +37,19 @@ Usage
     def test_multiple():
         assert requests.get("http://httpbin.org/get").text == '{"get": true}'
         assert requests.get("http://httpbin.org/ip").text == '{"ip": true}'
+
+Run your tests:
+
+.. code:: bash
+
+    pytest --record-mode=once test_network.py
+
+Default recording mode
+~~~~~~~~~~~~~~~~~~~~~~
+
+``pytest-recording`` uses the ``none`` VCR recording mode by default to prevent unintentional network requests.
+To allow them you need to pass a different recording mode (e.g. ``once``) via the ``--record-mode`` CLI option to your test command.
+See more information about available recording modes in the `official VCR documentation <https://vcrpy.readthedocs.io/en/latest/usage.html#record-modes>`_
 
 Configuration
 ~~~~~~~~~~~~~
