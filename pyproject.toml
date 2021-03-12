@@ -10,6 +10,6 @@ target_version = ["py37"]
 # config compatible with Black
 line_length = 120
 multi_line_output = 3
-default_sectiont = "THIRDPARTY"
+default_section = "THIRDPARTY"
 include_trailing_comma = true
 known_third_party = ["_pytest", "attr", "pytest", "pytest_recording", "setuptools", "vcr", "yaml"]

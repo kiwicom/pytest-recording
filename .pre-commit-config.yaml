@@ -3,7 +3,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v3.4.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -15,17 +15,17 @@ repos:
       - id: check-merge-conflict
 
   - repo: https://github.com/jorisroovers/gitlint
-    rev: v0.13.1
+    rev: v0.15.0
     hooks:
       - id: gitlint
 
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.24.2
+    rev: v1.26.0
     hooks:
       - id: yamllint
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.23.2
+    rev: v0.27.1
     hooks:
       - id: markdownlint
         language_version: system
@@ -47,7 +47,7 @@ repos:
         types: [python]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.782
+    rev: v0.812
     hooks:
       - id: mypy
         exclude: ^(docs/|tests/|setup.py).*$
@@ -59,16 +59,14 @@ repos:
       - id: seed-isort-config
 
   - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.5.3
+    rev: v5.7.0
     hooks:
       - id: isort
-        additional_dependencies: ["isort[pyproject]==4.3.21"]
 
   - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v2.6.0
+    rev: v2.7.2
     hooks:
       - id: pylint
-        additional_dependencies: ["isort[pyproject]==4.3.21"]
         exclude: ^(docs/).*$
         # disabled import-error as may be run out of environment with deps
         args: ["--disable=import-error"]
