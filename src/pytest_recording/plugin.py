@@ -10,6 +10,7 @@ from vcr.cassette import Cassette
 
 from . import hooks, network
 from ._vcr import use_cassette
+from .validation import validate_block_network_mark
 
 RECORD_MODES = ("once", "new_episodes", "none", "all", "rewrite")
 
@@ -91,6 +92,8 @@ def vcr_markers(request: SubRequest) -> List[Mark]:
 def block_network(request: SubRequest, record_mode: str) -> Iterator[None]:
     """Block network access in tests except for "none" VCR recording mode."""
     marker = request.node.get_closest_marker(name="block_network")
+    if marker is not None:
+        validate_block_network_mark(marker)
     # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
     default_block = marker or request.config.getoption("--block-network")
     allowed_hosts = getattr(marker, "kwargs", {}).get("allowed_hosts") or request.config.getoption("--allowed-hosts")
