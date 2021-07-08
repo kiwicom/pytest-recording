@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Changed
+~~~~~~~
+
+- Validate input arguments for ``vcr`` and ``block_network`` pytest marks. `#69`_
+
 `0.11.0`_ - 2020-11-25
 ----------------------
 
@@ -180,6 +185,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#69: https://github.com/kiwicom/pytest-recording/issues/69
 .. _#64: https://github.com/kiwicom/pytest-recording/issues/64
 .. _#55: https://github.com/kiwicom/pytest-recording/issues/55
 .. _#53: https://github.com/kiwicom/pytest-recording/issues/53

@@ -400,3 +400,25 @@ def test_critical_error():
     result.assert_outcomes(passed=1)
     # NOTE. In reality it is not likely to happen - e.g. if pytest will partially crash and will not call the teardown
     # part of the generator, but this try/finally implementation could also guard against errors on manual
+
+
+@pytest.mark.parametrize("args", ("foo=42", "42"))
+def test_invalid_input_arguments(testdir, args):
+    # When the `block_network` mark receives an unknown argument
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+@pytest.mark.block_network({})
+def test_request():
+    requests.get("https://google.com")
+    """.format(
+            args
+        )
+    )
+    result = testdir.runpytest()
+    # Then there should be an error
+    result.assert_outcomes(errors=1)
+    expected = "Invalid arguments to `block_network`. It accepts only the following keyword arguments: `allowed_hosts`."
+    assert expected in result.stdout.str()
