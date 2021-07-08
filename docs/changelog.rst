@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+Fixed
+~~~~~
+
+- Honor ``record_mode`` set via the ``vcr_config`` fixture or the ``vcr`` mark when ``block_network`` is applied. `#68`_
+
 Changed
 ~~~~~~~
 
@@ -186,6 +191,7 @@ Added
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
 .. _#69: https://github.com/kiwicom/pytest-recording/issues/69
+.. _#68: https://github.com/kiwicom/pytest-recording/issues/68
 .. _#64: https://github.com/kiwicom/pytest-recording/issues/64
 .. _#55: https://github.com/kiwicom/pytest-recording/issues/55
 .. _#53: https://github.com/kiwicom/pytest-recording/issues/53

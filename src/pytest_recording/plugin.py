@@ -9,7 +9,7 @@ from _pytest.mark.structures import Mark
 from vcr.cassette import Cassette
 
 from . import hooks, network
-from ._vcr import use_cassette
+from ._vcr import merge_kwargs, use_cassette
 from .validation import validate_block_network_mark
 
 RECORD_MODES = ("once", "new_episodes", "none", "all", "rewrite")
@@ -39,7 +39,7 @@ def pytest_addoption(parser: Parser) -> None:
     group.addoption(
         "--record-mode",
         action="store",
-        default="none",
+        default=None,
         choices=RECORD_MODES,
         help='VCR.py record mode. Default to "none".',
     )
@@ -67,7 +67,7 @@ def pytest_addhooks(pluginmanager: PytestPluginManager) -> None:
 @pytest.fixture(scope="session")  # type: ignore
 def record_mode(request: SubRequest) -> str:
     """When recording is disabled the VCR recording mode should be "none" to prevent network access."""
-    return request.config.getoption("--record-mode")
+    return request.config.getoption("--record-mode") or "none"
 
 
 @pytest.fixture(scope="session")  # type: ignore
@@ -89,7 +89,7 @@ def vcr_markers(request: SubRequest) -> List[Mark]:
 
 
 @pytest.fixture(autouse=True)  # type: ignore
-def block_network(request: SubRequest, record_mode: str) -> Iterator[None]:
+def block_network(request: SubRequest, record_mode: str, vcr_markers: List[Mark]) -> Iterator[None]:
     """Block network access in tests except for "none" VCR recording mode."""
     marker = request.node.get_closest_marker(name="block_network")
     if marker is not None:
@@ -99,6 +99,16 @@ def block_network(request: SubRequest, record_mode: str) -> Iterator[None]:
     allowed_hosts = getattr(marker, "kwargs", {}).get("allowed_hosts") or request.config.getoption("--allowed-hosts")
     if isinstance(allowed_hosts, str):
         allowed_hosts = allowed_hosts.split(",")
+    if vcr_markers:
+        # Take `record_mode` with the most priority:
+        #  - Explicit CLI option
+        #  - The `vcr_config` fixture
+        #  - The `vcr` mark
+        config = request.getfixturevalue("vcr_config")
+        merged_config = merge_kwargs(config, vcr_markers)
+        # If `--record-mode` was not explicitly passed in CLI, then take one from the merged config
+        if request.config.getoption("--record-mode") is None:
+            record_mode = merged_config.get("record_mode", "none")
     if default_block and (not request.getfixturevalue("vcr_markers") or record_mode == "none"):
         with network.blocking_context(allowed_hosts=allowed_hosts):
             yield
