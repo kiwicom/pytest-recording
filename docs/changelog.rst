@@ -17,7 +17,7 @@ Fixed
 Changed
 ~~~~~~~
 
-- Validate input arguments for ``vcr`` and ``block_network`` pytest marks. `#69`_
+- Validate input arguments for the ``block_network`` pytest mark. `#69`_
 
 `0.11.0`_ - 2020-11-25
 ----------------------
