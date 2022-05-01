@@ -94,9 +94,14 @@ def block_network(request: SubRequest, record_mode: str, vcr_markers: List[Mark]
     marker = request.node.get_closest_marker(name="block_network")
     if marker is not None:
         validate_block_network_mark(marker)
+    config = request.getfixturevalue("vcr_config")
     # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
+    # Take `--allowed-hosts` with the most priority:
+    #  - `block_network` mark
+    #  - CLI option
+    #  - vcr_config fixture
     default_block = marker or request.config.getoption("--block-network")
-    allowed_hosts = getattr(marker, "kwargs", {}).get("allowed_hosts") or request.config.getoption("--allowed-hosts")
+    allowed_hosts = getattr(marker, "kwargs", {}).get("allowed_hosts") or request.config.getoption("--allowed-hosts") or config.get("allowed_hosts")
     if isinstance(allowed_hosts, str):
         allowed_hosts = allowed_hosts.split(",")
     if vcr_markers:
@@ -104,7 +109,6 @@ def block_network(request: SubRequest, record_mode: str, vcr_markers: List[Mark]
         #  - Explicit CLI option
         #  - The `vcr_config` fixture
         #  - The `vcr` mark
-        config = request.getfixturevalue("vcr_config")
         merged_config = merge_kwargs(config, vcr_markers)
         # If `--record-mode` was not explicitly passed in CLI, then take one from the merged config
         if request.config.getoption("--record-mode") is None:
