@@ -101,7 +101,11 @@ def block_network(request: SubRequest, record_mode: str, vcr_markers: List[Mark]
     #  - CLI option
     #  - vcr_config fixture
     default_block = marker or request.config.getoption("--block-network")
-    allowed_hosts = getattr(marker, "kwargs", {}).get("allowed_hosts") or request.config.getoption("--allowed-hosts") or config.get("allowed_hosts")
+    allowed_hosts = (
+        getattr(marker, "kwargs", {}).get("allowed_hosts")
+        or request.config.getoption("--allowed-hosts")
+        or config.get("allowed_hosts")
+    )
     if isinstance(allowed_hosts, str):
         allowed_hosts = allowed_hosts.split(",")
     if vcr_markers:
