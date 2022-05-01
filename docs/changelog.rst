@@ -6,7 +6,7 @@ Changelog
 `Unreleased`_
 -------------
 
-- Allow ``block_network.allowed_hosts`` configuration via ``vcr_config`` fixture. #82
+- Allow ``block_network.allowed_hosts`` configuration via ``vcr_config`` fixture. `#82`_
 
 `0.12.0`_ - 2021-07-08
 ----------------------
