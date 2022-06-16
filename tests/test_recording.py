@@ -150,7 +150,7 @@ def test_cassette_recording_rewrite(testdir):
     test_function_size = test_function_cassette_path.size()
     assert test_function_size
     # Cassette should contain uuid as response
-    with open(str(test_function_cassette_path)) as cassette:
+    with open(str(test_function_cassette_path), encoding="utf8") as cassette:
         cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
         test_function_cassette_uuid = cassette["interactions"][0]["response"]["body"]["string"]
 
@@ -159,7 +159,7 @@ def test_cassette_recording_rewrite(testdir):
     )
     test_class_size = test_class_cassette_path.size()
     assert test_class_size
-    with open(str(test_class_cassette_path)) as cassette:
+    with open(str(test_class_cassette_path), encoding="utf8") as cassette:
         cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
         test_class_cassette_uuid = cassette["interactions"][0]["response"]["body"]["string"]
 
@@ -169,12 +169,12 @@ def test_cassette_recording_rewrite(testdir):
     # And cassette size has not changed
     assert test_function_cassette_path.size() == test_function_size
     # But uuid is different
-    with open(str(test_function_cassette_path)) as cassette:
+    with open(str(test_function_cassette_path), encoding="utf8") as cassette:
         cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
         assert test_function_cassette_uuid != cassette["interactions"][0]["response"]["body"]["string"]
 
     assert test_class_cassette_path.size() == test_class_size
-    with open(str(test_class_cassette_path)) as cassette:
+    with open(str(test_class_cassette_path), encoding="utf8") as cassette:
         cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
         assert test_class_cassette_uuid != cassette["interactions"][0]["response"]["body"]["string"]
 
@@ -226,7 +226,7 @@ def test_custom_cassette_name_rewrite(testdir):
     # And writing will happen to the default cassette
     cassette_size = cassette.size()
     assert cassette_size
-    with open(str(cassette)) as file:
+    with open(str(cassette), encoding="utf8") as file:
         file = yaml.load(file, Loader=yaml.BaseLoader)
         uuid = file["interactions"][0]["response"]["body"]["string"]
 
@@ -236,7 +236,7 @@ def test_custom_cassette_name_rewrite(testdir):
     # And cassette size is the same
     assert cassette.size() == cassette_size
     # But uuid in response is different
-    with open(str(cassette)) as file:
+    with open(str(cassette), encoding="utf8") as file:
         file = yaml.load(file, Loader=yaml.BaseLoader)
         assert uuid != file["interactions"][0]["response"]["body"]["string"]
 
