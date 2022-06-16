@@ -44,7 +44,6 @@ try:
                 self.url = value
             self.handle.setopt(option, value)
 
-
 except ImportError:
     pycurl = None  # type: ignore
     Curl = None  # type: ignore
@@ -56,7 +55,7 @@ _original_connect_ex = socket.socket.connect_ex
 
 # Global switch for pycurl disabling
 _disable_pycurl = False
-_allowed_hosts = None
+_allowed_hosts = None  # type: ignore
 
 
 @attr.s(slots=True, hash=True)

@@ -19,7 +19,7 @@ ConfigType = Dict[str, Any]
 
 def load_cassette(cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
     try:
-        with open(cassette_path) as f:
+        with open(cassette_path, encoding="utf8") as f:
             cassette_content = f.read()
     except OSError:
         return [], []

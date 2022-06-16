@@ -11,17 +11,15 @@ disable =
   no-member,
   unused-argument,
   broad-except,
-  relative-import,
   wrong-import-position,
   bare-except,
   locally-disabled,
   protected-access,
   abstract-method,
-  no-self-use,
   fixme,
   too-few-public-methods,
-  bad-continuation,
   useless-object-inheritance,
+  consider-using-f-string,
   redefined-outer-name
 
 
