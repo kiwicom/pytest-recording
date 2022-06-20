@@ -66,3 +66,23 @@ def test_default_cassette_marker(testdir):
     result = testdir.runpytest()
     result.assert_outcomes(passed=1)
     assert result.ret == 0
+
+
+def test_lazy_vcr_config(testdir):
+    # When test does not involve VCR
+    testdir.makepyfile(
+        """
+        import pytest
+
+        @pytest.fixture
+        def vcr_config():
+            raise RuntimeError("Should not run")
+
+        def test_marker():
+            pass
+        """
+    )
+    # Then the `vcr_config` fixture should not be evaluated
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+    assert result.ret == 0
