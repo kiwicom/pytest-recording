@@ -226,18 +226,26 @@ def test_no_vcr_mark_bytearray():
 
 
 @pytest.mark.parametrize(
-    "marker, cmd_options",
+    "marker, cmd_options, vcr_cfg",
     (
-        pytest.param('@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])', "", id="block_marker"),
-        pytest.param("", ("--block-network", "--allowed-hosts=127.0.0.*,127.0.1.1"), id="block_cmd"),
+        pytest.param('@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])', "", "", id="block_marker"),
+        pytest.param("", ("--block-network", "--allowed-hosts=127.0.0.*,127.0.1.1"), "", id="block_cmd"),
+        pytest.param(
+            "@pytest.mark.block_network()",
+            "",
+            "@pytest.fixture(autouse=True)\ndef vcr_config():\n    return {'allowed_hosts': '127.0.0.*,127.0.1.1'}",
+            id="vcr_cfg",
+        ),
     ),
 )
-def test_block_network_with_allowed_hosts(testdir, marker, cmd_options):
+def test_block_network_with_allowed_hosts(testdir, marker, cmd_options, vcr_cfg):
     testdir.makepyfile(
         """
 import socket
 import pytest
 import requests
+
+{vcr_cfg}
 
 {marker}
 def test_allowed(httpbin):
@@ -253,7 +261,8 @@ def test_blocked():
     assert socket.socket.connect.__name__ == "network_guard"
     assert socket.socket.connect_ex.__name__ == "network_guard"
     """.format(
-            marker=marker
+            marker=marker,
+            vcr_cfg=vcr_cfg,
         )
     )
 

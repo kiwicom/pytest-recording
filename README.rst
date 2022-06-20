@@ -194,6 +194,17 @@ Or via command-line option:
 
     $ pytest --record-mode=once --block-network --allowed-hosts=httpbin.*,localhost tests/
 
+
+Or via `vcr_config` fixture:
+
+.. code:: python
+
+    import pytest
+
+    @pytest.fixture(autouse=True)
+    def vcr_config():
+        return {"allowed_hosts": ["httpbin.*"]}
+
 Additional resources
 --------------------
 
