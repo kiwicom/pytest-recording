@@ -6,6 +6,9 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.12.2`_ - 2023-02-16
+----------------------
+
 - Add support for Python 3.10 and 3.11. `#99`_
 
 `0.12.1`_ - 2022-06-20
@@ -181,7 +184,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.12.1...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.12.2...HEAD
+.. _0.12.2: https://github.com/kiwicom/pytest-recording/compare/v0.12.1...v0.12.2
 .. _0.12.1: https://github.com/kiwicom/pytest-recording/compare/v0.12.0...v0.12.1
 .. _0.12.0: https://github.com/kiwicom/pytest-recording/compare/v0.11.0...v0.12.0
 .. _0.11.0: https://github.com/kiwicom/pytest-recording/compare/v0.10.0...v0.11.0

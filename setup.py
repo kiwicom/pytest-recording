@@ -14,7 +14,7 @@ def read(fname):
 
 setup(
     name="pytest-recording",
-    version="0.12.1",
+    version="0.12.2",
     author="Dmitry Dygalo",
     author_email="dadygalo@gmail.com",
     maintainer="Dmitry Dygalo",
