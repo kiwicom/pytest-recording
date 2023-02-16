@@ -27,15 +27,3 @@ jobs:
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.PYPI_TOKEN }}
-
-  release-notes:
-    name: Release Notes
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Release Notary Action
-      uses: docker://outillage/release-notary
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
