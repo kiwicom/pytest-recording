@@ -417,7 +417,7 @@ def test_pycurl_url_error():
     # And a wrapper may fail on URL manipulation due to missing URL
     curl = pycurl.Curl()
     # Then original pycurl error must be raised
-    with pytest.raises(pycurl.error, match="No URL set!"):
+    with pytest.raises(pycurl.error, match="No URL set"):
         curl.perform()
 
 
