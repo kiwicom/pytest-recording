@@ -62,23 +62,34 @@ jobs:
 
   tests:
     name: tests_${{ matrix.tox_job }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os_version }}
     strategy:
       matrix:
-        tox_job: [py35, py36, py37, py38, py39, no_pycurl]
         include:
           - tox_job: py35
-            python: 3.5
+            python: "3.5"
+            os_version: "ubuntu-20.04"
           - tox_job: py36
-            python: 3.6
+            python: "3.6"
+            os_version: "ubuntu-20.04"
           - tox_job: py37
-            python: 3.7
+            python: "3.7"
+            os_version: "ubuntu-latest"
           - tox_job: py38
-            python: 3.8
+            python: "3.8"
+            os_version: "ubuntu-latest"
           - tox_job: py39
-            python: 3.9
+            python: "3.9"
+            os_version: "ubuntu-latest"
           - tox_job: no_pycurl
-            python: 3.8
+            python: "3.8"
+            os_version: "ubuntu-latest"
+          - tox_job: py310
+            python: "3.10"
+            os_version: "ubuntu-latest"
+          - tox_job: py311
+            python: "3.11"
+            os_version: "ubuntu-latest"
 
     steps:
       - uses: actions/checkout@v3
