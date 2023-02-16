@@ -50,7 +50,7 @@ Submitting Pull Requests
 #. Follow **PEP-8** for naming and `black <https://github.com/psf/black>`_ for formatting.
 #. Tests are run using ``tox``::
 
-    tox -e pylint,mypy,py37
+    tox -e pylint,py37
 
    The test environments above are usually enough to cover most cases locally.
 
