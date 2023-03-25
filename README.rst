@@ -237,8 +237,8 @@ The code in this project is licensed under `MIT license`_. By contributing to ``
 
 .. |codecov| image:: https://codecov.io/gh/kiwicom/pytest-recording/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/kiwicom/pytest-recording
-.. |Build| image:: https://travis-ci.org/kiwicom/pytest-recording.svg?branch=master
-   :target: https://travis-ci.org/kiwicom/pytest-recording
+.. |Build| image:: https://github.com/kiwicom/pytest-recording/actions/workflows/build.yml/badge.svg
+   :target: https://github.com/kiwicom/pytest-recording/actions?query=workflow%3Abuild
 .. |Version| image:: https://img.shields.io/pypi/v/pytest-recording.svg
    :target: https://pypi.org/project/pytest-recording/
 .. |Python versions| image:: https://img.shields.io/pypi/pyversions/pytest-recording.svg
