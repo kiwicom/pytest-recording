@@ -32,7 +32,11 @@ class CombinedPersister(FilesystemPersister):
 
     extra_paths = attr.ib(type=List[str])
 
-    def load_cassette(self, cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
+    # FilesystemPersister.load_casette is a classmethod, which
+    # is likely why pylint gives an error.
+    def load_cassette(  # pylint: disable=arguments-differ
+        self, cassette_path: str, serializer: ModuleType
+    ) -> Tuple[List, List]:
         all_paths = chain.from_iterable(((cassette_path,), self.extra_paths))
         # Pairs of 2 lists per cassettes:
         all_content = (load_cassette(path, serializer) for path in unique(all_paths))
