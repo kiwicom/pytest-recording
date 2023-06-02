@@ -25,7 +25,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.11
 
       - run: pip install pre-commit
       - run: SKIP=pylint,mypy pre-commit run --all-files
@@ -40,7 +40,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.11
 
       - run: pip install pre-commit
       - run: pre-commit run pylint --all-files
@@ -55,7 +55,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.11
 
       - run: pip install pre-commit
       - run: pre-commit run mypy --all-files
@@ -66,12 +66,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - tox_job: py35
-            python: "3.5"
-            os_version: "ubuntu-20.04"
-          - tox_job: py36
-            python: "3.6"
-            os_version: "ubuntu-20.04"
           - tox_job: py37
             python: "3.7"
             os_version: "ubuntu-latest"
