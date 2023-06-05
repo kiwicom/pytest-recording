@@ -6,6 +6,8 @@ Changelog
 `Unreleased`_
 -------------
 
+- Drop support for Python 3.5 and 3.6. `#97`_
+
 `0.12.2`_ - 2023-02-16
 ----------------------
 
@@ -207,6 +209,7 @@ Added
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
 .. _#99: https://github.com/kiwicom/pytest-recording/pull/99
+.. _#97: https://github.com/kiwicom/pytest-recording/issues/97
 .. _#82: https://github.com/kiwicom/pytest-recording/pull/82
 .. _#69: https://github.com/kiwicom/pytest-recording/issues/69
 .. _#68: https://github.com/kiwicom/pytest-recording/issues/68
