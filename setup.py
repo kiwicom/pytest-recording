@@ -4,7 +4,7 @@ import os
 
 from setuptools import find_packages, setup
 
-install_requires = ["vcrpy>=2.0.1,<5", "pytest>=3.5.0", "attrs"]
+install_requires = ["vcrpy>=2.0.1", "pytest>=3.5.0", "attrs"]
 
 
 def read(fname):

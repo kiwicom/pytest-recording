@@ -7,6 +7,7 @@ Changelog
 -------------
 
 - Drop support for Python 3.5 and 3.6. `#97`_
+- Support `vcrpy v5 <https://github.com/kevin1024/vcrpy/releases/tag/v5.0.0>`_. `#110`_
 
 `0.12.2`_ - 2023-02-16
 ----------------------
@@ -208,6 +209,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#110: https://github.com/kiwicom/pytest-recording/pull/110
 .. _#99: https://github.com/kiwicom/pytest-recording/pull/99
 .. _#97: https://github.com/kiwicom/pytest-recording/issues/97
 .. _#82: https://github.com/kiwicom/pytest-recording/pull/82
