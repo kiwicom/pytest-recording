@@ -78,6 +78,9 @@ jobs:
           - tox_job: no_pycurl
             python: "3.8"
             os_version: "ubuntu-latest"
+          - tox_job: vcr_431
+            python: "3.8"
+            os_version: "ubuntu-latest"
           - tox_job: py310
             python: "3.10"
             os_version: "ubuntu-latest"

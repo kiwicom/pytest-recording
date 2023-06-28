@@ -1,5 +1,8 @@
 import pytest
+import vcr
 from pytest_recording._vcr import load_cassette
+
+VCR_VERSION = tuple(map(int, vcr.__version__.split(".")))
 
 
 def test_no_cassette(testdir):
@@ -324,6 +327,9 @@ def test_feature():
     result.assert_outcomes(passed=1)
 
 
+@pytest.mark.skipif(
+    VCR_VERSION >= (4, 4, 0), reason="Newer VCRpy versions do not use the `assert` statement in matchers"
+)
 def test_assertions_rewrite(testdir, create_file, get_cassette):
     # When a response match is not found
     testdir.makepyfile(
