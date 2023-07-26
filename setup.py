@@ -5,6 +5,15 @@ import os
 from setuptools import find_packages, setup
 
 install_requires = ["vcrpy>=2.0.1,<5", "pytest>=3.5.0", "attrs"]
+tests_require = [
+    "pytest-httpbin",
+    "pytest-mock",
+    "requests",
+    "Werkzeug==2.0.3",  # https://github.com/kevin1024/pytest-httpbin/issues/72
+]
+extras_require = {
+    "test": tests_require,
+}
 
 
 def read(fname):
@@ -28,6 +37,8 @@ setup(
     package_dir={"": "src"},
     python_requires=">=3.5",
     install_requires=install_requires,
+    tests_require=tests_require,
+    extras_require=extras_require,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: Pytest",
