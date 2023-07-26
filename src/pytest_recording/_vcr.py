@@ -12,6 +12,13 @@ from vcr.cassette import CassetteContextDecorator
 from vcr.persisters.filesystem import FilesystemPersister
 from vcr.serialize import deserialize
 
+try:
+    # VCR.py >=5
+    from vcr.cassette import CassetteNotFoundError
+except ImportError:
+    # VCR.py <5
+    CassetteNotFoundError = ValueError
+
 from .utils import unique, unpack
 
 ConfigType = Dict[str, Any]
@@ -49,7 +56,7 @@ class CombinedPersister(FilesystemPersister):
         requests, responses = starmap(unpack, zip(*all_content))
         requests, responses = list(requests), list(responses)
         if not requests or not responses:
-            raise ValueError("No cassettes found.")
+            raise CassetteNotFoundError("No cassettes found.")
         return requests, responses
 
 
