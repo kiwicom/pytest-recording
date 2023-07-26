@@ -50,7 +50,11 @@ class CombinedPersister(FilesystemPersister):
         requests, responses = starmap(unpack, zip(*all_content))
         requests, responses = list(requests), list(responses)
         if not requests or not responses:
-            raise CassetteNotFoundError("No cassettes found.")
+            try:
+                from vcr.cassette import CassetteNotFoundError
+                raise CassetteNotFoundError("No cassettes found.")
+            except ImportError:
+                raise ValueError("No cassettes found.")
         return requests, responses
 
 
