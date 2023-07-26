@@ -9,7 +9,7 @@ tests_require = [
     "pytest-httpbin",
     "pytest-mock",
     "requests",
-    "Werkzeug==2.0.3",  # https://github.com/kevin1024/pytest-httpbin/issues/72
+    "Werkzeug==2.2.3",  # https://github.com/kevin1024/pytest-httpbin/issues/72
 ]
 extras_require = {
     "test": tests_require,
