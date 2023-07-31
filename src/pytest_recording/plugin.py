@@ -133,7 +133,7 @@ def block_network(request: SubRequest, record_mode: str, vcr_markers: List[Mark]
 
 
 @pytest.fixture(autouse=True)  # type: ignore
-def vcr(  # pylint: disable=too-many-arguments
+def vcr(
     request: SubRequest,
     vcr_markers: List[Mark],
     vcr_cassette_dir: str,

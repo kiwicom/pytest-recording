@@ -6,7 +6,6 @@ on:
     paths:
       - '**.py'
       - '.github/workflows/*.yml'
-      - '.pylintrc'
       - 'pyproject.toml'
       - 'tox.ini'
       - '!docs/**'
@@ -28,22 +27,7 @@ jobs:
           python-version: 3.11
 
       - run: pip install pre-commit
-      - run: SKIP=pylint,mypy pre-commit run --all-files
-
-  pylint:
-    name: Pylint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      - run: pip install pre-commit
-      - run: pre-commit run pylint --all-files
+      - run: SKIP=mypy pre-commit run --all-files
 
   mypy:
     name: Mypy

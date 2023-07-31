@@ -13,3 +13,29 @@ multi_line_output = 3
 default_section = "THIRDPARTY"
 include_trailing_comma = true
 known_third_party = ["_pytest", "attr", "pytest", "pytest_recording", "setuptools", "vcr", "yaml"]
+
+[tool.ruff]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "D",  # pydocstyle
+]
+ignore = [
+    "E501",  # Line too long, handled by black
+    "B008",  # Do not perform function calls in argument defaults
+    "C901",  # Too complex
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D107",  # Missing docstring in `__init__`
+    "D203",  # One blank line before class
+    "D213",  # Multiline summary second line
+    "D401",  # Imperative mood
+]
+target-version = "py37"
