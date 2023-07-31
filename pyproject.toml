@@ -1,6 +1,58 @@
 [build-system]
-requires = ["setuptools >= 40.6.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytest-recording"
+version = "0.12.2"
+description = "A pytest plugin that allows you recording of network interactions via VCR.py"
+keywords = ["pytest", "vcr", "network", "mock"]
+authors = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]
+maintainers = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]
+requires-python = ">=3.7"
+license = "MIT"
+readme = "README.rst"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Testing",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "vcrpy>=2.0.1",
+    "pytest>=3.5.0"
+]
+[project.optional-dependencies]
+tests = [
+    "pytest-httpbin",
+    "pytest-mock",
+    "requests",
+    "Werkzeug==2.3.6"
+]
+dev = ["pytest_recording[tests]"]
+
+[project.urls]
+Documentation = "https://github.com/kiwicom/pytest-recording"
+Changelog = "https://github.com/kiwicom/pytest-recording/blob/master/docs/changelog.rst"
+"Bug Tracker" = "https://github.com/kiwicom/pytest-recording/issues"
+"Source Code" = "https://github.com/kiwicom/pytest-recording"
+"Change Log" = "https://github.com/kiwicom/pytest-recording/blob/master/docs/changelog.rst"
+
+[project.entry-points.pytest11]
+recording = "pytest_recording.plugin"
 
 [tool.black]
 line-length = 120
@@ -12,30 +64,30 @@ line_length = 120
 multi_line_output = 3
 default_section = "THIRDPARTY"
 include_trailing_comma = true
-known_third_party = ["_pytest", "packaging", "pytest", "pytest_recording", "setuptools", "vcr", "yaml"]
+known_third_party = ["_pytest", "packaging", "pytest", "pytest_recording", "vcr", "yaml"]
 
 [tool.ruff]
 select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "C",  # flake8-comprehensions
-    "B",  # flake8-bugbear
-    "D",  # pydocstyle
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+    "D", # pydocstyle
 ]
 ignore = [
-    "E501",  # Line too long, handled by black
-    "B008",  # Do not perform function calls in argument defaults
-    "C901",  # Too complex
-    "D100",  # Missing docstring in public module
-    "D101",  # Missing docstring in public class
-    "D102",  # Missing docstring in public method
-    "D103",  # Missing docstring in public function
-    "D104",  # Missing docstring in public package
-    "D105",  # Missing docstring in magic method
-    "D107",  # Missing docstring in `__init__`
-    "D203",  # One blank line before class
-    "D213",  # Multiline summary second line
-    "D401",  # Imperative mood
+    "E501", # Line too long, handled by black
+    "B008", # Do not perform function calls in argument defaults
+    "C901", # Too complex
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+    "D107", # Missing docstring in `__init__`
+    "D203", # One blank line before class
+    "D213", # Multiline summary second line
+    "D401", # Imperative mood
 ]
 target-version = "py37"
