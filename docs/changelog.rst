@@ -6,6 +6,9 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.13.0`_ - 2023-08-01
+----------------------
+
 - Drop support for Python 3.5 and 3.6. `#97`_
 - Add support for VCR.py 5.0.0. `#118`_
 - Drop direct dependency on ``attrs``.
@@ -189,7 +192,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.12.2...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.13.0...HEAD
+.. _0.13.0: https://github.com/kiwicom/pytest-recording/compare/v0.12.2...v0.13.0
 .. _0.12.2: https://github.com/kiwicom/pytest-recording/compare/v0.12.1...v0.12.2
 .. _0.12.1: https://github.com/kiwicom/pytest-recording/compare/v0.12.0...v0.12.1
 .. _0.12.0: https://github.com/kiwicom/pytest-recording/compare/v0.11.0...v0.12.0
