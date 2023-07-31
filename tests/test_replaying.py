@@ -96,7 +96,6 @@ def test_combined():
     result.assert_outcomes(passed=1)
 
 
-@pytest.mark.skipif(VCR_VERSION >= (5, 0, 0), reason="TODO Test needs a re-write for VCR.py >=5")
 def test_merged_kwargs(testdir, get_response_cassette):
     # When there are multiple pytest.mark.vcr with different kwargs
     testdir.makepyfile(
@@ -104,26 +103,27 @@ def test_merged_kwargs(testdir, get_response_cassette):
 import pytest
 import requests
 
+ORIGINAL = object()
+OVERRIDDEN = object()
+
 def before_request(request):
-    raise ValueError("Before")
+    return ORIGINAL
 
 def override_before_request(request):
-    raise ValueError("Overridden")
+    return OVERRIDDEN
 
 
 pytestmark = pytest.mark.vcr(before_record_request=before_request)
 
 GET_CASSETTE = "{}"
 
-@pytest.mark.vcr(GET_CASSETTE)
-def test_custom_path():
-    with pytest.raises(ValueError, match="Before"):
-        requests.get("http://httpbin.org/get")
+@pytest.mark.vcr
+def test_custom_path(vcr):
+    assert vcr._before_record_request("mock") is ORIGINAL
 
-@pytest.mark.vcr(GET_CASSETTE, before_record_request=override_before_request)
-def test_custom_path_with_kwargs():
-    with pytest.raises(ValueError, match="Overridden"):
-        requests.get("http://httpbin.org/get")
+@pytest.mark.vcr(before_record_request=override_before_request)
+def test_custom_path_with_kwargs(vcr):
+    assert vcr._before_record_request("mock") is OVERRIDDEN
     """.format(
             get_response_cassette
         )
@@ -250,33 +250,32 @@ def test_own():
     result.assert_outcomes(passed=1)
 
 
-@pytest.mark.skipif(VCR_VERSION >= (5, 0, 0), reason="TODO Test needs a re-write for VCR.py >=5")
 @pytest.mark.parametrize("scope", ("function", "module", "session"))
-def test_global_config(testdir, get_response_cassette, scope):
-    # When a test doesn't have its own mark
+def test_global_config(testdir, scope):
+    # When there is a `vcr_config` fixture
     testdir.makepyfile(
         """
 import pytest
 import requests
 
+EXPECTED = object()
 
 @pytest.fixture(scope="{}")
 def vcr_config():
     return {{"before_record_request": before_request}}
 
 def before_request(request):
-    raise ValueError("Before")
+    return EXPECTED
 
-@pytest.mark.vcr("{}")
-def test_own():
-    with pytest.raises(ValueError):
-        requests.get("http://httpbin.org/get")
+@pytest.mark.vcr
+def test_own(vcr):
+    assert vcr._before_record_request("mock") is EXPECTED
     """.format(
-            scope, get_response_cassette
+            scope
         )
     )
-    # Then it should use a cassette with a default name
-    result = testdir.runpytest()
+    # Then its config values should be merged with test-specific ones
+    result = testdir.runpytest("-s")
     result.assert_outcomes(passed=1)
 
 
