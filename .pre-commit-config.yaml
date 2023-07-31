@@ -30,11 +30,6 @@ repos:
       - id: markdownlint
         language_version: system
 
-  - repo: https://github.com/PyCQA/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-
   - repo: https://github.com/codingjoe/relint
     rev: 3.0.0
     hooks:
@@ -63,10 +58,7 @@ repos:
     hooks:
       - id: isort
 
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v3.0.0a5
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.281
     hooks:
-      - id: pylint
-        exclude: ^(docs/).*$
-        # disabled import-error as may be run out of environment with deps
-        args: ["--disable=import-error"]
+      - id: ruff

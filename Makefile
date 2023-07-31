@@ -13,9 +13,6 @@ test:
 tox-test:
 	tox -p all
 
-pylint:
-	tox -e pylint
-
 black:
 	black -l 120 src/pytest_recording docs tests setup.py
 
