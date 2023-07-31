@@ -46,7 +46,7 @@ repos:
     hooks:
       - id: mypy
         exclude: ^(docs/|tests/|setup.py).*$
-        additional_dependencies: [ "types-attrs", "types-pycurl" ]
+        additional_dependencies: [ "types-pycurl" ]
 
   - repo: https://github.com/asottile/seed-isort-config
     rev: v2.2.0

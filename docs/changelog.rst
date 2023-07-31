@@ -8,6 +8,7 @@ Changelog
 
 - Drop support for Python 3.5 and 3.6. `#97`_
 - Add support for VCR.py 5.0.0. `#118`_
+- Drop direct dependency on ``attrs``.
 
 `0.12.2`_ - 2023-02-16
 ----------------------

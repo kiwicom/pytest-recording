@@ -1,10 +1,10 @@
 import os
 from copy import deepcopy
+from dataclasses import dataclass
 from itertools import chain, starmap
 from types import ModuleType
 from typing import Any, Callable, Dict, List, Tuple
 
-import attr
 from _pytest.config import Config
 from _pytest.mark.structures import Mark
 from vcr import VCR
@@ -33,11 +33,11 @@ def load_cassette(cassette_path: str, serializer: ModuleType) -> Tuple[List, Lis
     return deserialize(cassette_content, serializer)
 
 
-@attr.s(slots=True)
+@dataclass
 class CombinedPersister(FilesystemPersister):
     """Load extra cassettes, but saves only the first one."""
 
-    extra_paths = attr.ib(type=List[str])
+    extra_paths: List[str]
 
     def load_cassette(self, cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
         all_paths = chain.from_iterable(((cassette_path,), self.extra_paths))
