@@ -1,4 +1,5 @@
 import pytest
+from packaging import version
 
 try:
     import pycurl
@@ -463,8 +464,11 @@ def test_critical_error():
     result = testdir.runpytest()
     # Then socket and pycurl should be unpatched anyway
     result.assert_outcomes(passed=1)
-    # NOTE. In reality it is not likely to happen - e.g. if pytest will partially crash and will not call the teardown
+    # NOTE. In reality, it is not likely to happen - e.g. if pytest will partially crash and will not call the teardown
     # part of the generator, but this try/finally implementation could also guard against errors on manual
+
+
+IS_PYTEST_ABOVE_54 = version.parse(pytest.__version__) >= version.parse("5.4.0")
 
 
 @pytest.mark.parametrize("args", ("foo=42", "42"))
@@ -484,6 +488,9 @@ def test_request():
     )
     result = testdir.runpytest()
     # Then there should be an error
-    result.assert_outcomes(errors=1)
+    if IS_PYTEST_ABOVE_54:
+        result.assert_outcomes(errors=1)
+    else:
+        result.assert_outcomes(error=1)
     expected = "Invalid arguments to `block_network`. It accepts only the following keyword arguments: `allowed_hosts`."
     assert expected in result.stdout.str()

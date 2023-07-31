@@ -2,22 +2,21 @@ import re
 import socket
 import sys
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 from typing import Any, Callable, Iterator, List, Optional, Tuple, Union
 from urllib.parse import urlparse
-
-import attr
 
 try:
     import pycurl
 
-    @attr.s(slots=True)
+    @dataclass
     class Curl:
         """Proxy to real pycurl.Curl.
 
         If `perform` is called then it will raise an error if network is disabled via `disable`
         """
 
-        handle = attr.ib(factory=pycurl.Curl, type=pycurl.Curl)
+        handle: pycurl.Curl = field(default_factory=pycurl.Curl)
         url = None  # type: Optional[str]
 
         def __getattribute__(self, item: str) -> Any:
@@ -58,7 +57,7 @@ _disable_pycurl = False
 _allowed_hosts = None  # type: ignore
 
 
-@attr.s(slots=True, hash=True)
+@dataclass(unsafe_hash=True)
 class PyCurlWrapper:
     """Imitate pycurl module."""
 
