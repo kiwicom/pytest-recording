@@ -31,7 +31,7 @@ def test_pytest_vcr_incompatibility(testdir, mocker):
     try:
         mocker.patch("pluggy._manager.PluginManager.has_plugin", return_value=True)
     except (AttributeError, ImportError):
-        # Python 3.5 & older `pluggy`
+        # Older `pluggy`
         mocker.patch("pluggy.manager.PluginManager.has_plugin", return_value=True)
     testdir.makepyfile(
         """
