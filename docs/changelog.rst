@@ -6,6 +6,8 @@ Changelog
 `Unreleased`_
 -------------
 
+- Add trove classifier for license.
+
 `0.13.0`_ - 2023-08-01
 ----------------------
 
