@@ -229,8 +229,18 @@ def test_no_vcr_mark_bytearray():
 @pytest.mark.parametrize(
     "marker, cmd_options, vcr_cfg",
     (
-        pytest.param('@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])', "", "", id="block_marker"),
-        pytest.param("", ("--block-network", "--allowed-hosts=127.0.0.*,127.0.1.1"), "", id="block_cmd"),
+        pytest.param(
+            '@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])',
+            "",
+            "",
+            id="block_marker",
+        ),
+        pytest.param(
+            "",
+            ("--block-network", "--allowed-hosts=127.0.0.*,127.0.1.1"),
+            "",
+            id="block_cmd",
+        ),
         pytest.param(
             "@pytest.mark.block_network()",
             "",
@@ -484,9 +494,7 @@ import requests
 @pytest.mark.block_network({})
 def test_request():
     requests.get("https://google.com")
-    """.format(
-            args
-        )
+    """.format(args)
     )
     result = testdir.runpytest()
     # Then there should be an error

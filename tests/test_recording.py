@@ -23,9 +23,7 @@ def test_cassette_recording(testdir):
         @pytest.mark.vcr
         def test_without_network():
             pass
-    """.format(
-            string.ascii_letters
-        )
+    """.format(string.ascii_letters)
     )
 
     # If recording is enabled
@@ -190,9 +188,7 @@ def test_custom_cassette_name(testdir):
         @pytest.mark.vcr("{}")
         def test_with_network(httpbin):
             assert requests.get(httpbin.url + "/get").status_code == 200
-    """.format(
-            cassette
-        )
+    """.format(cassette)
     )
 
     result = testdir.runpytest("--record-mode=all")
@@ -214,9 +210,7 @@ def test_custom_cassette_name_rewrite(testdir):
         @pytest.mark.vcr("{}")
         def test_with_network(httpbin):
             assert requests.get(httpbin.url + "/uuid").status_code == 200
-    """.format(
-            cassette
-        )
+    """.format(cassette)
     )
 
     result = testdir.runpytest("--record-mode=rewrite")
@@ -253,9 +247,7 @@ pytestmark = [pytest.mark.vcr("{}")]
 def test_network(httpbin):
     assert requests.get(httpbin.url + "/ip").status_code == 200
     assert requests.get(httpbin.url + "/get").status_code == 200
-    """.format(
-            ip_response_cassette
-        )
+    """.format(ip_response_cassette)
     )
 
     result = testdir.runpytest("--record-mode=all")
@@ -309,9 +301,7 @@ def test_network(httpbin):
 @pytest.mark.vcr("{}", serializer="json")
 def test_custom_name(httpbin):
     assert requests.get(httpbin.url + "/ip").status_code == 200
-    """.format(
-            custom_cassette_path
-        )
+    """.format(custom_cassette_path)
     )
 
     result = testdir.runpytest("--record-mode=all", "-s")

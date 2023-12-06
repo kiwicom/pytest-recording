@@ -4,16 +4,15 @@ from pytest_recording.plugin import RECORD_MODES
 
 
 @pytest.mark.parametrize(
-    "args, expected", [(("--record-mode={}".format(mode),), mode) for mode in RECORD_MODES] + [((), "none")]
+    "args, expected",
+    [(("--record-mode={}".format(mode),), mode) for mode in RECORD_MODES] + [((), "none")],
 )
 def test_record_mode(testdir, args, expected):
     testdir.makepyfile(
         """
         def test_mode(record_mode):
             assert record_mode == "{}"
-    """.format(
-            expected
-        )
+    """.format(expected)
     )
 
     # Record mode depends on the passed CMD arguments
