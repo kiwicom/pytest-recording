@@ -226,7 +226,7 @@ Python support
 
 Pytest-recording supports:
 
-- CPython 3.7, 3.8, 3.9, 3.10 and 3.11
+- CPython 3.7, 3.8, 3.9, 3.10, 3.11, and 3.12
 - PyPy 7 (3.6)
 
 License

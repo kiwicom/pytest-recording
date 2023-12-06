@@ -6,6 +6,7 @@ Changelog
 `Unreleased`_
 -------------
 
+- Add support for Python 3.12.
 - Add trove classifier for license.
 
 `0.13.0`_ - 2023-08-01

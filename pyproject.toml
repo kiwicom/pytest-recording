@@ -28,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Operating System :: OS Independent",
@@ -66,7 +67,7 @@ select = [
     "D", # pydocstyle
 ]
 ignore = [
-    "E501", # Line too long, handled by black
+    "E501", # Line too long, handled by ruff
     "B008", # Do not perform function calls in argument defaults
     "C901", # Too complex
     "D100", # Missing docstring in public module
