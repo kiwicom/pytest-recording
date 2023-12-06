@@ -76,7 +76,11 @@ def use_cassette(
         except OSError:
             pass
         record_mode = "new_episodes"
-    vcr = VCR(path_transformer=path_transformer, cassette_library_dir=vcr_cassette_dir, record_mode=record_mode)
+    vcr = VCR(
+        path_transformer=path_transformer,
+        cassette_library_dir=vcr_cassette_dir,
+        record_mode=record_mode,
+    )
 
     def extra_path_transformer(path: str) -> str:
         """Paths in extras can be handled as relative and as absolute.

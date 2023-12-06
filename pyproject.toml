@@ -55,19 +55,8 @@ Changelog = "https://github.com/kiwicom/pytest-recording/blob/master/docs/change
 [project.entry-points.pytest11]
 recording = "pytest_recording.plugin"
 
-[tool.black]
-line-length = 120
-target_version = ["py37"]
-
-[tool.isort]
-# config compatible with Black
-line_length = 120
-multi_line_output = 3
-default_section = "THIRDPARTY"
-include_trailing_comma = true
-known_third_party = ["_pytest", "packaging", "pytest", "pytest_recording", "vcr", "yaml"]
-
 [tool.ruff]
+line-length = 120
 select = [
     "E", # pycodestyle errors
     "W", # pycodestyle warnings
@@ -92,3 +81,10 @@ ignore = [
     "D401", # Imperative mood
 ]
 target-version = "py37"
+
+[tool.ruff.format]
+skip-magic-trailing-comma = false
+
+[tool.ruff.isort]
+known-first-party = ["pytest_recording"]
+known-third-party = ["_pytest", "packaging", "pytest", "vcr", "yaml"]

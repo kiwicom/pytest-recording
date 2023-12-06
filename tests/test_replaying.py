@@ -38,9 +38,7 @@ def test_combined():
 
 def test_no_vcr(httpbin):
     assert requests.get(httpbin.url + "/headers").status_code == 200
-""".format(
-            get_response_cassette, ip_response_cassette
-        )
+""".format(get_response_cassette, ip_response_cassette)
     )
     result = testdir.runpytest()
     result.assert_outcomes(passed=2)
@@ -65,9 +63,7 @@ def test_single_cassette():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
         requests.get("http://httpbin.org/ip")
-        """.format(
-            get_response_cassette, ip_response_cassette
-        )
+        """.format(get_response_cassette, ip_response_cassette)
     )
     # Then their cassettes are combined
     result = testdir.runpytest()
@@ -87,9 +83,7 @@ pytestmark = pytest.mark.vcr()
 @pytest.mark.vcr("{}")
 def test_combined():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
-""".format(
-            get_response_cassette
-        )
+""".format(get_response_cassette)
     )
     # Then it is noop for tests that already have pytest.mark.vcr applied
     result = testdir.runpytest()
@@ -124,9 +118,7 @@ def test_custom_path(vcr):
 @pytest.mark.vcr(before_record_request=override_before_request)
 def test_custom_path_with_kwargs(vcr):
     assert vcr._before_record_request("mock") is OVERRIDDEN
-    """.format(
-            get_response_cassette
-        )
+    """.format(get_response_cassette)
     )
     # Then each test function should have cassettes with merged kwargs
     result = testdir.runpytest()
@@ -166,9 +158,7 @@ import requests
 def test_custom_path():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
-    """.format(
-            get_response_cassette, ip_response_cassette
-        )
+    """.format(get_response_cassette, ip_response_cassette)
     )
     # Then they should be combined with each other
     result = testdir.runpytest()
@@ -189,9 +179,7 @@ pytestmark = [pytest.mark.vcr(CASSETTE)]
 @pytest.mark.vcr(CASSETTE, CASSETTE)
 def test_custom_path():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
-    """.format(
-            get_response_cassette
-        )
+    """.format(get_response_cassette)
     )
     # Then the cassette will be loaded only once
     # And will not produce any errors
@@ -218,9 +206,7 @@ class TestSomething:
     def test_custom_path(self):
         assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
         assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
-    """.format(
-            get_response_cassette, ip_response_cassette
-        )
+    """.format(get_response_cassette, ip_response_cassette)
     )
     # Then it should be combined with the other marks
     result = testdir.runpytest()
@@ -240,9 +226,7 @@ pytestmark = [pytest.mark.vcr("{}")]
 def test_own():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
-    """.format(
-            get_response_cassette
-        )
+    """.format(get_response_cassette)
     )
     create_file("cassettes/test_own_mark/test_own.yaml", ip_cassette)
     # Then it should use a cassette with a default name
@@ -270,9 +254,7 @@ def before_request(request):
 @pytest.mark.vcr
 def test_own(vcr):
     assert vcr._before_record_request("mock") is EXPECTED
-    """.format(
-            scope
-        )
+    """.format(scope)
     )
     # Then its config values should be merged with test-specific ones
     result = testdir.runpytest("-s")
@@ -329,7 +311,8 @@ def test_feature():
 
 
 @pytest.mark.skipif(
-    VCR_VERSION >= (4, 4, 0), reason="Newer VCRpy versions do not use the `assert` statement in matchers"
+    VCR_VERSION >= (4, 4, 0),
+    reason="Newer VCRpy versions do not use the `assert` statement in matchers",
 )
 def test_assertions_rewrite(testdir, create_file, get_cassette):
     # When a response match is not found
@@ -363,9 +346,7 @@ import requests
 def test_feature():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
-    """.format(
-            get_response_cassette
-        )
+    """.format(get_response_cassette)
     )
     # Then the default cassette should always be used together with the extra one
     create_file("cassettes/test_default_cassette_always_exist/test_feature.yaml", ip_cassette)

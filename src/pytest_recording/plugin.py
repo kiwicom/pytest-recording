@@ -25,7 +25,8 @@ def pytest_configure(config: Config) -> None:
     config.addinivalue_line("markers", "block_network: Block network access except for VCR recording.")
     config.addinivalue_line("markers", "default_cassette: Override the default cassette name.")
     config.addinivalue_line(
-        "markers", "allowed_hosts: List of regexes to match hosts to where connection must be allowed."
+        "markers",
+        "allowed_hosts: List of regexes to match hosts to where connection must be allowed.",
     )
     network.install_pycurl_wrapper()
 
@@ -44,7 +45,10 @@ def pytest_addoption(parser: Parser) -> None:
         help='VCR.py record mode. Default to "none".',
     )
     group.addoption(
-        "--block-network", action="store_true", default=False, help="Block network access except for VCR recording."
+        "--block-network",
+        action="store_true",
+        default=False,
+        help="Block network access except for VCR recording.",
     )
     group.addoption(
         "--allowed-hosts",
@@ -148,7 +152,12 @@ def vcr(
         config = request.getfixturevalue("vcr_config")
         default_cassette = request.getfixturevalue("default_cassette_name")
         with use_cassette(
-            default_cassette, vcr_cassette_dir, record_mode, vcr_markers, config, pytestconfig
+            default_cassette,
+            vcr_cassette_dir,
+            record_mode,
+            vcr_markers,
+            config,
+            pytestconfig,
         ) as cassette:
             yield cassette
     else:
