@@ -71,6 +71,9 @@ jobs:
           - tox_job: py311
             python: "3.11"
             os_version: "ubuntu-latest"
+          - tox_job: py312
+            python: "3.12"
+            os_version: "ubuntu-latest"
 
     steps:
       - uses: actions/checkout@v4
