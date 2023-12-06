@@ -51,7 +51,6 @@ Documentation = "https://github.com/kiwicom/pytest-recording"
 Changelog = "https://github.com/kiwicom/pytest-recording/blob/master/docs/changelog.rst"
 "Bug Tracker" = "https://github.com/kiwicom/pytest-recording/issues"
 "Source Code" = "https://github.com/kiwicom/pytest-recording"
-"Change Log" = "https://github.com/kiwicom/pytest-recording/blob/master/docs/changelog.rst"
 
 [project.entry-points.pytest11]
 recording = "pytest_recording.plugin"
