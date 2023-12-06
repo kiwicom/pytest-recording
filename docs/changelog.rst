@@ -6,6 +6,9 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.13.1`_ - 2023-12-07
+----------------------
+
 - Add support for Python 3.12.
 - Add trove classifier for license.
 
@@ -195,7 +198,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.13.0...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.13.1...HEAD
+.. _0.13.1: https://github.com/kiwicom/pytest-recording/compare/v0.13.0...v0.13.1
 .. _0.13.0: https://github.com/kiwicom/pytest-recording/compare/v0.12.2...v0.13.0
 .. _0.12.2: https://github.com/kiwicom/pytest-recording/compare/v0.12.1...v0.12.2
 .. _0.12.1: https://github.com/kiwicom/pytest-recording/compare/v0.12.0...v0.12.1
