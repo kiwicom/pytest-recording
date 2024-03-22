@@ -5,6 +5,7 @@ Changelog
 
 `Unreleased`_
 -------------
+- Documentation improvements.
 
 `0.13.1`_ - 2023-12-07
 ----------------------
