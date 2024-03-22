@@ -38,6 +38,15 @@ Usage
         assert requests.get("http://httpbin.org/get").text == '{"get": true}'
         assert requests.get("http://httpbin.org/ip").text == '{"ip": true}'
 
+    # Make assertions based on the cassette calls/responses:
+    @pytest.mark.vcr
+    def test_call_count(vcr):
+        assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+        assert requests.get("http://httpbin.org/ip").text == '{"ip": true}'
+        # See https://vcrpy.readthedocs.io/en/latest/advanced.html for more info
+        # about the Cassette object:
+        assert vcr.play_count == 2
+
 Run your tests:
 
 .. code:: bash
