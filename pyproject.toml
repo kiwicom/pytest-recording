@@ -42,7 +42,7 @@ tests = [
     "pytest-httpbin",
     "pytest-mock",
     "requests",
-    "Werkzeug==3.0.2"
+    "Werkzeug==3.0.3"
 ]
 dev = ["pytest_recording[tests]"]
 
