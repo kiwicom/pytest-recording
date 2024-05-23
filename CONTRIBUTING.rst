@@ -42,7 +42,7 @@ It would be awesome if you can submit a failing test that demonstrates the probl
 .. _fixbugs:
 
 Submitting Pull Requests
------------------------
+------------------------
 
 #. Fork the repository.
 #. Enable and install `pre-commit <https://pre-commit.com>`_ to ensure style-guides and code checks are followed.
