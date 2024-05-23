@@ -13,6 +13,18 @@ Features
 - Network access blocking;
 - The ``rewrite`` recording mode that rewrites cassettes from scratch.
 
+Installation
+------------
+
+This project can be installed via pip:
+
+.. code:: bash
+
+    pip install pytest-recording
+
+⚠️This project is not compatible with `pytest-vcr`, make sure to uninstall before ⚠️
+
+
 Usage
 -----
 
