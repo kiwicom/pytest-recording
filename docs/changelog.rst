@@ -5,6 +5,7 @@ Changelog
 
 `Unreleased`_
 -------------
+- Add lazy loading of VCR to reduce plugin overhead. `#145`_
 - Documentation improvements.
 
 `0.13.1`_ - 2023-12-07
@@ -223,6 +224,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#145: https://github.com/kiwicom/pytest-recording/issues/145
 .. _#118: https://github.com/kiwicom/pytest-recording/pull/118
 .. _#99: https://github.com/kiwicom/pytest-recording/pull/99
 .. _#97: https://github.com/kiwicom/pytest-recording/issues/97
