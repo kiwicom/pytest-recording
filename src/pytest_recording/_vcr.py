@@ -1,9 +1,8 @@
 import os
-from copy import deepcopy
 from dataclasses import dataclass
 from itertools import chain, starmap
 from types import ModuleType
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Callable, List, Tuple
 
 from _pytest.config import Config
 from _pytest.mark.structures import Mark
@@ -19,9 +18,7 @@ except ImportError:
     # VCR.py <5
     CassetteNotFoundError = ValueError
 
-from .utils import unique, unpack
-
-ConfigType = Dict[str, Any]
+from .utils import ConfigType, merge_kwargs, unique, unpack
 
 
 def load_cassette(cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
@@ -104,11 +101,3 @@ def get_path_transformer(config: ConfigType) -> Callable:
     else:
         suffix = ".yaml"
     return VCR.ensure_suffix(suffix)
-
-
-def merge_kwargs(config: ConfigType, markers: List[Mark]) -> ConfigType:
-    """Merge all kwargs into a single dictionary to pass to `vcr.use_cassette`."""
-    kwargs = deepcopy(config)
-    for marker in reversed(markers):
-        kwargs.update(marker.kwargs)
-    return kwargs

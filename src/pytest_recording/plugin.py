@@ -1,15 +1,17 @@
 import os
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional, TYPE_CHECKING
 
 import pytest
 from _pytest.config import Config, PytestPluginManager
 from _pytest.config.argparsing import Parser
 from _pytest.fixtures import SubRequest
 from _pytest.mark.structures import Mark
-from vcr.cassette import Cassette
+
+if TYPE_CHECKING:
+    from vcr.cassette import Cassette
 
 from . import hooks, network
-from ._vcr import merge_kwargs, use_cassette
+from .utils import merge_kwargs
 from .validation import validate_block_network_mark
 
 RECORD_MODES = ("once", "new_episodes", "none", "all", "rewrite")
@@ -144,11 +146,13 @@ def vcr(
     record_mode: str,
     disable_recording: bool,
     pytestconfig: Config,
-) -> Iterator[Optional[Cassette]]:
+) -> Iterator[Optional["Cassette"]]:
     """Install a cassette if a test is marked with `pytest.mark.vcr`."""
     if disable_recording:
         yield None
     elif vcr_markers:
+        from ._vcr import use_cassette
+
         config = request.getfixturevalue("vcr_config")
         default_cassette = request.getfixturevalue("default_cassette_name")
         with use_cassette(
