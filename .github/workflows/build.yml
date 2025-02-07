@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.13
 
       - run: pip install pre-commit
       - run: SKIP=mypy pre-commit run --all-files
@@ -39,7 +39,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: 3.13
 
       - run: pip install pre-commit
       - run: pre-commit run mypy --all-files
@@ -50,20 +50,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - tox_job: py37
-            python: "3.7"
-            os_version: "ubuntu-latest"
-          - tox_job: py38
-            python: "3.8"
-            os_version: "ubuntu-latest"
           - tox_job: py39
             python: "3.9"
             os_version: "ubuntu-latest"
           - tox_job: no_pycurl
-            python: "3.8"
+            python: "3.9"
             os_version: "ubuntu-latest"
           - tox_job: vcr_431
-            python: "3.8"
+            python: "3.9"
             os_version: "ubuntu-latest"
           - tox_job: py310
             python: "3.10"
@@ -73,6 +67,9 @@ jobs:
             os_version: "ubuntu-latest"
           - tox_job: py312
             python: "3.12"
+            os_version: "ubuntu-latest"
+          - tox_job: py313
+            python: "3.13"
             os_version: "ubuntu-latest"
 
     steps:

@@ -9,7 +9,7 @@ description = "A pytest plugin that allows you recording of network interactions
 keywords = ["pytest", "vcr", "network", "mock"]
 authors = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]
 maintainers = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 license = "MIT"
 readme = "README.rst"
 classifiers = [
@@ -18,17 +18,15 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Operating System :: OS Independent",
@@ -80,7 +78,7 @@ ignore = [
     "D213", # Multiline summary second line
     "D401", # Imperative mood
 ]
-target-version = "py37"
+target-version = "py39"
 
 [tool.ruff.format]
 skip-magic-trailing-comma = false

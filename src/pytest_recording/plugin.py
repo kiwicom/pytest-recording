@@ -185,7 +185,7 @@ def default_cassette_name(request: SubRequest) -> str:
     marker = request.node.get_closest_marker("default_cassette")
     if marker is not None:
         assert marker.args, (
-            "You should pass the cassette name as an argument " "to the `pytest.mark.default_cassette` marker"
+            "You should pass the cassette name as an argument to the `pytest.mark.default_cassette` marker"
         )
         return marker.args[0]
     return get_default_cassette_name(request.cls, request.node.name)

@@ -8,7 +8,7 @@ except ImportError as exc:
         # Case with different SSL backends should be loud and visible
         # Could happen with development when environment is recreated (e.g. locally)
         raise
-    pycurl = None
+    pycurl = None  # type: ignore[assignment]
 
 
 def assert_network_blocking(testdir, dirname):
@@ -419,9 +419,9 @@ def test_pycurl_setattr():
     # When pycurl is used for network access
     # And an attribute is set on an instance
     curl = pycurl.Curl()
-    curl.attr = 42
+    curl.attr = 42  # type: ignore[attr-defined]
     # Then it should be proxied to the original Curl instance itself
-    assert curl.handle.attr == 42
+    assert curl.handle.attr == 42  # type: ignore[attr-defined]
 
 
 @pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
