@@ -1,9 +1,9 @@
 default_language_version:
-  python: python3.11
+  python: python3.13
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -20,34 +20,33 @@ repos:
       - id: gitlint
 
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.33.0
+    rev: v1.35.1
     hooks:
       - id: yamllint
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.37.0
+    rev: v0.44.0
     hooks:
       - id: markdownlint
         language_version: system
 
   - repo: https://github.com/codingjoe/relint
-    rev: 3.1.0
+    rev: 3.3.1
     hooks:
       - id: relint
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.7.1
+    rev: v1.15.0
     hooks:
       - id: mypy
-        exclude: ^(docs/|tests/|setup.py).*$
-        additional_dependencies: [ "types-pycurl" ]
+        additional_dependencies: [ "types-pycurl", "types-PyYAML" ]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.7
+    rev: v0.9.5
     hooks:
       - id: ruff-format
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.7
+    rev: v0.9.5
     hooks:
       - id: ruff

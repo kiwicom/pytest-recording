@@ -4,6 +4,8 @@ import string
 import pytest
 import yaml
 
+from typing import Any
+
 
 def test_cassette_recording(testdir):
     testdir.makepyfile(
@@ -148,6 +150,7 @@ def test_cassette_recording_rewrite(testdir):
     test_function_size = test_function_cassette_path.size()
     assert test_function_size
     # Cassette should contain uuid as response
+    cassette: Any
     with open(str(test_function_cassette_path), encoding="utf8") as cassette:
         cassette = yaml.load(cassette, Loader=yaml.BaseLoader)
         test_function_cassette_uuid = cassette["interactions"][0]["response"]["body"]["string"]
@@ -220,6 +223,7 @@ def test_custom_cassette_name_rewrite(testdir):
     # And writing will happen to the default cassette
     cassette_size = cassette.size()
     assert cassette_size
+    file: Any
     with open(str(cassette), encoding="utf8") as file:
         file = yaml.load(file, Loader=yaml.BaseLoader)
         uuid = file["interactions"][0]["response"]["body"]["string"]
