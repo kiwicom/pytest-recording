@@ -14,7 +14,7 @@ from vcr.serialize import deserialize
 try:
     # VCR.py >=5
     from vcr.cassette import CassetteNotFoundError
-except ImportError:
+except ImportError:  # pragma: no cover
     # VCR.py <5
     CassetteNotFoundError = ValueError
 
