@@ -1,5 +1,15 @@
+import json
+import sys
+from io import BytesIO
+from socket import AF_INET, AF_NETLINK, AF_UNIX, SOCK_RAW, SOCK_STREAM, socket
+
+import pycurl
 import pytest
+import requests
+import vcr.errors
 from packaging import version
+
+from pytest_recording.network import blocking_context
 
 try:
     import pycurl
@@ -130,77 +140,46 @@ def test_no_blocking(httpbin):
     result.assert_outcomes(passed=1)
 
 
-def test_unix_socket(testdir):
-    testdir.makepyfile(
-        """
-from socket import socket, AF_UNIX, SOCK_STREAM
-import pytest
-
-def call(socket_name):
-    s = socket(AF_UNIX, SOCK_STREAM)
+def call(socket_name, family, type):
+    s = socket(family, type)
     try:
         return s.connect(socket_name)
     finally:
         s.close()
 
+
 @pytest.mark.block_network(allowed_hosts=["./allowed_socket"])
-def test_allowed():
+def test_block_network_allowed_socket():
     # Error from actual socket call, that means it was not blocked
     with pytest.raises(IOError):
-        call("./allowed_socket")
+        call("./allowed_socket", AF_UNIX, SOCK_STREAM)
+
 
 @pytest.mark.block_network(allowed_hosts=["./allowed_socket"])
-def test_blocked():
+def test_block_network_blocked_socket():
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
-        call("./blocked_socket")
-    """
-    )
-
-    result = testdir.runpytest()
-    result.assert_outcomes(passed=2)
+        call("./blocked_socket", AF_UNIX, SOCK_STREAM)
 
 
-def test_other_socket(testdir):
-    # When not AF_UNIX, AF_INET or AF_INET6 socket is used
-    testdir.makepyfile(
-        """
-from socket import socket, AF_NETLINK, SOCK_RAW
-import pytest
-
-def call():
-    s = socket(AF_NETLINK, SOCK_RAW)
-    try:
-        return s.connect((0, 0))
-    finally:
-        s.close()
-
+# When not AF_UNIX, AF_INET or AF_INET6 socket is used
+# Then socket.socket.connect call is blocked, even if resource name is in the allowed list
 @pytest.mark.block_network(allowed_hosts=["./allowed_socket", "127.0.0.1", "0"])
 def test_blocked():
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
-        call()
-    """
-    )
-    # Then socket.socket.connect call is blocked, even if resource name is in the allowed list
-    result = testdir.runpytest()
-    result.assert_outcomes(passed=1)
+        call((0, 0), AF_NETLINK, SOCK_RAW)
 
 
-def test_block_network(testdir):
-    # When record is disabled
-    testdir.makepyfile(
-        """
-import socket
-import pytest
-import requests
-import vcr.errors
+# When record is disabled
+
 
 @pytest.mark.block_network
 @pytest.mark.vcr
 def test_with_vcr_mark(httpbin):
     with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException, match=r"overwrite existing cassette"):
         requests.get(httpbin.url + "/ip")
-    assert socket.socket.connect.__name__ == "network_guard"
-    assert socket.socket.connect_ex.__name__ == "network_guard"
+    assert socket.connect.__name__ == "network_guard"
+    assert socket.connect_ex.__name__ == "network_guard"
+
 
 @pytest.mark.block_network
 def test_no_vcr_mark(httpbin):
@@ -211,19 +190,15 @@ def test_no_vcr_mark(httpbin):
 @pytest.mark.block_network(allowed_hosts=["127.0.0.2"])
 def test_no_vcr_mark_bytes():
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        with socket(AF_INET, SOCK_STREAM) as sock:
             sock.connect((b"127.0.0.1", 80))
+
 
 @pytest.mark.block_network(allowed_hosts=["127.0.0.2"])
 def test_no_vcr_mark_bytearray():
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        with socket(AF_INET, SOCK_STREAM) as sock:
             sock.connect((bytearray(b"127.0.0.1"), 80))
-    """
-    )
-
-    result = testdir.runpytest("-s")
-    result.assert_outcomes(passed=4)
 
 
 @pytest.mark.parametrize(
@@ -337,81 +312,57 @@ def test_no_vcr_mark(httpbin):
     assert cassette_path.exists()
 
 
+# When pycurl is used for network access
+# It should be blocked as well
 @pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
-def test_pycurl(testdir):
-    # When pycurl is used for network access
-    testdir.makepyfile(
-        r"""
-import json
-import sys
-import pytest
-import pycurl
-from io import BytesIO
-
-
 @pytest.mark.block_network
-def test_error(httpbin):
+def test_pycurl_error(httpbin):
     buffer = BytesIO()
     c = pycurl.Curl()
-    c.setopt(c.URL, httpbin.url + "/ip")
-    c.setopt(c.WRITEDATA, buffer)
+    c.setopt(c.URL, httpbin.url + "/ip")  # type: ignore[attr-defined]
+    c.setopt(c.WRITEDATA, buffer)  # type: ignore[attr-defined]
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
         c.perform()
     c.close()
-
-def test_work(httpbin):
-    buffer = BytesIO()
-    c = pycurl.Curl()
-    c.setopt(c.URL, httpbin.url + "/ip")
-    c.setopt(c.WRITEDATA, buffer)
-    c.perform()
-    c.close()
-    assert json.loads(buffer.getvalue()) == {"origin":"127.0.0.1"}
-    """
-    )
-
-    result = testdir.runpytest()
-    # It should be blocked as well
-    result.assert_outcomes(passed=2)
 
 
 @pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
-def test_pycurl_with_allowed_hosts(testdir):
-    # When pycurl is used for network access
-    testdir.makepyfile(
-        r"""
-import json
-import sys
-import pytest
-import pycurl
-from io import BytesIO
-
-
-@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
-def test_allowed(httpbin):
+def test_pycurl_work(httpbin):
     buffer = BytesIO()
     c = pycurl.Curl()
-    c.setopt(c.URL, httpbin.url + "/ip")
-    c.setopt(c.WRITEDATA, buffer)
+    c.setopt(c.URL, httpbin.url + "/ip")  # type: ignore[attr-defined]
+    c.setopt(c.WRITEDATA, buffer)  # type: ignore[attr-defined]
     c.perform()
     c.close()
-    assert json.loads(buffer.getvalue()) == {"origin":"127.0.0.1"}
+    assert json.loads(buffer.getvalue()) == {"origin": "127.0.0.1"}
 
+
+# When pycurl is used for network access
+# It should be blocked as well
+
+
+@pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
 @pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
-def test_blocked(httpbin):
+def test_pycurl_with_allowed_hosts_allowed(httpbin):
     buffer = BytesIO()
     c = pycurl.Curl()
-    c.setopt(c.URL, "http://example.com")
-    c.setopt(c.WRITEDATA, buffer)
+    c.setopt(c.URL, httpbin.url + "/ip")  # type: ignore[attr-defined]
+    c.setopt(c.WRITEDATA, buffer)  # type: ignore[attr-defined]
+    c.perform()
+    c.close()
+    assert json.loads(buffer.getvalue()) == {"origin": "127.0.0.1"}
+
+
+@pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
+@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
+def test_pycurl_with_allowed_hosts_blocked(httpbin):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, "http://example.com")  # type: ignore[attr-defined]
+    c.setopt(c.WRITEDATA, buffer)  # type: ignore[attr-defined]
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
         c.perform()
     c.close()
-    """
-    )
-
-    result = testdir.runpytest("-s")
-    # It should be blocked as well
-    result.assert_outcomes(passed=2)
 
 
 @pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
@@ -434,50 +385,31 @@ def test_pycurl_url_error():
         curl.perform()
 
 
+# When pycurl is patched
+# Patched module should be hashable - use case for auto-reloaders and similar (e.g. in Django)
+# The patch should behave as close to real modules as possible
 @pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
-def test_sys_modules(testdir):
-    # When pycurl is patched
-    testdir.makepyfile(
-        """
-import sys
-import pytest
-
 @pytest.mark.block_network
 def test_sys_modules():
     set(sys.modules.values())
-    """
-    )
-
-    result = testdir.runpytest()
-    # Patched module should be hashable - use case for auto-reloaders and similar (e.g. in Django)
-    # The patch should behave as close to real modules as possible
-    result.assert_outcomes(passed=1)
 
 
-def test_critical_error(testdir):
-    # When a critical error happened and the `network.disable` ctx manager is interrupted on `yield`
-    testdir.makepyfile(
-        """
-import socket
-from pytest_recording.network import blocking_context
+# When a critical error happened and the `network.disable` ctx manager is interrupted on `yield`
+# Then socket and pycurl should be unpatched anyway
+# NOTE. In reality, it is not likely to happen - e.g. if pytest will partially crash and will not call the teardown
+# part of the generator, but this try/finally implementation could also guard against errors on manual
+
 
 def test_critical_error():
     try:
         with blocking_context():
-            assert socket.socket.connect.__name__ == "network_guard"
-            assert socket.socket.connect_ex.__name__ == "network_guard"
+            assert socket.connect.__name__ == "network_guard"
+            assert socket.connect_ex.__name__ == "network_guard"
             raise ValueError
     except ValueError:
         pass
-    assert socket.socket.connect.__name__ == "connect"
-    assert socket.socket.connect_ex.__name__ == "connect_ex"
-    """
-    )
-    result = testdir.runpytest()
-    # Then socket and pycurl should be unpatched anyway
-    result.assert_outcomes(passed=1)
-    # NOTE. In reality, it is not likely to happen - e.g. if pytest will partially crash and will not call the teardown
-    # part of the generator, but this try/finally implementation could also guard against errors on manual
+    assert socket.connect.__name__ == "connect"
+    assert socket.connect_ex.__name__ == "connect_ex"
 
 
 IS_PYTEST_ABOVE_54 = version.parse(pytest.__version__) >= version.parse("5.4.0")
