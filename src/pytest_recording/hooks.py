@@ -1,5 +1,6 @@
-from _pytest.config import Config
 from typing import TYPE_CHECKING
+
+from _pytest.config import Config
 
 if TYPE_CHECKING:
     from vcr import VCR

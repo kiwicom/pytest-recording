@@ -1,6 +1,7 @@
 from copy import deepcopy
 from itertools import chain
 from typing import Any, Dict, Iterable, Iterator, List
+
 from _pytest.mark.structures import Mark
 
 ConfigType = Dict[str, Any]

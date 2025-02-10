@@ -3,7 +3,6 @@ import sys
 from io import BytesIO
 from socket import AF_INET, AF_NETLINK, AF_UNIX, SOCK_RAW, SOCK_STREAM, socket
 
-import pycurl
 import pytest
 import requests
 import vcr.errors

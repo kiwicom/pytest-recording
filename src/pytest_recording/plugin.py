@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Iterator, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
 
 import pytest
 from _pytest.config import Config, PytestPluginManager

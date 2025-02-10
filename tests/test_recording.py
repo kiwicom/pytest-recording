@@ -1,10 +1,9 @@
 import json
 import string
+from typing import Any
 
 import pytest
 import yaml
-
-from typing import Any
 
 
 def test_cassette_recording(testdir):
