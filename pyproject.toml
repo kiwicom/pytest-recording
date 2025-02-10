@@ -55,6 +55,9 @@ recording = "pytest_recording.plugin"
 
 [tool.ruff]
 line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
 select = [
     "E", # pycodestyle errors
     "W", # pycodestyle warnings
@@ -62,6 +65,9 @@ select = [
     "C", # flake8-comprehensions
     "B", # flake8-bugbear
     "D", # pydocstyle
+    "I", # isort
+    "T", # prints
+    "FIX", # fixme comments
 ]
 ignore = [
     "E501", # Line too long, handled by ruff
@@ -78,11 +84,10 @@ ignore = [
     "D213", # Multiline summary second line
     "D401", # Imperative mood
 ]
-target-version = "py39"
 
 [tool.ruff.format]
 skip-magic-trailing-comma = false
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["pytest_recording"]
 known-third-party = ["_pytest", "packaging", "pytest", "vcr", "yaml"]

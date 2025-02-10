@@ -1,27 +1,17 @@
 import pytest
+import requests
 import vcr
+
 from pytest_recording._vcr import load_cassette
 
 VCR_VERSION = tuple(map(int, vcr.__version__.split(".")))
 
 
-def test_no_cassette(testdir):
+@pytest.mark.vcr
+def test_no_cassete_vcr_used():
     """If pytest.mark.vcr is applied and there is no cassette - an exception happens."""
-    testdir.makepyfile(
-        """
-        import pytest
-        import requests
-        import vcr
-
-        @pytest.mark.vcr
-        def test_vcr_used():
-            with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
-                requests.get('http://localhost/get')
-    """
-    )
-
-    result = testdir.runpytest()
-    result.assert_outcomes(passed=1)
+    with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
+        requests.get("http://localhost/get")
 
 
 def test_combine_cassettes(testdir, get_response_cassette, ip_response_cassette):
