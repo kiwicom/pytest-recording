@@ -57,7 +57,7 @@ jobs:
             python: "3.9"
             os_version: "ubuntu-latest"
           - tox_job: pypy3-no_pycurl
-            python: "pypy-3.11"
+            python: "pypy-3.10"
             os_version: "ubuntu-latest"
           - tox_job: vcr_431
             python: "3.9"
