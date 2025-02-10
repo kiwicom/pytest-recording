@@ -11,5 +11,6 @@ source =
 [report]
 show_missing = true
 precision = 2
+fail_under = 100
 exclude_also =
    if TYPE_CHECKING:
