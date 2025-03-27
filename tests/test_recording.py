@@ -28,7 +28,7 @@ def test_cassette_recording(testdir):
     )
 
     # If recording is enabled
-    result = testdir.runpytest("--record-mode=all")
+    result = testdir.runpytest("--record-mode=all", "-p no:pretty")
     result.assert_outcomes(passed=3)
 
     # Then tests that use network will create cassettes
@@ -55,7 +55,7 @@ def test_disable_recording(testdir):
     )
 
     # If recording is disabled
-    result = testdir.runpytest("--disable-recording")
+    result = testdir.runpytest("--disable-recording", "-p no:pretty")
     result.assert_outcomes(passed=1)
 
     # Then there should be no cassettes
@@ -75,7 +75,7 @@ def test_record_mode_in_mark(testdir):
             assert requests.get(httpbin.url + "/get").status_code == 200
     """
     )
-    result = testdir.runpytest()
+    result = testdir.runpytest("-p no:pretty")
     result.assert_outcomes(passed=1)
     cassette_path = testdir.tmpdir.join("cassettes/test_record_mode_in_mark/test_record_mode.yaml")
     assert cassette_path.size()
@@ -93,7 +93,7 @@ def test_override_default_cassette(testdir):
             assert requests.get(httpbin.url + "/get").status_code == 200
     """
     )
-    result = testdir.runpytest()
+    result = testdir.runpytest("-p no:pretty")
     result.assert_outcomes(passed=1)
     cassette_path = testdir.tmpdir.join("cassettes/test_override_default_cassette/foo.yaml")
     assert cassette_path.size()
@@ -115,7 +115,7 @@ def test_record_mode_in_config(testdir):
             assert requests.get(httpbin.url + "/get").status_code == 200
     """
     )
-    result = testdir.runpytest()
+    result = testdir.runpytest("-p no:pretty")
     result.assert_outcomes(passed=1)
     cassette_path = testdir.tmpdir.join("cassettes/test_record_mode_in_config/test_record_mode.yaml")
     assert cassette_path.size()
@@ -139,7 +139,7 @@ def test_cassette_recording_rewrite(testdir):
     )
 
     # If recording is enabled
-    result = testdir.runpytest("--record-mode=rewrite")
+    result = testdir.runpytest("--record-mode=rewrite", "-p no:pretty")
     result.assert_outcomes(passed=2)
 
     # Then tests that use network will create cassettes
@@ -164,7 +164,7 @@ def test_cassette_recording_rewrite(testdir):
         test_class_cassette_uuid = cassette["interactions"][0]["response"]["body"]["string"]
 
     # Second run will pass as well
-    result = testdir.runpytest("--record-mode=rewrite")
+    result = testdir.runpytest("--record-mode=rewrite", "-p no:pretty")
     result.assert_outcomes(passed=2)
     # And cassette size has not changed
     assert test_function_cassette_path.size() == test_function_size
@@ -193,7 +193,7 @@ def test_custom_cassette_name(testdir):
     """.format(cassette)
     )
 
-    result = testdir.runpytest("--record-mode=all")
+    result = testdir.runpytest("--record-mode=all", "-p no:pretty")
     result.assert_outcomes(passed=1)
 
     # Then tests with custom cassette names specified will create appropriate cassettes
@@ -215,7 +215,7 @@ def test_custom_cassette_name_rewrite(testdir):
     """.format(cassette)
     )
 
-    result = testdir.runpytest("--record-mode=rewrite")
+    result = testdir.runpytest("--record-mode=rewrite", "-p no:pretty")
     result.assert_outcomes(passed=1)
 
     # Then tests with custom cassette names specified will create appropriate cassettes
@@ -228,7 +228,7 @@ def test_custom_cassette_name_rewrite(testdir):
         uuid = file["interactions"][0]["response"]["body"]["string"]
 
     # Second run will pass as well
-    result = testdir.runpytest("--record-mode=rewrite")
+    result = testdir.runpytest("--record-mode=rewrite", "-p no:pretty")
     result.assert_outcomes(passed=1)
     # And cassette size is the same
     assert cassette.size() == cassette_size
@@ -253,7 +253,7 @@ def test_network(httpbin):
     """.format(ip_response_cassette)
     )
 
-    result = testdir.runpytest("--record-mode=all")
+    result = testdir.runpytest("--record-mode=all", "-p no:pretty")
     result.assert_outcomes(passed=1)
 
     # Then writing should happen only to the closest cassette
@@ -276,7 +276,7 @@ def test_network(httpbin, value):
     """
     )
 
-    result = testdir.runpytest("--record-mode=all")
+    result = testdir.runpytest("--record-mode=all", "-p no:pretty")
     result.assert_outcomes(passed=4)
 
     # Then those characters should be replaced
@@ -307,7 +307,7 @@ def test_custom_name(httpbin):
     """.format(custom_cassette_path)
     )
 
-    result = testdir.runpytest("--record-mode=all", "-s")
+    result = testdir.runpytest("--record-mode=all", "-s", "-p no:pretty")
     result.assert_outcomes(passed=2)
 
     # Then the created cassette should have "json" extension
@@ -352,7 +352,7 @@ def test_multiple_marks(testdir, code):
     testdir.makepyfile(code.format(first_cassette, second_cassette))
 
     # If recording is enabled
-    result = testdir.runpytest("--record-mode=all")
+    result = testdir.runpytest("--record-mode=all", "-p no:pretty")
     result.assert_outcomes(passed=1)
 
     # And only the default cassette is writable
@@ -410,5 +410,5 @@ def test_two(vcr):
     )
 
     # Different kwargs should be merged properly
-    result = testdir.runpytest()
+    result = testdir.runpytest("-p no:pretty")
     result.assert_outcomes(passed=2)
