@@ -30,7 +30,7 @@ def test_no_vcr(httpbin):
     assert requests.get(httpbin.url + "/headers").status_code == 200
 """.format(get_response_cassette, ip_response_cassette)
     )
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=2)
 
 
@@ -56,7 +56,7 @@ def test_single_cassette():
         """.format(get_response_cassette, ip_response_cassette)
     )
     # Then their cassettes are combined
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=2)
 
 
@@ -76,7 +76,7 @@ def test_combined():
 """.format(get_response_cassette)
     )
     # Then it is noop for tests that already have pytest.mark.vcr applied
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
 
 
@@ -111,7 +111,7 @@ def test_custom_path_with_kwargs(vcr):
     """.format(get_response_cassette)
     )
     # Then each test function should have cassettes with merged kwargs
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=2)
 
 
@@ -133,7 +133,7 @@ def test_single_kwargs():
     """
     )
     # Then the VCR instance associated with the test function should get these kwargs
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
 
 
@@ -151,7 +151,7 @@ def test_custom_path():
     """.format(get_response_cassette, ip_response_cassette)
     )
     # Then they should be combined with each other
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
 
 
@@ -174,7 +174,7 @@ def test_custom_path():
     # Then the cassette will be loaded only once
     # And will not produce any errors
     mocked_load_cassette = mocker.patch("pytest_recording._vcr.load_cassette", wraps=load_cassette)
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
     # Default one + extra one
     assert mocked_load_cassette.call_count == 2
@@ -199,7 +199,7 @@ class TestSomething:
     """.format(get_response_cassette, ip_response_cassette)
     )
     # Then it should be combined with the other marks
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
 
 
@@ -220,7 +220,7 @@ def test_own():
     )
     create_file("cassettes/test_own_mark/test_own.yaml", ip_cassette)
     # Then it should use a cassette with a default name
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
 
 
@@ -247,7 +247,7 @@ def test_own(vcr):
     """.format(scope)
     )
     # Then its config values should be merged with test-specific ones
-    result = testdir.runpytest("-s", "-p no:pretty")
+    result = testdir.runpytest("-s")
     result.assert_outcomes(passed=1)
 
 
@@ -276,7 +276,7 @@ def test_feature():
     # Then cassettes should not collide with each other, they should be separate
     create_file("cassettes/test_a/test_feature.yaml", get_cassette)
     create_file("cassettes/test_b/test_feature.yaml", ip_cassette)
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=2)
 
 
@@ -296,7 +296,7 @@ def test_feature():
     )
     # Then tests without own marks should use test function names for cassettes
     create_file("cassettes/test_global_mark/test_feature.yaml", get_cassette)
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
 
 
@@ -318,7 +318,7 @@ def test_feature():
     """
     )
     create_file("cassettes/test_assertions_rewrite/test_feature.yaml", get_cassette)
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(failed=1)
     # Then assertions should be rewritten
     result.stdout.fnmatch_lines(["*assert 'POST' == 'GET'", "*Left contains one more item: ('a', '1')"])
@@ -340,7 +340,7 @@ def test_feature():
     )
     # Then the default cassette should always be used together with the extra one
     create_file("cassettes/test_default_cassette_always_exist/test_feature.yaml", ip_cassette)
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
 
 
@@ -360,7 +360,7 @@ def test_feature():
     )
     create_file("cassettes/test_relative_cassette_path/test_feature.yaml", get_cassette)
     create_file("cassettes/test_relative_cassette_path/ip_cassette.yaml", ip_cassette)
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     # Then it should be properly loaded and used
     result.assert_outcomes(passed=1)
 
@@ -381,5 +381,5 @@ def test_feature():
     pass
     """
     )
-    result = testdir.runpytest("-s", "-p no:pretty")
+    result = testdir.runpytest("-s")
     assert "test_recording_configure_hook.py HOOK IS CALLED" in result.outlines

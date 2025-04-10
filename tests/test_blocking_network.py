@@ -21,7 +21,7 @@ except ImportError as exc:
 
 
 def assert_network_blocking(testdir, dirname):
-    result = testdir.runpytest("--record-mode=all", "-p no:pretty")
+    result = testdir.runpytest("--record-mode=all")
     # Then all network requests in tests with block_network mark except for marked with pytest.mark.vcr should fail
     result.assert_outcomes(passed=3)
 
@@ -134,7 +134,7 @@ def test_no_blocking(httpbin):
     """
     )
 
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     # Then socket.socket.connect should fail
     result.assert_outcomes(passed=1)
 
@@ -251,7 +251,7 @@ def test_blocked():
         )
     )
 
-    result = testdir.runpytest(*cmd_options, "-p no:pretty")
+    result = testdir.runpytest(*cmd_options)
     result.assert_outcomes(passed=2)
 
 
@@ -278,7 +278,7 @@ def test_no_vcr_mark(httpbin):
     """
     )
 
-    result = testdir.runpytest("--block-network", "-p no:pretty")
+    result = testdir.runpytest("--block-network")
     # Then all network interactions in all tests should be blocked
     result.assert_outcomes(passed=2)
 
@@ -302,7 +302,7 @@ def test_no_vcr_mark(httpbin):
     """
     )
 
-    result = testdir.runpytest("--block-network", "--record-mode=all", "-p no:pretty")
+    result = testdir.runpytest("--block-network", "--record-mode=all")
     # Then only tests with `pytest.mark.vcr` should record cassettes, other tests with network should raise errors
     result.assert_outcomes(passed=2)
 
@@ -427,7 +427,7 @@ def test_request():
     requests.get("https://google.com")
     """.format(args)
     )
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     # Then there should be an error
     if IS_PYTEST_ABOVE_54:
         result.assert_outcomes(errors=1)

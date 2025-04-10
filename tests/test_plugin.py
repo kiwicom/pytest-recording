@@ -17,13 +17,13 @@ def test_record_mode(testdir, args, expected):
     )
 
     # Record mode depends on the passed CMD arguments
-    result = testdir.runpytest(*args, "-p no:pretty")
+    result = testdir.runpytest(*args)
     result.assert_outcomes(passed=1)
     assert result.ret == 0
 
 
 def test_help_message(testdir):
-    result = testdir.runpytest("--help", "-p no:pretty")
+    result = testdir.runpytest("--help")
     result.stdout.fnmatch_lines(["recording:", "*--record-mode=*", "*VCR.py record mode.*"])
 
 
@@ -41,7 +41,7 @@ def test_pytest_vcr_incompatibility(testdir, mocker):
     )
 
     # Record mode depends on the passed CMD arguments
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     assert (
         "INTERNALERROR> RuntimeError: `pytest-recording` is incompatible with `pytest-vcr`. "
         "Please, uninstall `pytest-vcr` in order to use `pytest-recording`." in result.errlines
@@ -63,7 +63,7 @@ def test_default_cassette_marker(testdir):
         """
     )
     # Then the default_cassette_name fixture should be overridden
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
     assert result.ret == 0
 
@@ -83,6 +83,6 @@ def test_lazy_vcr_config(testdir):
         """
     )
     # Then the `vcr_config` fixture should not be evaluated
-    result = testdir.runpytest("-p no:pretty")
+    result = testdir.runpytest()
     result.assert_outcomes(passed=1)
     assert result.ret == 0
