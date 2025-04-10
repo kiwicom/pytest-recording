@@ -4,6 +4,18 @@ pytest_plugins = "pytester"
 
 
 @pytest.fixture
+def pytester(pytester):
+    original_runpytest = pytester.runpytest
+
+    def runpytest(*args, **kwargs):
+        args = ("-p no:pretty", *args)
+        return original_runpytest(*args, **kwargs)
+
+    pytester.runpytest = runpytest
+    return pytester
+
+
+@pytest.fixture
 def create_file(testdir):
     def inner(path, content):
         path = testdir.tmpdir.join(path)
