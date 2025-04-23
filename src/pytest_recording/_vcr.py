@@ -1,4 +1,6 @@
+import hashlib
 import os
+import re
 from dataclasses import dataclass
 from itertools import chain, starmap
 from types import ModuleType
@@ -62,6 +64,13 @@ def use_cassette(
     pytestconfig: Config,
 ) -> CassetteContextDecorator:
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
+    # Restructure `default_cassette` to prevent it from being too long.
+    match = re.match(r"^(.+?)\[(.+?)\]$", default_cassette)
+    if match:
+        prefix, inside = match.groups()
+        hash_part = hashlib.md5(inside.encode()).hexdigest()[:8]
+        default_cassette = f"{prefix}[{hash_part}]"
+
     merged_config = merge_kwargs(config, markers)
     if "record_mode" in merged_config:
         record_mode = merged_config["record_mode"]
