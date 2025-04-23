@@ -1,6 +1,5 @@
 import hashlib
 import os
-import re
 from dataclasses import dataclass
 from itertools import chain, starmap
 from types import ModuleType
@@ -21,6 +20,8 @@ except ImportError:  # pragma: no cover
     CassetteNotFoundError = ValueError
 
 from .utils import ConfigType, merge_kwargs, unique, unpack
+
+MAX_FILENAME_LEN = os.pathconf(".", "PC_NAME_MAX")
 
 
 def load_cassette(cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
@@ -64,14 +65,15 @@ def use_cassette(
     pytestconfig: Config,
 ) -> CassetteContextDecorator:
     """Create a VCR instance and return an appropriate context manager for the given cassette configuration."""
-    # Restructure `default_cassette` to prevent it from being too long.
-    match = re.match(r"^(.+?)\[(.+?)\]$", default_cassette)
-    if match:
-        prefix, inside = match.groups()
-        hash_part = hashlib.md5(inside.encode()).hexdigest()[:8]
-        default_cassette = f"{prefix}[{hash_part}]"
-
     merged_config = merge_kwargs(config, markers)
+
+    # Check `default_cassette` to prevent it from being too long.
+    suffix = merged_config.get("serializer", ".yaml")
+    if len(default_cassette) + len(suffix) > MAX_FILENAME_LEN:
+        hash_part = hashlib.md5(default_cassette.encode()).hexdigest()
+        prefix = default_cassette[: MAX_FILENAME_LEN - len(suffix) - len(hash_part) - 3]
+        default_cassette = f"{prefix}...{hash_part}"
+
     if "record_mode" in merged_config:
         record_mode = merged_config["record_mode"]
     path_transformer = get_path_transformer(merged_config)
