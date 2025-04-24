@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytest-recording"
-version = "0.13.2"
-description = "A pytest plugin that allows you recording of network interactions via VCR.py"
+version = "0.13.3"
+description = "A pytest plugin powered by VCR.py to record and replay HTTP traffic"
 keywords = ["pytest", "vcr", "network", "mock"]
 authors = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]
 maintainers = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]

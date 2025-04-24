@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.13.3`_ - 2025-04-24
+----------------------
+
+- Limit generated cassette names to prevent ``OSError``. `#172`_
+
 `0.13.2`_ - 2024-07-09
 ----------------------
 
@@ -204,7 +209,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.13.2...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.13.3...HEAD
+.. _0.13.3: https://github.com/kiwicom/pytest-recording/compare/v0.13.2...v0.13.3
 .. _0.13.2: https://github.com/kiwicom/pytest-recording/compare/v0.13.1...v0.13.2
 .. _0.13.1: https://github.com/kiwicom/pytest-recording/compare/v0.13.0...v0.13.1
 .. _0.13.0: https://github.com/kiwicom/pytest-recording/compare/v0.12.2...v0.13.0
@@ -229,6 +235,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#172: https://github.com/kiwicom/pytest-recording/issues/172
 .. _#145: https://github.com/kiwicom/pytest-recording/issues/145
 .. _#118: https://github.com/kiwicom/pytest-recording/pull/118
 .. _#99: https://github.com/kiwicom/pytest-recording/pull/99

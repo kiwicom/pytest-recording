@@ -3,7 +3,7 @@ pytest-recording
 
 |codecov| |Build| |Version| |Python versions| |License|
 
-A pytest plugin that records network interactions in your tests via VCR.py.
+A pytest plugin powered by VCR.py to record and replay HTTP traffic.
 
 Features
 --------
@@ -22,8 +22,7 @@ This project can be installed via pip:
 
     pip install pytest-recording
 
-⚠️This project is not compatible with `pytest-vcr`, make sure to uninstall before ⚠️
-
+ ⚠️ Incompatible with ``pytest-vcr`` — please uninstall ``pytest-vcr`` before use. ⚠️
 
 Usage
 -----
