@@ -242,6 +242,30 @@ To run the tests:
 
 For more information, take a look at `our contributing guide <https://github.com/kiwicom/pytest-recording/blob/master/CONTRIBUTING.rst>`_
 
+Test Isolation for Package Maintainers
+--------------------------------------
+
+When running pytest-based tests in a packaging environment, globally installed plugins can break test suites by  
+injecting unexpected hooks or fixtures (e.g. ``pytest-pretty``) that your code isn’t designed for.  
+
+To guarantee a clean, reproducible test run:
+
+.. code-block:: console
+
+    export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+    export PYTEST_PLUGINS=pytest_httpbin.plugin,pytest_mock,pytest_recording.plugin
+
+- **PYTEST_DISABLE_PLUGIN_AUTOLOAD**  
+  Disables loading of any plugins via setuptools entry-points; only those you explicitly list  
+  will be activated.
+
+- **PYTEST_PLUGINS**  
+  Comma-separated list of plugin modules pytest should load (the core plugin manager still  
+  discovers builtin plugins and `conftest.py`).
+
+Include these exports in your package’s build or CI script so that system-wide pytest plugins  
+(e.g. linting, formatting, or unrelated test helpers) cannot interfere with your tests.
+
 Python support
 --------------
 
