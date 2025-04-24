@@ -22,7 +22,8 @@ This project can be installed via pip:
 
     pip install pytest-recording
 
- ⚠️ Incompatible with ``pytest-vcr`` — please uninstall ``pytest-vcr`` before use. ⚠️
+
+⚠️ Incompatible with ``pytest-vcr`` — please uninstall ``pytest-vcr`` before use. ⚠️
 
 Usage
 -----
