@@ -412,3 +412,30 @@ def test_two(vcr):
     # Different kwargs should be merged properly
     result = testdir.runpytest()
     result.assert_outcomes(passed=2)
+
+
+def test_long_cassette_name(testdir):
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+@pytest.mark.vcr
+@pytest.mark.parametrize(
+    "data",
+    [
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' * 5,
+    ],
+)
+def test_with_parametrize(httpbin,data):
+    assert requests.get(httpbin.url + "/get").status_code == 200
+    """
+    )
+
+    result = testdir.runpytest("--record-mode=all")
+    result.assert_outcomes(passed=1)
+
+    cassette_path = testdir.tmpdir.join(
+        "cassettes/test_long_cassette_name/test_with_parametrize[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefg...e6273968ceb1173c9b9ca1a67463cdd4.yaml"
+    )
+    assert cassette_path.size()
