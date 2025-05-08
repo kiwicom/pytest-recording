@@ -187,7 +187,7 @@ def test_custom_cassette_name(testdir):
         import pytest
         import requests
 
-        @pytest.mark.vcr("{}")
+        @pytest.mark.vcr(r"{}")
         def test_with_network(httpbin):
             assert requests.get(httpbin.url + "/get").status_code == 200
     """.format(cassette)
@@ -209,7 +209,7 @@ def test_custom_cassette_name_rewrite(testdir):
         import pytest
         import requests
 
-        @pytest.mark.vcr("{}")
+        @pytest.mark.vcr(r"{}")
         def test_with_network(httpbin):
             assert requests.get(httpbin.url + "/uuid").status_code == 200
     """.format(cassette)
@@ -245,7 +245,7 @@ def test_default_cassette_recording(testdir, ip_response_cassette):
 import pytest
 import requests
 
-pytestmark = [pytest.mark.vcr("{}")]
+pytestmark = [pytest.mark.vcr(r"{}")]
 
 def test_network(httpbin):
     assert requests.get(httpbin.url + "/ip").status_code == 200
@@ -301,7 +301,7 @@ pytestmark = [pytest.mark.vcr()]
 def test_network(httpbin):
     assert requests.get(httpbin.url + "/ip").status_code == 200
 
-@pytest.mark.vcr("{}", serializer="json")
+@pytest.mark.vcr(r"{}", serializer="json")
 def test_custom_name(httpbin):
     assert requests.get(httpbin.url + "/ip").status_code == 200
     """.format(custom_cassette_path)
@@ -329,8 +329,8 @@ def test_custom_name(httpbin):
 import pytest
 import requests
 
-@pytest.mark.vcr("{}")
-@pytest.mark.vcr("{}")
+@pytest.mark.vcr(r"{}")
+@pytest.mark.vcr(r"{}")
 def test_with_network(httpbin):
     assert requests.get(httpbin.url + "/get").status_code == 200
 """,
@@ -338,9 +338,9 @@ def test_with_network(httpbin):
 import pytest
 import requests
 
-pytestmark = pytest.mark.vcr("{}")
+pytestmark = pytest.mark.vcr(r"{}")
 
-@pytest.mark.vcr("{}")
+@pytest.mark.vcr(r"{}")
 def test_with_network(httpbin):
     assert requests.get(httpbin.url + "/get").status_code == 200
 """,

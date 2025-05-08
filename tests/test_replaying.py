@@ -20,8 +20,8 @@ def test_combine_cassettes(testdir, get_response_cassette, ip_response_cassette)
 import pytest
 import requests
 
-@pytest.mark.vcr("{}")
-@pytest.mark.vcr("{}")
+@pytest.mark.vcr(r"{}")
+@pytest.mark.vcr(r"{}")
 def test_combined():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
@@ -42,9 +42,9 @@ import pytest
 import requests
 import vcr
 
-pytestmark = pytest.mark.vcr("{}")
+pytestmark = pytest.mark.vcr(r"{}")
 
-@pytest.mark.vcr("{}")
+@pytest.mark.vcr(r"{}")
 def test_combined():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
@@ -70,7 +70,7 @@ import vcr
 
 pytestmark = pytest.mark.vcr()
 
-@pytest.mark.vcr("{}")
+@pytest.mark.vcr(r"{}")
 def test_combined():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
 """.format(get_response_cassette)
@@ -99,7 +99,7 @@ def override_before_request(request):
 
 pytestmark = pytest.mark.vcr(before_record_request=before_request)
 
-GET_CASSETTE = "{}"
+GET_CASSETTE = r"{}"
 
 @pytest.mark.vcr
 def test_custom_path(vcr):
@@ -144,7 +144,7 @@ def test_multiple_cassettes_in_mark(testdir, get_response_cassette, ip_response_
 import pytest
 import requests
 
-@pytest.mark.vcr("{}", "{}")
+@pytest.mark.vcr(r"{}", r"{}")
 def test_custom_path():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
@@ -162,7 +162,7 @@ def test_repeated_cassettes(testdir, mocker, get_response_cassette):
 import pytest
 import requests
 
-CASSETTE = "{}"
+CASSETTE = r"{}"
 
 pytestmark = [pytest.mark.vcr(CASSETTE)]
 
@@ -187,9 +187,9 @@ def test_class_mark(testdir, get_response_cassette, ip_response_cassette):
 import pytest
 import requests
 
-pytestmark = [pytest.mark.vcr("{}")]
+pytestmark = [pytest.mark.vcr(r"{}")]
 
-@pytest.mark.vcr("{}")
+@pytest.mark.vcr(r"{}")
 class TestSomething:
 
     @pytest.mark.vcr()
@@ -210,7 +210,7 @@ def test_own_mark(testdir, get_response_cassette, create_file, ip_cassette):
 import pytest
 import requests
 
-pytestmark = [pytest.mark.vcr("{}")]
+pytestmark = [pytest.mark.vcr(r"{}")]
 
 
 def test_own():
@@ -332,7 +332,7 @@ import pytest
 import requests
 
 
-@pytest.mark.vcr("{}")
+@pytest.mark.vcr(r"{}")
 def test_feature():
     assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
     assert requests.get("http://httpbin.org/ip").text == '{{"ip": true}}'
