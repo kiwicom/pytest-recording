@@ -6,6 +6,11 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.13.4`_ - 2025-04-24
+----------------------
+
+- ``AttributeError`` on Windows. `#172`_
+
 `0.13.3`_ - 2025-04-24
 ----------------------
 
@@ -209,7 +214,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.13.3...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.13.4...HEAD
+.. _0.13.4: https://github.com/kiwicom/pytest-recording/compare/v0.13.3...v0.13.4
 .. _0.13.3: https://github.com/kiwicom/pytest-recording/compare/v0.13.2...v0.13.3
 .. _0.13.2: https://github.com/kiwicom/pytest-recording/compare/v0.13.1...v0.13.2
 .. _0.13.1: https://github.com/kiwicom/pytest-recording/compare/v0.13.0...v0.13.1
@@ -235,6 +241,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#174: https://github.com/kiwicom/pytest-recording/issues/174
 .. _#172: https://github.com/kiwicom/pytest-recording/issues/172
 .. _#145: https://github.com/kiwicom/pytest-recording/issues/145
 .. _#118: https://github.com/kiwicom/pytest-recording/pull/118
