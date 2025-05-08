@@ -24,7 +24,7 @@ from .utils import ConfigType, merge_kwargs, unique, unpack
 try:
     # Try to get max filename length on Unix-like systems
     MAX_FILENAME_LEN = os.pathconf(".", "PC_NAME_MAX")
-except (AttributeError, ValueError, OSError):
+except (AttributeError, ValueError, OSError):  # pragma: no cover
     # Fallback for Windows or unsupported systems
     MAX_FILENAME_LEN = 255
 
