@@ -1,7 +1,7 @@
 import json
 import sys
 from io import BytesIO
-from socket import AF_INET, AF_NETLINK, AF_UNIX, SOCK_RAW, SOCK_STREAM, socket
+from socket import AF_INET, SOCK_RAW, SOCK_STREAM, socket
 
 import pytest
 import requests
@@ -9,6 +9,14 @@ import vcr.errors
 from packaging import version
 
 from pytest_recording.network import blocking_context
+
+# Windows doesn’t have AF_NETLINK & AF_UNIX
+try:
+    from socket import AF_NETLINK, AF_UNIX
+except ImportError:
+    AF_NETLINK = None  # type: ignore[assignment]
+    AF_UNIX = None  # type: ignore[assignment]
+
 
 try:
     import pycurl
@@ -18,6 +26,10 @@ except ImportError as exc:
         # Could happen with development when environment is recreated (e.g. locally)
         raise
     pycurl = None  # type: ignore[assignment]
+
+
+skip_netlink = pytest.mark.skipif(AF_NETLINK is None, reason="AF_NETLINK not available on this platform")
+skip_unix = pytest.mark.skipif(AF_UNIX is None, reason="AF_UNIX not available on this platform")
 
 
 def assert_network_blocking(testdir, dirname):
@@ -147,6 +159,7 @@ def call(socket_name, family, type):
         s.close()
 
 
+@skip_unix
 @pytest.mark.block_network(allowed_hosts=["./allowed_socket"])
 def test_block_network_allowed_socket():
     # Error from actual socket call, that means it was not blocked
@@ -154,6 +167,7 @@ def test_block_network_allowed_socket():
         call("./allowed_socket", AF_UNIX, SOCK_STREAM)
 
 
+@skip_unix
 @pytest.mark.block_network(allowed_hosts=["./allowed_socket"])
 def test_block_network_blocked_socket():
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
@@ -162,6 +176,7 @@ def test_block_network_blocked_socket():
 
 # When not AF_UNIX, AF_INET or AF_INET6 socket is used
 # Then socket.socket.connect call is blocked, even if resource name is in the allowed list
+@skip_netlink
 @pytest.mark.block_network(allowed_hosts=["./allowed_socket", "127.0.0.1", "0"])
 def test_blocked():
     with pytest.raises(RuntimeError, match=r"^Network is disabled$"):

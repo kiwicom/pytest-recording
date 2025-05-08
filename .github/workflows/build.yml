@@ -16,7 +16,7 @@ on:
 jobs:
   pre-commit:
     name: Generic pre-commit checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,7 +31,7 @@ jobs:
 
   mypy:
     name: Mypy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,35 +45,60 @@ jobs:
       - run: pre-commit run mypy --all-files
 
   tests:
-    name: tests_${{ matrix.tox_job }}
+    name: Test ${{ matrix.tox_job }} on ${{ matrix.os_version }}
     runs-on: ${{ matrix.os_version }}
     strategy:
       matrix:
         include:
           - tox_job: py39
             python: "3.9"
-            os_version: "ubuntu-latest"
+            os_version: "ubuntu-24.04"
           - tox_job: py39-no_pycurl
             python: "3.9"
-            os_version: "ubuntu-latest"
+            os_version: "ubuntu-24.04"
           - tox_job: pypy3-no_pycurl
             python: "pypy-3.10"
-            os_version: "ubuntu-latest"
+            os_version: "ubuntu-24.04"
           - tox_job: vcr_431
             python: "3.9"
-            os_version: "ubuntu-latest"
+            os_version: "ubuntu-24.04"
           - tox_job: py310
             python: "3.10"
-            os_version: "ubuntu-latest"
+            os_version: "ubuntu-24.04"
           - tox_job: py311
             python: "3.11"
-            os_version: "ubuntu-latest"
+            os_version: "ubuntu-24.04"
           - tox_job: py312
             python: "3.12"
-            os_version: "ubuntu-latest"
+            os_version: "ubuntu-24.04"
           - tox_job: py313
             python: "3.13"
-            os_version: "ubuntu-latest"
+            os_version: "ubuntu-24.04"
+
+          - tox_job: py39
+            python: "3.9"
+            os_version: "windows-2022"
+          - tox_job: py39-no_pycurl
+            python: "3.9"
+            os_version: "windows-2022"
+          - tox_job: pypy3-no_pycurl
+            python: "pypy-3.10"
+            os_version: "windows-2022"
+          - tox_job: vcr_431
+            python: "3.9"
+            os_version: "windows-2022"
+          - tox_job: py310
+            python: "3.10"
+            os_version: "windows-2022"
+          - tox_job: py311
+            python: "3.11"
+            os_version: "windows-2022"
+          - tox_job: py312
+            python: "3.12"
+            os_version: "windows-2022"
+          - tox_job: py313
+            python: "3.13"
+            os_version: "windows-2022"
 
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +111,9 @@ jobs:
 
       - run: pip install tox coverage
 
-      - run: sudo apt update && sudo apt install libcurl4-openssl-dev libssl-dev
+      - name: Install system deps on Linux
+        if: runner.os == 'Linux'
+        run: sudo apt update && sudo apt install -y libcurl4-openssl-dev libssl-dev
 
       - name: Run ${{ matrix.tox_job }} tox job
         run: tox -e ${{ matrix.tox_job }}
