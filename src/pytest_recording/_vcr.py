@@ -21,7 +21,12 @@ except ImportError:  # pragma: no cover
 
 from .utils import ConfigType, merge_kwargs, unique, unpack
 
-MAX_FILENAME_LEN = os.pathconf(".", "PC_NAME_MAX")
+try:
+    # Try to get max filename length on Unix-like systems
+    MAX_FILENAME_LEN = os.pathconf(".", "PC_NAME_MAX")
+except (AttributeError, ValueError, OSError):
+    # Fallback for Windows or unsupported systems
+    MAX_FILENAME_LEN = 255
 
 
 def load_cassette(cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
