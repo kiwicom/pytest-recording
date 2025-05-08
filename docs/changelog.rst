@@ -9,7 +9,7 @@ Changelog
 `0.13.4`_ - 2025-04-24
 ----------------------
 
-- ``AttributeError`` on Windows. `#172`_
+- ``AttributeError`` on Windows. `#174`_
 
 `0.13.3`_ - 2025-04-24
 ----------------------
