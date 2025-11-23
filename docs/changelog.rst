@@ -6,6 +6,8 @@ Changelog
 `Unreleased`_
 -------------
 
+- Add support for Python 3.14 and drop EOL 3.9. `#185`_
+
 `0.13.4`_ - 2025-04-24
 ----------------------
 
@@ -241,6 +243,7 @@ Added
 .. _0.3.0: https://github.com/kiwicom/pytest-recording/compare/v0.2.0...v0.3.0
 .. _0.2.0: https://github.com/kiwicom/pytest-recording/compare/v0.1.0...v0.2.0
 
+.. _#185: https://github.com/kiwicom/pytest-recording/pull/185
 .. _#174: https://github.com/kiwicom/pytest-recording/issues/174
 .. _#172: https://github.com/kiwicom/pytest-recording/issues/172
 .. _#145: https://github.com/kiwicom/pytest-recording/issues/145

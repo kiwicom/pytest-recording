@@ -54,7 +54,7 @@ class CombinedPersister(FilesystemPersister):
         #    but the functional approach is faster
         # 2. It could be done more efficient, but the `deserialize` implementation should be adjusted as well
         #    But it is a private API, which could be changed.
-        requests, responses = starmap(unpack, zip(*all_content))
+        requests, responses = starmap(unpack, zip(*all_content, strict=True))
         requests, responses = list(requests), list(responses)
         if not requests or not responses:
             raise CassetteNotFoundError("No cassettes found.")

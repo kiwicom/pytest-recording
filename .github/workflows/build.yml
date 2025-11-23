@@ -18,13 +18,13 @@ jobs:
     name: Generic pre-commit checks
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: 3.13
+          python-version: 3.x
 
       - run: pip install pre-commit
       - run: SKIP=mypy pre-commit run --all-files
@@ -33,13 +33,13 @@ jobs:
     name: Mypy
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: 3.13
+          python-version: 3.x
 
       - run: pip install pre-commit
       - run: pre-commit run mypy --all-files
@@ -50,17 +50,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - tox_job: py39
-            python: "3.9"
-            os_version: "ubuntu-24.04"
-          - tox_job: py39-no_pycurl
-            python: "3.9"
-            os_version: "ubuntu-24.04"
           - tox_job: pypy3-no_pycurl
-            python: "pypy-3.10"
-            os_version: "ubuntu-24.04"
-          - tox_job: vcr_431
-            python: "3.9"
+            python: "pypy3.11"
             os_version: "ubuntu-24.04"
           - tox_job: py310
             python: "3.10"
@@ -73,19 +64,13 @@ jobs:
             os_version: "ubuntu-24.04"
           - tox_job: py313
             python: "3.13"
+            os_version: "ubuntu-24.04"
+          - tox_job: py314
+            python: "3.14"
             os_version: "ubuntu-24.04"
 
-          - tox_job: py39
-            python: "3.9"
-            os_version: "windows-2022"
-          - tox_job: py39-no_pycurl
-            python: "3.9"
-            os_version: "windows-2022"
           - tox_job: pypy3-no_pycurl
-            python: "pypy-3.10"
-            os_version: "windows-2022"
-          - tox_job: vcr_431
-            python: "3.9"
+            python: "pypy3.11"
             os_version: "windows-2022"
           - tox_job: py310
             python: "3.10"
@@ -98,14 +83,17 @@ jobs:
             os_version: "windows-2022"
           - tox_job: py313
             python: "3.13"
+            os_version: "windows-2022"
+          - tox_job: py314
+            python: "3.14"
             os_version: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
 
@@ -123,6 +111,6 @@ jobs:
       - run: coverage xml -i
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5.4.3
+        uses: codecov/codecov-action@v5.5.1
         with:
           file: ./coverage.xml
