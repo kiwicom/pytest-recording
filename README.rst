@@ -186,7 +186,7 @@ To have more confidence that your tests will not go over the wire, you can block
 
     ...
     # in case of access
-    RuntimeError: Network is disabled
+    RuntimeError: Network is disabled for host '...'
 
 Besides marks, the network access could be blocked globally with ``--block-network`` command-line option.
 
@@ -221,7 +221,7 @@ It is possible to allow access to specified hosts during network blocking:
     @pytest.mark.block_network(allowed_hosts=["httpbin.*"])
     def test_access():
         assert requests.get("http://httpbin.org/get").text == '{"get": true}'
-        with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        with pytest.raises(RuntimeError, match=r"^Network is disabled for host "):
             requests.get("http://example.com")
 
 Or via command-line option:
