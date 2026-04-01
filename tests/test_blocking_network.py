@@ -27,6 +27,13 @@ except ImportError as exc:
         raise
     pycurl = None  # type: ignore[assignment]
 
+try:
+    import curl_cffi
+    from curl_cffi import CurlOpt
+except ImportError:
+    curl_cffi = None  # type: ignore[assignment]
+    CurlOpt = None  # type: ignore[assignment]
+
 
 skip_netlink = pytest.mark.skipif(AF_NETLINK is None, reason="AF_NETLINK not available on this platform")
 skip_unix = pytest.mark.skipif(AF_UNIX is None, reason="AF_UNIX not available on this platform")
@@ -406,6 +413,57 @@ def test_pycurl_url_error():
 @pytest.mark.block_network
 def test_sys_modules():
     set(sys.modules.values())
+
+
+# When curl_cffi is used for network access
+# It should be blocked as well
+@pytest.mark.skipif(curl_cffi is None, reason="Requires curl_cffi installed.")
+@pytest.mark.block_network
+def test_curl_cffi_error(httpbin):
+    from curl_cffi import Curl, CurlOpt
+
+    c = Curl()
+    c.setopt(CurlOpt.URL, (httpbin.url + "/ip").encode())
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        c.perform()
+    c.close()
+
+
+@pytest.mark.skipif(curl_cffi is None, reason="Requires curl_cffi installed.")
+def test_curl_cffi_work(httpbin):
+    from curl_cffi import requests as cffi_requests
+
+    response = cffi_requests.get(httpbin.url + "/ip")
+    assert response.status_code == 200
+    assert response.json() == {"origin": "127.0.0.1"}
+
+
+@pytest.mark.skipif(curl_cffi is None, reason="Requires curl_cffi installed.")
+@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
+def test_curl_cffi_with_allowed_hosts_allowed(httpbin):
+    from curl_cffi import requests as cffi_requests
+
+    response = cffi_requests.get(httpbin.url + "/ip")
+    assert response.status_code == 200
+    assert response.json() == {"origin": "127.0.0.1"}
+
+
+@pytest.mark.skipif(curl_cffi is None, reason="Requires curl_cffi installed.")
+@pytest.mark.block_network(allowed_hosts=["127.0.0.*", "127.0.1.1"])
+def test_curl_cffi_with_allowed_hosts_blocked():
+    from curl_cffi import requests as cffi_requests
+
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        cffi_requests.get("http://example.com")
+
+
+@pytest.mark.skipif(curl_cffi is None, reason="Requires curl_cffi installed.")
+@pytest.mark.block_network
+def test_curl_cffi_high_level_blocked(httpbin):
+    from curl_cffi import requests as cffi_requests
+
+    with pytest.raises(RuntimeError, match=r"^Network is disabled$"):
+        cffi_requests.get(httpbin.url + "/ip")
 
 
 # When a critical error happened and the `network.disable` ctx manager is interrupted on `yield`

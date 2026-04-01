@@ -47,6 +47,17 @@ except ImportError:
     pycurl = None  # type: ignore
     Curl = None  # type: ignore
 
+try:
+    import curl_cffi
+    from curl_cffi import CurlOpt as _CurlCffiOpt
+
+    _original_curl_cffi_perform = curl_cffi.Curl.perform
+    _original_curl_cffi_setopt = curl_cffi.Curl.setopt
+except ImportError:
+    curl_cffi = None  # type: ignore
+    _original_curl_cffi_perform = None  # type: ignore
+    _original_curl_cffi_setopt = None  # type: ignore
+
 # `socket.socket` is not patched, because it could be needed for live servers (e.g. pytest-httpbin)
 # But methods that could connect to remote are patched to prevent network access
 _original_connect = socket.socket.connect
@@ -55,6 +66,11 @@ _original_connect_ex = socket.socket.connect_ex
 # Global switch for pycurl disabling
 _disable_pycurl = False
 _allowed_hosts = None  # type: ignore
+
+# Global state for curl_cffi disabling
+_disable_curl_cffi = False
+_allowed_hosts_curl_cffi = None  # type: ignore
+_curl_cffi_urls = {}  # type: dict
 
 
 @dataclass(unsafe_hash=True)
@@ -86,6 +102,64 @@ def install_pycurl_wrapper() -> None:
 @check_pycurl_installed
 def uninstall_pycurl_wrapper() -> None:
     sys.modules["pycurl"] = pycurl
+
+
+def _curl_cffi_setopt_guard(self: Any, option: Any, value: Any) -> Any:
+    """Capture URL from curl_cffi setopt calls for network blocking."""
+    if option == _CurlCffiOpt.URL:
+        url = value.decode() if isinstance(value, bytes) else value
+        _curl_cffi_urls[id(self)] = url
+    return _original_curl_cffi_setopt(self, option, value)
+
+
+def _curl_cffi_perform_guard(self: Any, *args: Any, **kwargs: Any) -> Any:
+    """Block network for curl_cffi when disabled."""
+    if _disable_curl_cffi:
+        url = _curl_cffi_urls.get(id(self))
+        host = urlparse(url).hostname if url else None
+        if not host or is_host_in_allowed_hosts(host, _allowed_hosts_curl_cffi):
+            return _original_curl_cffi_perform(self, *args, **kwargs)
+        raise RuntimeError("Network is disabled")
+    return _original_curl_cffi_perform(self, *args, **kwargs)
+
+
+def check_curl_cffi_installed(func: Callable) -> Callable:
+    """No-op if curl_cffi is not installed."""
+
+    def inner(*args: Any, **kwargs: Any) -> Any:
+        if curl_cffi is None:
+            return  # type: ignore
+        return func(*args, **kwargs)
+
+    return inner
+
+
+@check_curl_cffi_installed
+def install_curl_cffi_wrapper() -> None:
+    curl_cffi.Curl.setopt = _curl_cffi_setopt_guard  # type: ignore
+    curl_cffi.Curl.perform = _curl_cffi_perform_guard  # type: ignore
+
+
+@check_curl_cffi_installed
+def uninstall_curl_cffi_wrapper() -> None:
+    curl_cffi.Curl.perform = _original_curl_cffi_perform  # type: ignore
+    curl_cffi.Curl.setopt = _original_curl_cffi_setopt  # type: ignore
+
+
+def block_curl_cffi(allowed_hosts: Optional[List[str]] = None) -> None:
+    global _disable_curl_cffi
+    global _allowed_hosts_curl_cffi
+    _disable_curl_cffi = True
+    _allowed_hosts_curl_cffi = allowed_hosts
+    install_curl_cffi_wrapper()
+
+
+def unblock_curl_cffi() -> None:
+    global _disable_curl_cffi
+    global _allowed_hosts_curl_cffi
+    _disable_curl_cffi = False
+    _allowed_hosts_curl_cffi = None
+    uninstall_curl_cffi_wrapper()
 
 
 def block_pycurl(allowed_hosts: Optional[List[str]] = None) -> None:
@@ -130,10 +204,12 @@ def block(allowed_hosts: Optional[List[str]] = None) -> None:
     block_socket(allowed_hosts=allowed_hosts)
     # NOTE: Applying socket blocking makes curl hangs - it should be carefully patched
     block_pycurl(allowed_hosts=allowed_hosts)
+    block_curl_cffi(allowed_hosts=allowed_hosts)
 
 
 def unblock() -> None:
     unblock_pycurl()
+    unblock_curl_cffi()
     unblock_socket()
 
 

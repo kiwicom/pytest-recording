@@ -31,10 +31,12 @@ def pytest_configure(config: Config) -> None:
         "allowed_hosts: List of regexes to match hosts to where connection must be allowed.",
     )
     network.install_pycurl_wrapper()
+    network.install_curl_cffi_wrapper()
 
 
 def pytest_unconfigure() -> None:
     network.uninstall_pycurl_wrapper()
+    network.uninstall_curl_cffi_wrapper()
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -151,6 +153,7 @@ def vcr(
     if disable_recording:
         yield None
     elif vcr_markers:
+        from . import _curl_cffi
         from ._vcr import use_cassette
 
         config = request.getfixturevalue("vcr_config")
@@ -163,7 +166,8 @@ def vcr(
             config,
             pytestconfig,
         ) as cassette:
-            yield cassette
+            with _curl_cffi.patch(cassette):
+                yield cassette
     else:
         yield None
 
