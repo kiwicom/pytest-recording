@@ -119,6 +119,20 @@ Resulting VCR configs for each test:
 - ``test_one`` - ``{"ignore_localhost": True, "filter_headers": []}``
 - ``test_two`` - ``{"ignore_localhost": True, "filter_headers": ["authorization"], "filter_query_parameters": ["api_key"]}``
 
+The ``vcr_config`` fixture forwards any keyword argument to vcrpy, so ``ignore_hosts``
+and other VCR.py options work directly:
+
+.. code:: python
+
+    import pytest
+
+    @pytest.fixture(scope="module")
+    def vcr_config():
+        return {
+            "filter_headers": ["authorization"],
+            "ignore_hosts": ["169.254.169.254", "metadata.google.internal"],
+        }
+
 You can get access to the used ``VCR`` instance via ``pytest_recording_configure`` hook. It might be useful for registering
 custom matchers, persisters, etc.:
 
