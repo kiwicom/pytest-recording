@@ -121,6 +121,42 @@ def test_record_mode_in_config(testdir):
     assert cassette_path.size()
 
 
+def test_rewrite_record_mode_in_config(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.fixture(scope="module")
+        def vcr_config():
+            return {"record_mode": "rewrite"}
+
+        @pytest.mark.vcr
+        def test_record_mode(httpbin):
+            assert requests.get(httpbin.url + "/uuid").status_code == 200
+    """
+    )
+    cassette_path = testdir.tmpdir.join("cassettes/test_rewrite_record_mode_in_config/test_record_mode.yaml")
+
+    # If recording is enabled
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+
+    # Then the test creates a cassette
+    cassette_size = cassette_path.size()
+    assert cassette_size
+    with open(str(cassette_path), encoding="utf8") as cassette:
+        first_uuid = yaml.load(cassette, Loader=yaml.BaseLoader)["interactions"][0]["response"]["body"]["string"]
+
+    # Rewriting again replaces the cassette instead of replaying or extending it
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+    assert cassette_path.size() == cassette_size
+    with open(str(cassette_path), encoding="utf8") as cassette:
+        second_uuid = yaml.load(cassette, Loader=yaml.BaseLoader)["interactions"][0]["response"]["body"]["string"]
+    assert first_uuid != second_uuid
+
+
 def test_cassette_recording_rewrite(testdir):
     testdir.makepyfile(
         """

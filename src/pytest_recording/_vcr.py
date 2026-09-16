@@ -79,8 +79,11 @@ def use_cassette(
         prefix = default_cassette[: MAX_FILENAME_LEN - len(suffix) - len(hash_part) - 3]
         default_cassette = f"{prefix}...{hash_part}"
 
+    # `record_mode` is not passed to `vcr.use_cassette` below, because VCR.py validates it
+    # and does not know about the extra "rewrite" mode. The resolved mode is set on the
+    # `VCR` instance instead.
     if "record_mode" in merged_config:
-        record_mode = merged_config["record_mode"]
+        record_mode = merged_config.pop("record_mode")
     path_transformer = get_path_transformer(merged_config)
     if record_mode == "rewrite":
         path = path_transformer(os.path.join(vcr_cassette_dir, default_cassette))
