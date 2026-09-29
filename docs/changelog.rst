@@ -8,7 +8,7 @@ Changelog
 
 - Add support for Python 3.14 and drop EOL 3.9. `#185`_
 - Document ``ignore_hosts`` in the ``vcr_config`` fixture example. `#170`_
-- Fix ``ValueError: 'rewrite' is not a valid record_mode`` raised by VCR.py 8.3+ when the ``rewrite`` mode is set via the ``vcr_config`` fixture or the ``vcr`` mark. `#205`_
+- Fix ``ValueError: 'rewrite' is not a valid record_mode`` raised by VCR.py 8.2.1+ when the ``rewrite`` mode is set via the ``vcr_config`` fixture or the ``vcr`` mark. `#205`_
 
 `0.13.4`_ - 2025-04-24
 ----------------------
