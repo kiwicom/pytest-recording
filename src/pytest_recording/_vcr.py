@@ -89,6 +89,9 @@ def use_cassette(
         except OSError:
             pass
         record_mode = "new_episodes"
+        # VCR.py does not know the "rewrite" mode and validates `record_mode`.
+        if "record_mode" in merged_config:
+            merged_config["record_mode"] = record_mode
     vcr = VCR(
         path_transformer=path_transformer,
         cassette_library_dir=vcr_cassette_dir,
