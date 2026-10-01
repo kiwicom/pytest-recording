@@ -68,6 +68,9 @@ jobs:
           - tox_job: py314
             python: "3.14"
             os_version: "ubuntu-24.04"
+          - tox_job: py315
+            python: "3.15"
+            os_version: "ubuntu-24.04"
 
           - tox_job: pypy3-no_pycurl
             python: "pypy3.11"
@@ -87,6 +90,9 @@ jobs:
           - tox_job: py314
             python: "3.14"
             os_version: "windows-2022"
+          - tox_job: py315
+            python: "3.15"
+            os_version: "windows-2022"
 
     steps:
       - uses: actions/checkout@v6
@@ -96,6 +102,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
+          allow-prereleases: true
 
       - run: pip install tox coverage
 
