@@ -6,6 +6,9 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.14.0`_ - 2026-10-02
+----------------------
+
 - Add support for Python 3.15.
 - Add support for Python 3.14 and drop EOL 3.9. `#185`_
 - Document ``ignore_hosts`` in the ``vcr_config`` fixture example. `#170`_
@@ -219,7 +222,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.13.4...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.14.0...HEAD
+.. _0.14.0: https://github.com/kiwicom/pytest-recording/compare/v0.13.4...v0.14.0
 .. _0.13.4: https://github.com/kiwicom/pytest-recording/compare/v0.13.3...v0.13.4
 .. _0.13.3: https://github.com/kiwicom/pytest-recording/compare/v0.13.2...v0.13.3
 .. _0.13.2: https://github.com/kiwicom/pytest-recording/compare/v0.13.1...v0.13.2
