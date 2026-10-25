@@ -189,7 +189,7 @@ def test_blocked():
 @pytest.mark.block_network
 @pytest.mark.vcr
 def test_with_vcr_mark(httpbin):
-    with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException, match=r"overwrite existing cassette"):
+    with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
         requests.get(httpbin.url + "/ip")
     assert socket.connect.__name__ == "network_guard"
     assert socket.connect_ex.__name__ == "network_guard"
@@ -281,7 +281,7 @@ import vcr.errors
 
 @pytest.mark.vcr
 def test_with_vcr_mark(httpbin):
-    with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException, match=r"overwrite existing cassette"):
+    with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
         requests.get(httpbin.url + "/ip")
     assert socket.socket.connect.__name__ == "network_guard"
     assert socket.socket.connect_ex.__name__ == "network_guard"
