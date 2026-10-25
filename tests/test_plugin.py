@@ -27,12 +27,7 @@ def test_help_message(testdir):
     result.stdout.fnmatch_lines(["recording:", "*--record-mode=*", "*VCR.py record mode.*"])
 
 
-def test_pytest_vcr_incompatibility(testdir, mocker):
-    try:
-        mocker.patch("pluggy._manager.PluginManager.has_plugin", return_value=True)
-    except (AttributeError, ImportError):
-        # Older `pluggy`
-        mocker.patch("pluggy.manager.PluginManager.has_plugin", return_value=True)
+def test_pytest_vcr_incompatibility(testdir):
     testdir.makepyfile(
         """
         def test_():
@@ -40,8 +35,8 @@ def test_pytest_vcr_incompatibility(testdir, mocker):
     """
     )
 
-    # Record mode depends on the passed CMD arguments
-    result = testdir.runpytest()
+    # `pytest-vcr` registers its plugin as `vcr`
+    result = testdir.runpytest("-p", "vcr")
     assert (
         "INTERNALERROR> RuntimeError: `pytest-recording` is incompatible with `pytest-vcr`. "
         "Please, uninstall `pytest-vcr` in order to use `pytest-recording`." in result.errlines
