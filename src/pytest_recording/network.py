@@ -1,6 +1,7 @@
 import re
 import socket
 import sys
+import threading
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterator, List, Optional, Tuple, Union
@@ -51,6 +52,21 @@ except ImportError:
 # But methods that could connect to remote are patched to prevent network access
 _original_connect = socket.socket.connect
 _original_connect_ex = socket.socket.connect_ex
+_original_socketpair = socket.socketpair
+
+# `socket.socketpair()` is emulated on Windows with a real loopback `connect()`, and asyncio builds
+# every event loop's self-pipe that way. Without an exemption the guard blocks the event loop
+# itself instead of the network, so the whole asyncio suite dies at setup.
+#
+# The exemption is set only while a `socketpair()` call is running, and it is thread-local: a
+# plain module-level flag would also unblock every other thread's connections for the duration of
+# that call, and a test suite running thread pools would silently lose the guard.
+_socketpair_state = threading.local()
+
+
+def _inside_socketpair() -> bool:
+    return getattr(_socketpair_state, "active", False)
+
 
 # Global switch for pycurl disabling
 _disable_pycurl = False
@@ -102,18 +118,34 @@ def unblock_pycurl() -> None:
     _allowed_hosts = None
 
 
+def make_socketpair_guard(original_func: Callable) -> Callable:
+    def socketpair_guard(*args: Any, **kwargs: Any) -> Tuple[Any, Any]:
+        previous = getattr(_socketpair_state, "active", False)
+        _socketpair_state.active = True
+        try:
+            return original_func(*args, **kwargs)
+        finally:
+            _socketpair_state.active = previous
+
+    return socketpair_guard
+
+
 def block_socket(allowed_hosts: Optional[List[str]] = None) -> None:
     socket.socket.connect = make_network_guard(_original_connect, allowed_hosts=allowed_hosts)  # type: ignore
     socket.socket.connect_ex = make_network_guard(_original_connect_ex, allowed_hosts=allowed_hosts)  # type: ignore
+    socket.socketpair = make_socketpair_guard(_original_socketpair)  # type: ignore
 
 
 def unblock_socket() -> None:
     socket.socket.connect = _original_connect  # type: ignore
     socket.socket.connect_ex = _original_connect_ex  # type: ignore
+    socket.socketpair = _original_socketpair  # type: ignore
 
 
 def make_network_guard(original_func: Callable, allowed_hosts: Optional[List[str]] = None) -> Callable:
     def network_guard(self: Any, address: Union[Tuple, str, bytes], *args: Any, **kwargs: Any) -> Any:
+        if _inside_socketpair():
+            return original_func(self, address, *args, **kwargs)
         host = ""  # type: Union[str, bytes, bytearray]
         if self.family in (socket.AF_INET, socket.AF_INET6):
             host = address[0]  # type: ignore
