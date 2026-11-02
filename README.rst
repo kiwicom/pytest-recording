@@ -240,7 +240,7 @@ It is possible to allow access to specified hosts during network blocking:
     @pytest.mark.block_network(allowed_hosts=["127.0.0.1"])
     def test_access():
         assert requests.get("http://127.0.0.1:8000/").status_code == 200
-        with pytest.raises(RuntimeError, match=r"^Network is disabled for host '192.0.2.1'$"):
+        with pytest.raises(RuntimeError, match=r"^Network is disabled for host '192.0.2.1'"):
             requests.get("http://192.0.2.1")
 
 Entries in ``allowed_hosts`` are regular expressions matched against the host the client connects to.

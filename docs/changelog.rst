@@ -6,6 +6,7 @@ Changelog
 `Unreleased`_
 -------------
 
+- List the allowed hosts in the ``Network is disabled`` error message. `#63`_
 - Warn when the ``rewrite`` record mode fails to remove an existing cassette, instead of silently ignoring the error. `#198`_
 - Document overriding the ``vcr_cassette_dir`` fixture to change where cassettes are looked up. `#151`_
 - Document that ``allowed_hosts`` matches IP addresses for socket-based clients. `#40`_
@@ -278,6 +279,7 @@ Added
 .. _#69: https://github.com/kiwicom/pytest-recording/issues/69
 .. _#68: https://github.com/kiwicom/pytest-recording/issues/68
 .. _#64: https://github.com/kiwicom/pytest-recording/issues/64
+.. _#63: https://github.com/kiwicom/pytest-recording/issues/63
 .. _#55: https://github.com/kiwicom/pytest-recording/issues/55
 .. _#53: https://github.com/kiwicom/pytest-recording/issues/53
 .. _#47: https://github.com/kiwicom/pytest-recording/issues/47
