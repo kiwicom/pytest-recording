@@ -6,6 +6,9 @@ Changelog
 `Unreleased`_
 -------------
 
+`0.14.1`_ - 2026-11-02
+----------------------
+
 - Allow ``socket.socketpair()`` inside the blocking context, so asyncio event loops can be built on Windows. `#212`_
 - Include the blocked host in the ``Network is disabled`` error message. `#190`_
 
@@ -225,7 +228,8 @@ Added
 
 - Initial public release
 
-.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.14.0...HEAD
+.. _Unreleased: https://github.com/kiwicom/pytest-recording/compare/v0.14.1...HEAD
+.. _0.14.1: https://github.com/kiwicom/pytest-recording/compare/v0.14.0...v0.14.1
 .. _0.14.0: https://github.com/kiwicom/pytest-recording/compare/v0.13.4...v0.14.0
 .. _0.13.4: https://github.com/kiwicom/pytest-recording/compare/v0.13.3...v0.13.4
 .. _0.13.3: https://github.com/kiwicom/pytest-recording/compare/v0.13.2...v0.13.3
