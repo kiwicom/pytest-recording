@@ -7,6 +7,8 @@ Changelog
 -------------
 
 - Warn when the ``rewrite`` record mode fails to remove an existing cassette, instead of silently ignoring the error. `#198`_
+- Document overriding the ``vcr_cassette_dir`` fixture to change where cassettes are looked up. `#151`_
+- Document that ``allowed_hosts`` matches IP addresses for socket-based clients. `#40`_
 
 `0.14.1`_ - 2026-11-02
 ----------------------
@@ -267,6 +269,7 @@ Added
 .. _#172: https://github.com/kiwicom/pytest-recording/issues/172
 .. _#212: https://github.com/kiwicom/pytest-recording/issues/212
 .. _#170: https://github.com/kiwicom/pytest-recording/issues/170
+.. _#151: https://github.com/kiwicom/pytest-recording/issues/151
 .. _#145: https://github.com/kiwicom/pytest-recording/issues/145
 .. _#118: https://github.com/kiwicom/pytest-recording/pull/118
 .. _#99: https://github.com/kiwicom/pytest-recording/pull/99
@@ -279,6 +282,7 @@ Added
 .. _#53: https://github.com/kiwicom/pytest-recording/issues/53
 .. _#47: https://github.com/kiwicom/pytest-recording/issues/47
 .. _#45: https://github.com/kiwicom/pytest-recording/issues/45
+.. _#40: https://github.com/kiwicom/pytest-recording/issues/40
 .. _#37: https://github.com/kiwicom/pytest-recording/issues/37
 .. _#34: https://github.com/kiwicom/pytest-recording/issues/34
 .. _#20: https://github.com/kiwicom/pytest-recording/issues/20

@@ -149,6 +149,25 @@ custom matchers, persisters, etc.:
 
 You can disable the VCR.py integration entirely by passing the ``--disable-recording`` CLI option.
 
+Cassettes directory
+~~~~~~~~~~~~~~~~~~~
+
+Each test module stores its cassettes in ``cassettes/{module_name}/`` next to the module.
+To use a different directory, override the ``vcr_cassette_dir`` fixture:
+
+.. code:: python
+
+    # conftest.py
+    import os
+    import pytest
+
+    @pytest.fixture
+    def vcr_cassette_dir():
+        return os.path.join(os.path.dirname(__file__), "shared_cassettes")
+
+Relative paths in ``pytest.mark.vcr("shared.yaml")`` resolve against this directory.
+The ``cassette_library_dir`` key in ``vcr_config`` does not affect extra cassettes.
+
 Rewrite record mode
 ~~~~~~~~~~~~~~~~~~~
 
@@ -218,17 +237,21 @@ It is possible to allow access to specified hosts during network blocking:
     import pytest
     import requests
 
-    @pytest.mark.block_network(allowed_hosts=["httpbin.*"])
+    @pytest.mark.block_network(allowed_hosts=["127.0.0.1"])
     def test_access():
-        assert requests.get("http://httpbin.org/get").text == '{"get": true}'
-        with pytest.raises(RuntimeError, match=r"^Network is disabled for host "):
-            requests.get("http://example.com")
+        assert requests.get("http://127.0.0.1:8000/").status_code == 200
+        with pytest.raises(RuntimeError, match=r"^Network is disabled for host '192.0.2.1'$"):
+            requests.get("http://192.0.2.1")
+
+Entries in ``allowed_hosts`` are regular expressions matched against the host the client connects to.
+Socket-based clients like ``requests`` resolve hostnames before connecting, so list IP addresses for them
+(``127.0.0.1``, ``10.0.0.*``). ``pycurl`` exposes the hostname, so hostname patterns like ``httpbin.*`` work there.
 
 Or via command-line option:
 
 .. code:: bash
 
-    $ pytest --record-mode=once --block-network --allowed-hosts=httpbin.*,localhost tests/
+    $ pytest --record-mode=once --block-network --allowed-hosts=127.0.0.1,::1 tests/
 
 
 Or via `vcr_config` fixture:
@@ -239,7 +262,7 @@ Or via `vcr_config` fixture:
 
     @pytest.fixture(autouse=True)
     def vcr_config():
-        return {"allowed_hosts": ["httpbin.*"]}
+        return {"allowed_hosts": ["127.0.0.1"]}
 
 Additional resources
 --------------------
