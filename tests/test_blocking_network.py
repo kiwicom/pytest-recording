@@ -1,6 +1,5 @@
 import asyncio
 import json
-import socket as socket_module
 import sys
 import threading
 from io import BytesIO
@@ -11,6 +10,7 @@ import requests
 import vcr.errors
 from packaging import version
 
+from pytest_recording import network
 from pytest_recording.network import blocking_context
 
 # Windows doesn’t have AF_NETLINK & AF_UNIX
@@ -459,7 +459,7 @@ def test_socketpair_is_allowed_while_network_is_blocked():
     # `socketpair()` is emulated on Windows with a real loopback `connect()`, which the guard used
     # to reject - the socket is in-process, so it must not count as network access.
     with blocking_context():
-        left, right = socket_module.socketpair()
+        left, right = network.socket.socketpair()
         try:
             left.sendall(b"ping")
             assert right.recv(4) == b"ping"
@@ -468,7 +468,7 @@ def test_socketpair_is_allowed_while_network_is_blocked():
             right.close()
 
         # A real remote connect is still blocked.
-        probe = socket_module.socket(AF_INET, SOCK_STREAM)
+        probe = socket(AF_INET, SOCK_STREAM)
         try:
             with pytest.raises(RuntimeError, match="Network is disabled"):
                 probe.connect(("192.0.2.1", 80))
@@ -488,8 +488,6 @@ def test_event_loop_can_be_created_while_network_is_blocked():
 def test_socketpair_exemption_does_not_leak_to_other_threads(monkeypatch):
     # The exemption is thread-local on purpose: a module-level flag would unblock every other
     # thread's connections for as long as one thread sits inside `socketpair()`.
-    from pytest_recording import network
-
     started = threading.Event()
     release = threading.Event()
     real_socketpair = network._original_socketpair
@@ -501,10 +499,10 @@ def test_socketpair_exemption_does_not_leak_to_other_threads(monkeypatch):
 
     monkeypatch.setattr(network, "_original_socketpair", slow_socketpair)
 
-    made: "list[tuple[socket_module.socket, socket_module.socket]]" = []
+    made: "list[tuple[socket, socket]]" = []
 
     def worker_target() -> None:
-        made.append(socket_module.socketpair())
+        made.append(network.socket.socketpair())
 
     worker = threading.Thread(target=worker_target)
 
@@ -513,7 +511,7 @@ def test_socketpair_exemption_does_not_leak_to_other_threads(monkeypatch):
         assert started.wait(10), "worker never entered socketpair()"
         try:
             # While that call is in flight, this thread is still not allowed to connect.
-            probe = socket_module.socket(AF_INET, SOCK_STREAM)
+            probe = socket(AF_INET, SOCK_STREAM)
             try:
                 with pytest.raises(RuntimeError, match="Network is disabled"):
                     probe.connect(("192.0.2.1", 80))
