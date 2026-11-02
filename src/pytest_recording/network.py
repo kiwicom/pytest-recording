@@ -26,7 +26,7 @@ try:
                 host = urlparse(self.url).hostname
                 if not host or is_host_in_allowed_hosts(host, _allowed_hosts):
                     return getattr(handle, item)
-                raise RuntimeError(f"Network is disabled for host {host!r}")
+                raise network_disabled_error(host, _allowed_hosts)
             if item == "handle":
                 return handle
             if item == "setopt":
@@ -153,7 +153,7 @@ def make_network_guard(original_func: Callable, allowed_hosts: Optional[List[str
             host = address  # type: ignore
         if is_host_in_allowed_hosts(host, allowed_hosts):
             return original_func(self, address, *args, **kwargs)
-        raise RuntimeError(f"Network is disabled for host {host!r}")
+        raise network_disabled_error(host, allowed_hosts)
 
     return network_guard
 
@@ -191,6 +191,13 @@ def to_string(value: Union[str, bytes, bytearray]) -> str:
     if isinstance(value, (bytes, bytearray)):
         return value.decode()
     return value
+
+
+def network_disabled_error(host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]]) -> RuntimeError:
+    message = f"Network is disabled for host {host!r}"
+    if allowed_hosts:
+        message += f" (allowed hosts: {', '.join(map(repr, allowed_hosts))})"
+    return RuntimeError(message)
 
 
 def is_host_in_allowed_hosts(host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]]) -> bool:
