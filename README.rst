@@ -264,6 +264,21 @@ Or via `vcr_config` fixture:
     def vcr_config():
         return {"allowed_hosts": ["127.0.0.1"]}
 
+To allow every private IP address (loopback, LAN, Docker networks), use ``allow_private_ips``.
+It helps when services run in Docker Compose and their IPs are not known in advance:
+
+.. code:: python
+
+    import pytest
+
+    @pytest.mark.block_network(allow_private_ips=True)
+    def test_service():
+        ...
+
+The same works with ``--allow-private-ips`` on the command line or ``{"allow_private_ips": True}`` in ``vcr_config``.
+"Private" follows Python's ``ipaddress`` module, so it includes the ``169.254.169.254`` cloud metadata endpoint.
+``pycurl`` passes hostnames to the guard, so only URLs with IP addresses match there.
+
 Additional resources
 --------------------
 

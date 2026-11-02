@@ -1,3 +1,4 @@
+import ipaddress
 import re
 import socket
 import sys
@@ -24,9 +25,9 @@ try:
             handle = object.__getattribute__(self, "handle")
             if _disable_pycurl and item == "perform":
                 host = urlparse(self.url).hostname
-                if not host or is_host_in_allowed_hosts(host, _allowed_hosts):
+                if not host or is_host_allowed(host, _allowed_hosts, _allow_private_ips):
                     return getattr(handle, item)
-                raise network_disabled_error(host, _allowed_hosts)
+                raise network_disabled_error(host, _allowed_hosts, _allow_private_ips)
             if item == "handle":
                 return handle
             if item == "setopt":
@@ -71,6 +72,7 @@ def _inside_socketpair() -> bool:
 # Global switch for pycurl disabling
 _disable_pycurl = False
 _allowed_hosts = None  # type: ignore
+_allow_private_ips = False
 
 
 @dataclass(unsafe_hash=True)
@@ -104,18 +106,22 @@ def uninstall_pycurl_wrapper() -> None:
     sys.modules["pycurl"] = pycurl
 
 
-def block_pycurl(allowed_hosts: Optional[List[str]] = None) -> None:
+def block_pycurl(allowed_hosts: Optional[List[str]] = None, allow_private_ips: bool = False) -> None:
     global _disable_pycurl
     global _allowed_hosts
+    global _allow_private_ips
     _disable_pycurl = True
     _allowed_hosts = allowed_hosts
+    _allow_private_ips = allow_private_ips
 
 
 def unblock_pycurl() -> None:
     global _disable_pycurl
     global _allowed_hosts
+    global _allow_private_ips
     _disable_pycurl = False
     _allowed_hosts = None
+    _allow_private_ips = False
 
 
 def make_socketpair_guard(original_func: Callable) -> Callable:
@@ -130,9 +136,9 @@ def make_socketpair_guard(original_func: Callable) -> Callable:
     return socketpair_guard
 
 
-def block_socket(allowed_hosts: Optional[List[str]] = None) -> None:
-    socket.socket.connect = make_network_guard(_original_connect, allowed_hosts=allowed_hosts)  # type: ignore
-    socket.socket.connect_ex = make_network_guard(_original_connect_ex, allowed_hosts=allowed_hosts)  # type: ignore
+def block_socket(allowed_hosts: Optional[List[str]] = None, allow_private_ips: bool = False) -> None:
+    socket.socket.connect = make_network_guard(_original_connect, allowed_hosts, allow_private_ips)  # type: ignore
+    socket.socket.connect_ex = make_network_guard(_original_connect_ex, allowed_hosts, allow_private_ips)  # type: ignore
     socket.socketpair = make_socketpair_guard(_original_socketpair)  # type: ignore
 
 
@@ -142,7 +148,9 @@ def unblock_socket() -> None:
     socket.socketpair = _original_socketpair  # type: ignore
 
 
-def make_network_guard(original_func: Callable, allowed_hosts: Optional[List[str]] = None) -> Callable:
+def make_network_guard(
+    original_func: Callable, allowed_hosts: Optional[List[str]] = None, allow_private_ips: bool = False
+) -> Callable:
     def network_guard(self: Any, address: Union[Tuple, str, bytes], *args: Any, **kwargs: Any) -> Any:
         if _inside_socketpair():
             return original_func(self, address, *args, **kwargs)
@@ -151,17 +159,17 @@ def make_network_guard(original_func: Callable, allowed_hosts: Optional[List[str
             host = address[0]  # type: ignore
         elif self.family == socket.AF_UNIX:
             host = address  # type: ignore
-        if is_host_in_allowed_hosts(host, allowed_hosts):
+        if is_host_allowed(host, allowed_hosts, allow_private_ips):
             return original_func(self, address, *args, **kwargs)
-        raise network_disabled_error(host, allowed_hosts)
+        raise network_disabled_error(host, allowed_hosts, allow_private_ips)
 
     return network_guard
 
 
-def block(allowed_hosts: Optional[List[str]] = None) -> None:
-    block_socket(allowed_hosts=allowed_hosts)
+def block(allowed_hosts: Optional[List[str]] = None, allow_private_ips: bool = False) -> None:
+    block_socket(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips)
     # NOTE: Applying socket blocking makes curl hangs - it should be carefully patched
-    block_pycurl(allowed_hosts=allowed_hosts)
+    block_pycurl(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips)
 
 
 def unblock() -> None:
@@ -170,7 +178,7 @@ def unblock() -> None:
 
 
 @contextmanager
-def blocking_context(allowed_hosts: Optional[List[str]] = None) -> Iterator[None]:
+def blocking_context(allowed_hosts: Optional[List[str]] = None, allow_private_ips: bool = False) -> Iterator[None]:
     """Block connections via socket and pycurl.
 
     Note:
@@ -179,7 +187,7 @@ def blocking_context(allowed_hosts: Optional[List[str]] = None) -> Iterator[None
         Local servers are not touched since it could interfere with live servers needed for tests (e.g. pytest-httpbin)
 
     """
-    block(allowed_hosts=allowed_hosts)
+    block(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips)
     try:
         yield
     finally:
@@ -193,11 +201,30 @@ def to_string(value: Union[str, bytes, bytearray]) -> str:
     return value
 
 
-def network_disabled_error(host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]]) -> RuntimeError:
+def network_disabled_error(
+    host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]], allow_private_ips: bool = False
+) -> RuntimeError:
     message = f"Network is disabled for host {host!r}"
-    if allowed_hosts:
-        message += f" (allowed hosts: {', '.join(map(repr, allowed_hosts))})"
+    allowed = [repr(allowed_host) for allowed_host in allowed_hosts or ()]
+    if allow_private_ips:
+        allowed.append("private IPs")
+    if allowed:
+        message += f" (allowed hosts: {', '.join(allowed)})"
     return RuntimeError(message)
+
+
+def is_host_allowed(
+    host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]], allow_private_ips: bool
+) -> bool:
+    return is_host_in_allowed_hosts(host, allowed_hosts) or (allow_private_ips and is_private_ip(host))
+
+
+def is_private_ip(host: Union[str, bytes, bytearray]) -> bool:
+    try:
+        return ipaddress.ip_address(to_string(host)).is_private
+    except ValueError:
+        # Hostnames (pycurl) and AF_UNIX paths
+        return False
 
 
 def is_host_in_allowed_hosts(host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]]) -> bool:

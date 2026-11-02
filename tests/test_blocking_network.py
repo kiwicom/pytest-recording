@@ -278,6 +278,70 @@ def test_blocked():
     result.assert_outcomes(passed=2)
 
 
+@pytest.mark.parametrize(
+    "marker, cmd_options, vcr_cfg",
+    (
+        pytest.param("@pytest.mark.block_network(allow_private_ips=True)", (), "", id="block_marker"),
+        pytest.param("", ("--block-network", "--allow-private-ips"), "", id="block_cmd"),
+        pytest.param(
+            "@pytest.mark.block_network()",
+            (),
+            "@pytest.fixture(autouse=True)\ndef vcr_config():\n    return {'allow_private_ips': True}",
+            id="vcr_cfg",
+        ),
+    ),
+)
+def test_block_network_with_private_ips_allowed(testdir, marker, cmd_options, vcr_cfg):
+    testdir.makepyfile(
+        """
+import pytest
+import requests
+
+{vcr_cfg}
+
+{marker}
+def test_allowed(httpbin):
+    assert requests.get(httpbin.url + "/ip").status_code == 200
+
+{marker}
+def test_blocked():
+    with pytest.raises(RuntimeError) as exc:
+        requests.get("http://8.8.8.8")
+    assert str(exc.value) == "Network is disabled for host '8.8.8.8' (allowed hosts: private IPs)"
+    """.format(marker=marker, vcr_cfg=vcr_cfg)
+    )
+
+    result = testdir.runpytest(*cmd_options)
+    result.assert_outcomes(passed=2)
+
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.2"], allow_private_ips=True)
+def test_private_ips_listed_with_allowed_hosts():
+    with pytest.raises(RuntimeError) as exc:
+        with socket(AF_INET, SOCK_STREAM) as sock:
+            sock.connect((b"8.8.8.8", 80))
+    assert str(exc.value) == "Network is disabled for host b'8.8.8.8' (allowed hosts: '127.0.0.2', private IPs)"
+
+
+@skip_unix
+@pytest.mark.block_network(allow_private_ips=True)
+def test_private_ips_do_not_allow_unix_sockets():
+    with pytest.raises(RuntimeError):
+        call("./blocked_socket", AF_UNIX, SOCK_STREAM)
+
+
+@pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
+@pytest.mark.block_network(allow_private_ips=True)
+def test_pycurl_with_private_ips_allowed(httpbin):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, httpbin.url + "/ip")  # type: ignore[attr-defined]
+    c.setopt(c.WRITEDATA, buffer)  # type: ignore[attr-defined]
+    c.perform()
+    c.close()
+    assert buffer.getvalue()
+
+
 def test_block_network_via_cmd(testdir):
     # When `--block-network` option is passed to CMD
     testdir.makepyfile(
@@ -457,7 +521,7 @@ def test_request():
         result.assert_outcomes(errors=1)
     else:
         result.assert_outcomes(error=1)
-    expected = "Invalid arguments to `block_network`. It accepts only the following keyword arguments: `allowed_hosts`."
+    expected = "Invalid arguments to `block_network`. It accepts only the following keyword arguments: `allowed_hosts`, `allow_private_ips`."
     assert expected in result.stdout.str()
 
 
