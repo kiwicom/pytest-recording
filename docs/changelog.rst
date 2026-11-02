@@ -6,6 +6,8 @@ Changelog
 `Unreleased`_
 -------------
 
+- Allow ``socket.socketpair()`` inside the blocking context, so asyncio event loops can be built on Windows. `#212`_
+
 `0.14.0`_ - 2026-10-02
 ----------------------
 
@@ -254,6 +256,7 @@ Added
 .. _#185: https://github.com/kiwicom/pytest-recording/pull/185
 .. _#174: https://github.com/kiwicom/pytest-recording/issues/174
 .. _#172: https://github.com/kiwicom/pytest-recording/issues/172
+.. _#212: https://github.com/kiwicom/pytest-recording/issues/212
 .. _#170: https://github.com/kiwicom/pytest-recording/issues/170
 .. _#145: https://github.com/kiwicom/pytest-recording/issues/145
 .. _#118: https://github.com/kiwicom/pytest-recording/pull/118
