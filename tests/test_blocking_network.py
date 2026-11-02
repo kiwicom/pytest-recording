@@ -259,8 +259,8 @@ def test_allowed(httpbin):
 
 {marker}
 def test_blocked():
-    with pytest.raises(RuntimeError, match="^Network is disabled for host "):
-        requests.get("http://example.com")
+    with pytest.raises(RuntimeError, match="^Network is disabled for host '192.0.2.1'$"):
+        requests.get("http://192.0.2.1")
     assert socket.socket.connect.__name__ == "network_guard"
     assert socket.socket.connect_ex.__name__ == "network_guard"
     """.format(
