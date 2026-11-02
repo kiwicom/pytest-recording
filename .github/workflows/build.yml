@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: 3.x
+          python-version: "3.14"
 
       - run: pip install pre-commit
       - run: SKIP=mypy pre-commit run --all-files
@@ -39,7 +39,7 @@ jobs:
 
       - uses: actions/setup-python@v7
         with:
-          python-version: 3.x
+          python-version: "3.14"
 
       - run: pip install pre-commit
       - run: pre-commit run mypy --all-files
