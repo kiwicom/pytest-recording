@@ -6,6 +6,7 @@ Changelog
 `Unreleased`_
 -------------
 
+- Add the ``allow_private_ips`` option to allow connections to private IP addresses while network is blocked. `#74`_
 - List the allowed hosts in the ``Network is disabled`` error message. `#63`_
 - Warn when the ``rewrite`` record mode fails to remove an existing cassette, instead of silently ignoring the error. `#198`_
 - Document overriding the ``vcr_cassette_dir`` fixture to change where cassettes are looked up. `#151`_
@@ -276,6 +277,7 @@ Added
 .. _#99: https://github.com/kiwicom/pytest-recording/pull/99
 .. _#97: https://github.com/kiwicom/pytest-recording/issues/97
 .. _#82: https://github.com/kiwicom/pytest-recording/pull/82
+.. _#74: https://github.com/kiwicom/pytest-recording/issues/74
 .. _#69: https://github.com/kiwicom/pytest-recording/issues/69
 .. _#68: https://github.com/kiwicom/pytest-recording/issues/68
 .. _#64: https://github.com/kiwicom/pytest-recording/issues/64

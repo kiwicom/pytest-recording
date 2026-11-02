@@ -59,6 +59,12 @@ def pytest_addoption(parser: Parser) -> None:
         help="List of regexes, separated by comma, to match hosts to where connection must be allowed.",
     )
     group.addoption(
+        "--allow-private-ips",
+        action="store_true",
+        default=False,
+        help="Allow connections to private IP addresses (loopback, LAN, Docker networks) while network is blocked.",
+    )
+    group.addoption(
         "--disable-recording",
         action="store_true",
         default=False,
@@ -108,6 +114,18 @@ def allowed_hosts(request: SubRequest) -> List[str]:
 
 
 @pytest.fixture  # type: ignore
+def allow_private_ips(request: SubRequest) -> bool:
+    """Whether connections to private IP addresses are allowed while network is blocked."""
+    block_network = request.node.get_closest_marker(name="block_network")
+    config = request.getfixturevalue("vcr_config")
+    return bool(
+        getattr(block_network, "kwargs", {}).get("allow_private_ips")
+        or request.config.getoption("--allow-private-ips")
+        or config.get("allow_private_ips")
+    )
+
+
+@pytest.fixture  # type: ignore
 def vcr_markers(request: SubRequest) -> List[Mark]:
     """All markers applied to the certain test together with cassette names associated with each marker."""
     return list(request.node.iter_markers(name="vcr"))
@@ -132,7 +150,8 @@ def block_network(request: SubRequest, record_mode: str, vcr_markers: List[Mark]
     # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
     if (block_network or request.config.getoption("--block-network")) and (not vcr_markers or record_mode == "none"):
         allowed_hosts = request.getfixturevalue("allowed_hosts")
-        with network.blocking_context(allowed_hosts=allowed_hosts):
+        allow_private_ips = request.getfixturevalue("allow_private_ips")
+        with network.blocking_context(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips):
             yield
     else:
         yield
