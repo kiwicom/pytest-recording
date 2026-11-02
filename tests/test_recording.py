@@ -512,6 +512,7 @@ import requests
     [
         'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' * 5,
     ],
+    ids=str,
 )
 def test_with_parametrize(httpbin,data):
     assert requests.get(httpbin.url + "/get").status_code == 200
