@@ -16,30 +16,30 @@ on:
 jobs:
   pre-commit:
     name: Generic pre-commit checks
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
-          python-version: 3.x
+          python-version: "3.15"
 
       - run: pip install pre-commit
       - run: SKIP=mypy pre-commit run --all-files
 
   mypy:
     name: Mypy
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
-          python-version: 3.x
+          python-version: "3.15"
 
       - run: pip install pre-commit
       - run: pre-commit run mypy --all-files
@@ -93,11 +93,11 @@ jobs:
             os_version: "windows-2022"
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
           allow-prereleases: true
@@ -116,6 +116,6 @@ jobs:
       - run: coverage xml -i
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v7.0.0
+        uses: codecov/codecov-action@v7.1.1
         with:
           file: ./coverage.xml
