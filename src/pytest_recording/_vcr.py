@@ -1,5 +1,6 @@
 import hashlib
 import os
+import warnings
 from dataclasses import dataclass
 from itertools import chain, starmap
 from types import ModuleType
@@ -86,8 +87,10 @@ def use_cassette(
         path = path_transformer(os.path.join(vcr_cassette_dir, default_cassette))
         try:
             os.remove(path)
-        except OSError:
+        except FileNotFoundError:
             pass
+        except OSError as exc:
+            warnings.warn(f"Failed to remove cassette {path!r}: {exc}", stacklevel=2)
         record_mode = "new_episodes"
         # VCR.py does not know the "rewrite" mode and validates `record_mode`.
         if "record_mode" in merged_config:

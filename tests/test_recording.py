@@ -287,6 +287,39 @@ def test_custom_cassette_name(testdir):
     assert cassette.size()
 
 
+def test_rewrite_warns_when_cassette_cannot_be_removed(testdir):
+    # A directory in place of the cassette makes `os.remove` fail with an error other than "not found"
+    testdir.mkdir("cassettes").mkdir("test_rewrite_warns_when_cassette_cannot_be_removed").mkdir("test_rewrite.yaml")
+    testdir.makepyfile(
+        """
+        import pytest
+
+        @pytest.mark.vcr
+        def test_rewrite():
+            pass
+    """
+    )
+
+    result = testdir.runpytest("--record-mode=rewrite")
+    result.assert_outcomes(passed=1)
+    result.stdout.fnmatch_lines(["*UserWarning: Failed to remove cassette*test_rewrite.yaml*"])
+
+
+def test_rewrite_does_not_warn_when_cassette_is_missing(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+
+        @pytest.mark.vcr
+        def test_rewrite():
+            pass
+    """
+    )
+
+    result = testdir.runpytest("--record-mode=rewrite", "-W", "error::UserWarning")
+    result.assert_outcomes(passed=1)
+
+
 def test_custom_cassette_name_rewrite(testdir):
     # When a custom cassette name is passed to pytest.mark.vcr
     cassette = testdir.tmpdir.join("cassettes/test_custom_cassette_name_rewrite/test_with_network.yaml")
