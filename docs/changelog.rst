@@ -6,6 +6,7 @@ Changelog
 `Unreleased`_
 -------------
 
+- Add a ``transports`` argument to the network API for selecting socket and/or pycurl blocking.
 - Add the ``allow_private_ips`` option to allow connections to private IP addresses while network is blocked. `#74`_
 - List the allowed hosts in the ``Network is disabled`` error message. `#63`_
 - Warn when the ``rewrite`` record mode fails to remove an existing cassette, instead of silently ignoring the error. `#198`_
