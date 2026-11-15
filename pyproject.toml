@@ -69,6 +69,10 @@ select = [
     "I", # isort
     "T", # prints
     "FIX", # fixme comments
+    "UP", # pyupgrade
+    "SIM", # flake8-simplify
+    "FURB", # refurb
+    "PGH003", # blanket-type-ignore
 ]
 ignore = [
     "E501", # Line too long, handled by ruff
