@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-15
+
 ### Added
 
 - `transports` argument for `network.block`, `network.unblock` and `network.blocking_context` to select socket and/or pycurl blocking. [#16]
@@ -230,7 +232,8 @@
 
 - Initial public release
 
-[Unreleased]: https://github.com/kiwicom/pytest-recording/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/kiwicom/pytest-recording/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/kiwicom/pytest-recording/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/kiwicom/pytest-recording/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/kiwicom/pytest-recording/compare/v0.13.4...v0.14.0
 [0.13.4]: https://github.com/kiwicom/pytest-recording/compare/v0.13.3...v0.13.4
