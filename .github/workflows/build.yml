@@ -6,6 +6,8 @@ on:
     paths:
       - '**.py'
       - '.github/workflows/*.yml'
+      - '.pre-commit-config.yaml'
+      - 'mypy.ini'
       - 'pyproject.toml'
       - 'tox.ini'
       - '!docs/**'
@@ -14,35 +16,18 @@ on:
       - master
 
 jobs:
-  pre-commit:
-    name: Generic pre-commit checks
-    runs-on: ubuntu-26.04
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 1
-
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.15"
-
-      - run: pip install pre-commit
-      - run: SKIP=mypy pre-commit run --all-files
-
-  mypy:
-    name: Mypy
-    runs-on: ubuntu-26.04
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
-
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.15"
-
-      - run: pip install pre-commit
-      - run: pre-commit run mypy --all-files
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - run: uvx prek run --all-files
 
   tests:
     name: Test ${{ matrix.tox_job }} on ${{ matrix.os_version }}

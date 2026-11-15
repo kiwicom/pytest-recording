@@ -17,8 +17,8 @@ from pytest_recording.network import blocking_context
 try:
     from socket import AF_NETLINK, AF_UNIX
 except ImportError:
-    AF_NETLINK = None  # type: ignore[assignment]
-    AF_UNIX = None  # type: ignore[assignment]
+    AF_NETLINK = None  # type: ignore[assignment, misc]
+    AF_UNIX = None  # type: ignore[assignment, misc]
 
 
 try:

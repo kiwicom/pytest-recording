@@ -8,7 +8,7 @@ VCR_VERSION = tuple(map(int, vcr.__version__.split(".")))
 
 
 @pytest.mark.vcr
-def test_no_cassete_vcr_used():
+def test_no_cassette_vcr_used():
     """If pytest.mark.vcr is applied and there is no cassette - an exception happens."""
     with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
         requests.get("http://localhost/get")
