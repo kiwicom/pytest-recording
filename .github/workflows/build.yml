@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   tests:
-    name: Test ${{ matrix.python }} on ${{ matrix.os }}
+    name: Test ${{ matrix.tox-env || matrix.python }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
@@ -34,6 +34,9 @@ jobs:
           - os: ubuntu-24.04
             python: "pypy3.11"
             tox-env: pypy3-no_pycurl
+          - os: ubuntu-24.04
+            python: "3.10"
+            tox-env: lowest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
