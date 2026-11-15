@@ -1,32 +1,58 @@
-name: Post-release jobs
+name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: read
 
 jobs:
-  build-n-publish:
-    name: Build and publish Python 🐍 distributions 📦 to PyPI
+  publish:
+    name: Publish to PyPI
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    environment: pypi
+    permissions:
+      # Trusted Publishing exchanges this for a short-lived PyPI token.
+      id-token: write
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        persist-credentials: false
-    - name: Set up Python 3
-      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-      with:
-        python-version: 3.x
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: false
+      - name: Check that the tag matches the package version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: test "$TAG" = "v$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml | head -1)"
+      - run: uv build
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
 
-    - run: pip install hatch
-
-    - name: Build package
-      run: hatch build
-
-    - name: Publish distribution package to PyPI
-      uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}  # zizmor: ignore[use-trusted-publishing]
+  github-release:
+    name: Create GitHub release
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      # Creates the GitHub release.
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          # The release section, followed by the link definitions its entries refer to.
+          awk -v version="$version" '
+            /^## / { inside = index($0, "## [" version "]") == 1; next }
+            inside { print }
+          ' CHANGELOG.md > notes.md
+          grep '^\[#' CHANGELOG.md >> notes.md
+          gh release create "$TAG" --title "Release $version" --notes-file notes.md --verify-tag
