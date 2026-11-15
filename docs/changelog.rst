@@ -6,7 +6,7 @@ Changelog
 `Unreleased`_
 -------------
 
-- Add a ``transports`` argument to the network API for selecting socket and/or pycurl blocking.
+- Add a ``transports`` argument to the network API for selecting socket and/or pycurl blocking. `#16`_
 - Add the ``allow_private_ips`` option to allow connections to private IP addresses while network is blocked. `#74`_
 - List the allowed hosts in the ``Network is disabled`` error message. `#63`_
 - Warn when the ``rewrite`` record mode fails to remove an existing cassette, instead of silently ignoring the error. `#198`_
@@ -291,6 +291,7 @@ Added
 .. _#37: https://github.com/kiwicom/pytest-recording/issues/37
 .. _#34: https://github.com/kiwicom/pytest-recording/issues/34
 .. _#20: https://github.com/kiwicom/pytest-recording/issues/20
+.. _#16: https://github.com/kiwicom/pytest-recording/issues/16
 .. _#10: https://github.com/kiwicom/pytest-recording/issues/10
 .. _#8: https://github.com/kiwicom/pytest-recording/issues/8
 .. _#7: https://github.com/kiwicom/pytest-recording/issues/7

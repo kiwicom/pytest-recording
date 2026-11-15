@@ -279,6 +279,18 @@ The same works with ``--allow-private-ips`` on the command line or ``{"allow_pri
 "Private" follows Python's ``ipaddress`` module, so it includes the ``169.254.169.254`` cloud metadata endpoint.
 ``pycurl`` passes hostnames to the guard, so only URLs with IP addresses match there.
 
+``pytest_recording.network.blocking_context`` blocks both ``socket`` and ``pycurl``. To block only one of them, pass ``transports``:
+
+.. code:: python
+
+    from pytest_recording.network import blocking_context
+
+    with blocking_context(transports=("socket",)):
+        # Socket connections are blocked; pycurl is unchanged.
+        ...
+
+``network.block`` and ``network.unblock`` accept the same argument. The ``block_network`` mark and ``--block-network`` always block both.
+
 Additional resources
 --------------------
 
@@ -345,21 +357,3 @@ The code in this project is licensed under `MIT license`_. By contributing to ``
    :target: https://opensource.org/licenses/MIT
 
 .. _MIT license: https://opensource.org/licenses/MIT
-
-Selecting network transports
-----------------------------
-
-The Python network API blocks both ``socket`` and ``pycurl`` by default. To block
-only one transport, pass its name to ``blocking_context``::
-
-    from pytest_recording.network import blocking_context
-
-    with blocking_context(transports=("socket",)):
-        # Socket connections are blocked; pycurl is unchanged.
-        ...
-
-The same argument is available on ``block`` and ``unblock``. Pass the same
-selection to both when calling them directly. Unknown names and empty selections
-raise ``ValueError`` before changing network state; duplicate names are ignored.
-Selecting pycurl when it is not installed does not affect socket connections.
-This option does not change the pytest marker or command-line interface.
