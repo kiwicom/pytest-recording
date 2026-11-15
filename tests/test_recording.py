@@ -8,12 +8,12 @@ import yaml
 
 def test_cassette_recording(testdir):
     testdir.makepyfile(
-        """
+        f"""
         import pytest
         import requests
 
         @pytest.mark.vcr
-        def test_{}(httpbin):
+        def test_{string.ascii_letters}(httpbin):
             assert requests.get(httpbin.url + "/get").status_code == 200
 
         @pytest.mark.vcr
@@ -24,7 +24,7 @@ def test_cassette_recording(testdir):
         @pytest.mark.vcr
         def test_without_network():
             pass
-    """.format(string.ascii_letters)
+    """
     )
 
     # If recording is enabled
@@ -32,7 +32,7 @@ def test_cassette_recording(testdir):
     result.assert_outcomes(passed=3)
 
     # Then tests that use network will create cassettes
-    cassette_path = testdir.tmpdir.join("cassettes/test_cassette_recording/test_{}.yaml".format(string.ascii_letters))
+    cassette_path = testdir.tmpdir.join(f"cassettes/test_cassette_recording/test_{string.ascii_letters}.yaml")
     assert cassette_path.size()
     cassette_path = testdir.tmpdir.join("cassettes/test_cassette_recording/TestSomething.test_with_network.yaml")
     assert cassette_path.size()
@@ -269,14 +269,14 @@ def test_custom_cassette_name(testdir):
     # When a custom cassette name is passed to pytest.mark.vcr
     cassette = testdir.tmpdir.join("cassettes/test_custom_cassette_name/test_with_network.yaml")
     testdir.makepyfile(
-        """
+        f"""
         import pytest
         import requests
 
-        @pytest.mark.vcr(r"{}")
+        @pytest.mark.vcr(r"{cassette}")
         def test_with_network(httpbin):
             assert requests.get(httpbin.url + "/get").status_code == 200
-    """.format(cassette)
+    """
     )
 
     result = testdir.runpytest("--record-mode=all")
@@ -324,14 +324,14 @@ def test_custom_cassette_name_rewrite(testdir):
     # When a custom cassette name is passed to pytest.mark.vcr
     cassette = testdir.tmpdir.join("cassettes/test_custom_cassette_name_rewrite/test_with_network.yaml")
     testdir.makepyfile(
-        """
+        f"""
         import pytest
         import requests
 
-        @pytest.mark.vcr(r"{}")
+        @pytest.mark.vcr(r"{cassette}")
         def test_with_network(httpbin):
             assert requests.get(httpbin.url + "/uuid").status_code == 200
-    """.format(cassette)
+    """
     )
 
     result = testdir.runpytest("--record-mode=rewrite")
@@ -360,16 +360,16 @@ def test_custom_cassette_name_rewrite(testdir):
 def test_default_cassette_recording(testdir, ip_response_cassette):
     # When a cassette is applied on a module level
     testdir.makepyfile(
-        """
+        f"""
 import pytest
 import requests
 
-pytestmark = [pytest.mark.vcr(r"{}")]
+pytestmark = [pytest.mark.vcr(r"{ip_response_cassette}")]
 
 def test_network(httpbin):
     assert requests.get(httpbin.url + "/ip").status_code == 200
     assert requests.get(httpbin.url + "/get").status_code == 200
-    """.format(ip_response_cassette)
+    """
     )
 
     result = testdir.runpytest("--record-mode=all")
@@ -410,7 +410,7 @@ def test_json_serializer(testdir):
     custom_cassette_path = testdir.tmpdir.join("custom.json")
     # When the `serializer` config option is set to "json"
     testdir.makepyfile(
-        """
+        f"""
 import pytest
 import requests
 
@@ -420,10 +420,10 @@ pytestmark = [pytest.mark.vcr()]
 def test_network(httpbin):
     assert requests.get(httpbin.url + "/ip").status_code == 200
 
-@pytest.mark.vcr(r"{}", serializer="json")
+@pytest.mark.vcr(r"{custom_cassette_path}", serializer="json")
 def test_custom_name(httpbin):
     assert requests.get(httpbin.url + "/ip").status_code == 200
-    """.format(custom_cassette_path)
+    """
     )
 
     result = testdir.runpytest("--record-mode=all", "-s")

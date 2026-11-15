@@ -1,5 +1,6 @@
 import os
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, Optional
 
 import pytest
 from _pytest.config import Config, PytestPluginManager
@@ -76,26 +77,26 @@ def pytest_addhooks(pluginmanager: PytestPluginManager) -> None:
     pluginmanager.add_hookspecs(hooks)
 
 
-@pytest.fixture(scope="session")  # type: ignore
+@pytest.fixture(scope="session")
 def record_mode(request: SubRequest) -> str:
     """When recording is disabled the VCR recording mode should be "none" to prevent network access."""
     return request.config.getoption("--record-mode") or "none"
 
 
-@pytest.fixture(scope="session")  # type: ignore
+@pytest.fixture(scope="session")
 def disable_recording(request: SubRequest) -> bool:
     """Disable VCR.py integration."""
-    return request.config.getoption("--disable-recording")
+    return bool(request.config.getoption("--disable-recording"))
 
 
-@pytest.fixture  # type: ignore
-def vcr_config() -> Dict:
+@pytest.fixture
+def vcr_config() -> dict[str, Any]:
     """A shareable configuration for VCR.use_cassette call."""
     return {}
 
 
-@pytest.fixture  # type: ignore
-def allowed_hosts(request: SubRequest) -> List[str]:
+@pytest.fixture
+def allowed_hosts(request: SubRequest) -> list[str] | None:
     """List of regexes to match hosts to where connection must be allowed."""
     block_network = request.node.get_closest_marker(name="block_network")
     config = request.getfixturevalue("vcr_config")
@@ -103,7 +104,7 @@ def allowed_hosts(request: SubRequest) -> List[str]:
     #  - `block_network` mark
     #  - CLI option
     #  - `vcr_config` fixture
-    allowed_hosts = (
+    allowed_hosts: list[str] | str | None = (
         getattr(block_network, "kwargs", {}).get("allowed_hosts")
         or request.config.getoption("--allowed-hosts")
         or config.get("allowed_hosts")
@@ -113,7 +114,7 @@ def allowed_hosts(request: SubRequest) -> List[str]:
     return allowed_hosts
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def allow_private_ips(request: SubRequest) -> bool:
     """Whether connections to private IP addresses are allowed while network is blocked."""
     block_network = request.node.get_closest_marker(name="block_network")
@@ -125,14 +126,14 @@ def allow_private_ips(request: SubRequest) -> bool:
     )
 
 
-@pytest.fixture  # type: ignore
-def vcr_markers(request: SubRequest) -> List[Mark]:
+@pytest.fixture
+def vcr_markers(request: SubRequest) -> list[Mark]:
     """All markers applied to the certain test together with cassette names associated with each marker."""
     return list(request.node.iter_markers(name="vcr"))
 
 
-@pytest.fixture(autouse=True)  # type: ignore
-def block_network(request: SubRequest, record_mode: str, vcr_markers: List[Mark]) -> Iterator[None]:
+@pytest.fixture(autouse=True)
+def block_network(request: SubRequest, record_mode: str, vcr_markers: list[Mark]) -> Iterator[None]:
     """Block network access in tests except for "none" VCR recording mode."""
     block_network = request.node.get_closest_marker(name="block_network")
     if block_network is not None:
@@ -157,10 +158,10 @@ def block_network(request: SubRequest, record_mode: str, vcr_markers: List[Mark]
         yield
 
 
-@pytest.fixture(autouse=True)  # type: ignore
+@pytest.fixture(autouse=True)
 def vcr(
     request: SubRequest,
-    vcr_markers: List[Mark],
+    vcr_markers: list[Mark],
     vcr_cassette_dir: str,
     record_mode: str,
     disable_recording: bool,
@@ -187,7 +188,7 @@ def vcr(
         yield None
 
 
-@pytest.fixture(scope="module")  # type: ignore
+@pytest.fixture(scope="module")
 def vcr_cassette_dir(request: SubRequest) -> str:
     """Each test module has its own cassettes directory to avoid name collisions.
 
@@ -199,22 +200,20 @@ def vcr_cassette_dir(request: SubRequest) -> str:
     return os.path.join(module.dirname, "cassettes", module.purebasename)
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def default_cassette_name(request: SubRequest) -> str:
     marker = request.node.get_closest_marker("default_cassette")
     if marker is not None:
         assert marker.args, (
             "You should pass the cassette name as an argument to the `pytest.mark.default_cassette` marker"
         )
-        return marker.args[0]
+        name: str = marker.args[0]
+        return name
     return get_default_cassette_name(request.cls, request.node.name)
 
 
 def get_default_cassette_name(test_class: Any, test_name: str) -> str:
-    if test_class:
-        cassette_name = "{}.{}".format(test_class.__name__, test_name)
-    else:
-        cassette_name = test_name
+    cassette_name = f"{test_class.__name__}.{test_name}" if test_class else test_name
     # The cassette name should not contain characters that are forbidden in a file name
     # In this case there is a possibility to have a collision if there will be names with different
     # forbidden chars but the same resulting string.

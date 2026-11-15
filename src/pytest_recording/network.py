@@ -3,9 +3,10 @@ import re
 import socket
 import sys
 import threading
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable, Iterator, List, Optional, Tuple, Union
+from typing import Any, ClassVar
 from urllib.parse import urlparse
 
 try:
@@ -19,7 +20,7 @@ try:
         """
 
         handle: pycurl.Curl = field(default_factory=pycurl.Curl)
-        url = None  # type: Optional[str]
+        url: ClassVar[str | None] = None
 
         def __getattribute__(self, item: str) -> Any:
             handle = object.__getattribute__(self, "handle")
@@ -42,12 +43,12 @@ try:
 
         def setopt(self, option: int, value: Any) -> None:
             if option == pycurl.URL:
-                self.url = value
+                self.url = value  # type: ignore[misc]
             self.handle.setopt(option, value)
 
 except ImportError:
-    pycurl = None  # type: ignore
-    Curl = None  # type: ignore
+    pycurl = None  # type: ignore[assignment]
+    Curl = None  # type: ignore[assignment, misc]
 
 # `socket.socket` is not patched, because it could be needed for live servers (e.g. pytest-httpbin)
 # But methods that could connect to remote are patched to prevent network access
@@ -74,7 +75,7 @@ TRANSPORTS = ("socket", "pycurl")
 
 # Global switch for pycurl disabling
 _disable_pycurl = False
-_allowed_hosts = None  # type: ignore
+_allowed_hosts: list[str] | None = None
 _allow_private_ips = False
 
 
@@ -88,12 +89,12 @@ class PyCurlWrapper:
         return getattr(pycurl, item)
 
 
-def check_pycurl_installed(func: Callable) -> Callable:
+def check_pycurl_installed(func: Callable[..., Any]) -> Callable[..., Any]:
     """No-op if pycurl is not installed."""
 
     def inner(*args: Any, **kwargs: Any) -> Any:
         if pycurl is None:
-            return  # type: ignore
+            return None  # type: ignore[unreachable]
         return func(*args, **kwargs)
 
     return inner
@@ -101,7 +102,7 @@ def check_pycurl_installed(func: Callable) -> Callable:
 
 @check_pycurl_installed
 def install_pycurl_wrapper() -> None:
-    sys.modules["pycurl"] = PyCurlWrapper()  # type: ignore
+    sys.modules["pycurl"] = PyCurlWrapper()  # type: ignore[assignment]
 
 
 @check_pycurl_installed
@@ -109,7 +110,7 @@ def uninstall_pycurl_wrapper() -> None:
     sys.modules["pycurl"] = pycurl
 
 
-def block_pycurl(allowed_hosts: Optional[List[str]] = None, allow_private_ips: bool = False) -> None:
+def block_pycurl(allowed_hosts: list[str] | None = None, allow_private_ips: bool = False) -> None:
     global _disable_pycurl
     global _allowed_hosts
     global _allow_private_ips
@@ -127,8 +128,8 @@ def unblock_pycurl() -> None:
     _allow_private_ips = False
 
 
-def make_socketpair_guard(original_func: Callable) -> Callable:
-    def socketpair_guard(*args: Any, **kwargs: Any) -> Tuple[Any, Any]:
+def make_socketpair_guard(original_func: Callable[..., Any]) -> Callable[..., Any]:
+    def socketpair_guard(*args: Any, **kwargs: Any) -> Any:
         previous = getattr(_socketpair_state, "active", False)
         _socketpair_state.active = True
         try:
@@ -139,29 +140,29 @@ def make_socketpair_guard(original_func: Callable) -> Callable:
     return socketpair_guard
 
 
-def block_socket(allowed_hosts: Optional[List[str]] = None, allow_private_ips: bool = False) -> None:
-    socket.socket.connect = make_network_guard(_original_connect, allowed_hosts, allow_private_ips)  # type: ignore
-    socket.socket.connect_ex = make_network_guard(_original_connect_ex, allowed_hosts, allow_private_ips)  # type: ignore
-    socket.socketpair = make_socketpair_guard(_original_socketpair)  # type: ignore
+def block_socket(allowed_hosts: list[str] | None = None, allow_private_ips: bool = False) -> None:
+    socket.socket.connect = make_network_guard(_original_connect, allowed_hosts, allow_private_ips)  # type: ignore[method-assign]
+    socket.socket.connect_ex = make_network_guard(_original_connect_ex, allowed_hosts, allow_private_ips)  # type: ignore[method-assign]
+    socket.socketpair = make_socketpair_guard(_original_socketpair)
 
 
 def unblock_socket() -> None:
-    socket.socket.connect = _original_connect  # type: ignore
-    socket.socket.connect_ex = _original_connect_ex  # type: ignore
-    socket.socketpair = _original_socketpair  # type: ignore
+    socket.socket.connect = _original_connect  # type: ignore[method-assign]
+    socket.socket.connect_ex = _original_connect_ex  # type: ignore[method-assign]
+    socket.socketpair = _original_socketpair
 
 
 def make_network_guard(
-    original_func: Callable, allowed_hosts: Optional[List[str]] = None, allow_private_ips: bool = False
-) -> Callable:
-    def network_guard(self: Any, address: Union[Tuple, str, bytes], *args: Any, **kwargs: Any) -> Any:
+    original_func: Callable[..., Any], allowed_hosts: list[str] | None = None, allow_private_ips: bool = False
+) -> Callable[..., Any]:
+    def network_guard(self: Any, address: tuple[Any, ...] | str | bytes, *args: Any, **kwargs: Any) -> Any:
         if _inside_socketpair():
             return original_func(self, address, *args, **kwargs)
-        host = ""  # type: Union[str, bytes, bytearray]
+        host: str | bytes | bytearray = ""
         if self.family in (socket.AF_INET, socket.AF_INET6):
-            host = address[0]  # type: ignore
+            host = address[0]  # type: ignore[assignment]
         elif self.family == socket.AF_UNIX:
-            host = address  # type: ignore
+            host = address  # type: ignore[assignment]
         if is_host_allowed(host, allowed_hosts, allow_private_ips):
             return original_func(self, address, *args, **kwargs)
         raise network_disabled_error(host, allowed_hosts, allow_private_ips)
@@ -169,7 +170,7 @@ def make_network_guard(
     return network_guard
 
 
-def _select_transports(transports: Iterable[str]) -> Tuple[str, ...]:
+def _select_transports(transports: Iterable[str]) -> tuple[str, ...]:
     selected = tuple(transports)
     if not selected:
         raise ValueError("transports must not be empty")
@@ -180,7 +181,7 @@ def _select_transports(transports: Iterable[str]) -> Tuple[str, ...]:
 
 
 def block(
-    allowed_hosts: Optional[List[str]] = None,
+    allowed_hosts: list[str] | None = None,
     allow_private_ips: bool = False,
     transports: Iterable[str] = TRANSPORTS,
 ) -> None:
@@ -204,7 +205,7 @@ def unblock(transports: Iterable[str] = TRANSPORTS) -> None:
 
 @contextmanager
 def blocking_context(
-    allowed_hosts: Optional[List[str]] = None,
+    allowed_hosts: list[str] | None = None,
     allow_private_ips: bool = False,
     transports: Iterable[str] = TRANSPORTS,
 ) -> Iterator[None]:
@@ -225,14 +226,14 @@ def blocking_context(
         unblock(transports=selected)
 
 
-def to_string(value: Union[str, bytes, bytearray]) -> str:
+def to_string(value: str | bytes | bytearray) -> str:
     if isinstance(value, (bytes, bytearray)):
         return value.decode()
     return value
 
 
 def network_disabled_error(
-    host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]], allow_private_ips: bool = False
+    host: str | bytes | bytearray, allowed_hosts: list[str] | None, allow_private_ips: bool = False
 ) -> RuntimeError:
     message = f"Network is disabled for host {host!r}"
     allowed = [repr(allowed_host) for allowed_host in allowed_hosts or ()]
@@ -243,13 +244,11 @@ def network_disabled_error(
     return RuntimeError(message)
 
 
-def is_host_allowed(
-    host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]], allow_private_ips: bool
-) -> bool:
+def is_host_allowed(host: str | bytes | bytearray, allowed_hosts: list[str] | None, allow_private_ips: bool) -> bool:
     return is_host_in_allowed_hosts(host, allowed_hosts) or (allow_private_ips and is_private_ip(host))
 
 
-def is_private_ip(host: Union[str, bytes, bytearray]) -> bool:
+def is_private_ip(host: str | bytes | bytearray) -> bool:
     try:
         return ipaddress.ip_address(to_string(host)).is_private
     except ValueError:
@@ -257,7 +256,7 @@ def is_private_ip(host: Union[str, bytes, bytearray]) -> bool:
         return False
 
 
-def is_host_in_allowed_hosts(host: Union[str, bytes, bytearray], allowed_hosts: Optional[List[str]]) -> bool:
+def is_host_in_allowed_hosts(host: str | bytes | bytearray, allowed_hosts: list[str] | None) -> bool:
     """Match provided host to a list of host regexps."""
     if allowed_hosts is not None:
         combined = "(" + ")|(".join(allowed_hosts) + ")"

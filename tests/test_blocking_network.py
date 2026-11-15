@@ -1,5 +1,6 @@
 import asyncio
 import json
+import socket as socket_module
 import sys
 import threading
 from io import BytesIO
@@ -41,7 +42,7 @@ def assert_network_blocking(testdir, dirname):
     result.assert_outcomes(passed=3)
 
     # And a cassette is recorded for the case where pytest.mark.vcr is applied
-    cassette_path = testdir.tmpdir.join("cassettes/{}/test_recording.yaml".format(dirname))
+    cassette_path = testdir.tmpdir.join(f"cassettes/{dirname}/test_recording.yaml")
     assert cassette_path.exists()
 
 
@@ -208,17 +209,15 @@ def test_no_vcr_mark(httpbin):
 
 @pytest.mark.block_network(allowed_hosts=["127.0.0.2"])
 def test_no_vcr_mark_bytes():
-    with pytest.raises(RuntimeError) as exc:
-        with socket(AF_INET, SOCK_STREAM) as sock:
-            sock.connect((b"127.0.0.1", 80))
+    with pytest.raises(RuntimeError) as exc, socket(AF_INET, SOCK_STREAM) as sock:
+        sock.connect((b"127.0.0.1", 80))
     assert str(exc.value) == "Network is disabled for host b'127.0.0.1' (allowed hosts: '127.0.0.2')"
 
 
 @pytest.mark.block_network(allowed_hosts=["127.0.0.2"])
 def test_no_vcr_mark_bytearray():
-    with pytest.raises(RuntimeError) as exc:
-        with socket(AF_INET, SOCK_STREAM) as sock:
-            sock.connect((bytearray(b"127.0.0.1"), 80))
+    with pytest.raises(RuntimeError) as exc, socket(AF_INET, SOCK_STREAM) as sock:
+        sock.connect((bytearray(b"127.0.0.1"), 80))
     assert str(exc.value) == "Network is disabled for host bytearray(b'127.0.0.1') (allowed hosts: '127.0.0.2')"
 
 
@@ -247,7 +246,7 @@ def test_no_vcr_mark_bytearray():
 )
 def test_block_network_with_allowed_hosts(testdir, marker, cmd_options, vcr_cfg):
     testdir.makepyfile(
-        """
+        f"""
 import socket
 import pytest
 import requests
@@ -268,10 +267,7 @@ def test_blocked():
     assert str(exc.value) == "Network is disabled for host '192.0.2.1' (allowed hosts: '127.0.0.*', '127.0.1.1')"
     assert socket.socket.connect.__name__ == "network_guard"
     assert socket.socket.connect_ex.__name__ == "network_guard"
-    """.format(
-            marker=marker,
-            vcr_cfg=vcr_cfg,
-        )
+    """
     )
 
     result = testdir.runpytest(*cmd_options)
@@ -293,7 +289,7 @@ def test_blocked():
 )
 def test_block_network_with_private_ips_allowed(testdir, marker, cmd_options, vcr_cfg):
     testdir.makepyfile(
-        """
+        f"""
 import pytest
 import requests
 
@@ -308,7 +304,7 @@ def test_blocked():
     with pytest.raises(RuntimeError) as exc:
         requests.get("http://8.8.8.8")
     assert str(exc.value) == "Network is disabled for host '8.8.8.8' (allowed hosts: private IPs)"
-    """.format(marker=marker, vcr_cfg=vcr_cfg)
+    """
     )
 
     result = testdir.runpytest(*cmd_options)
@@ -317,9 +313,8 @@ def test_blocked():
 
 @pytest.mark.block_network(allowed_hosts=["127.0.0.2"], allow_private_ips=True)
 def test_private_ips_listed_with_allowed_hosts():
-    with pytest.raises(RuntimeError) as exc:
-        with socket(AF_INET, SOCK_STREAM) as sock:
-            sock.connect((b"8.8.8.8", 80))
+    with pytest.raises(RuntimeError) as exc, socket(AF_INET, SOCK_STREAM) as sock:
+        sock.connect((b"8.8.8.8", 80))
     assert str(exc.value) == "Network is disabled for host b'8.8.8.8' (allowed hosts: '127.0.0.2', private IPs)"
 
 
@@ -506,14 +501,14 @@ IS_PYTEST_ABOVE_54 = version.parse(pytest.__version__) >= version.parse("5.4.0")
 def test_invalid_input_arguments(testdir, args):
     # When the `block_network` mark receives an unknown argument
     testdir.makepyfile(
-        """
+        f"""
 import pytest
 import requests
 
-@pytest.mark.block_network({})
+@pytest.mark.block_network({args})
 def test_request():
     requests.get("https://google.com")
-    """.format(args)
+    """
     )
     result = testdir.runpytest()
     # Then there should be an error
@@ -529,7 +524,7 @@ def test_socketpair_is_allowed_while_network_is_blocked():
     # `socketpair()` is emulated on Windows with a real loopback `connect()`, which the guard used
     # to reject - the socket is in-process, so it must not count as network access.
     with blocking_context():
-        left, right = network.socket.socketpair()
+        left, right = socket_module.socketpair()
         try:
             left.sendall(b"ping")
             assert right.recv(4) == b"ping"
@@ -569,10 +564,10 @@ def test_socketpair_exemption_does_not_leak_to_other_threads(monkeypatch):
 
     monkeypatch.setattr(network, "_original_socketpair", slow_socketpair)
 
-    made: "list[tuple[socket, socket]]" = []
+    made: list[tuple[socket, socket]] = []
 
     def worker_target() -> None:
-        made.append(network.socket.socketpair())
+        made.append(socket_module.socketpair())
 
     worker = threading.Thread(target=worker_target)
 

@@ -1,10 +1,11 @@
 import hashlib
 import os
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
 from itertools import chain, starmap
 from types import ModuleType
-from typing import Callable, List, Tuple
+from typing import Any
 
 from _pytest.config import Config
 from _pytest.mark.structures import Mark
@@ -30,22 +31,23 @@ except (AttributeError, ValueError, OSError):
     MAX_FILENAME_LEN = 255
 
 
-def load_cassette(cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
+def load_cassette(cassette_path: str, serializer: ModuleType) -> tuple[list[Any], list[Any]]:
     try:
         with open(cassette_path, encoding="utf8") as f:
             cassette_content = f.read()
     except OSError:
         return [], []
-    return deserialize(cassette_content, serializer)
+    content: tuple[list[Any], list[Any]] = deserialize(cassette_content, serializer)
+    return content
 
 
 @dataclass
-class CombinedPersister(FilesystemPersister):
+class CombinedPersister(FilesystemPersister):  # type: ignore[misc]
     """Load extra cassettes, but saves only the first one."""
 
-    extra_paths: List[str]
+    extra_paths: list[str]
 
-    def load_cassette(self, cassette_path: str, serializer: ModuleType) -> Tuple[List, List]:
+    def load_cassette(self, cassette_path: str, serializer: ModuleType) -> tuple[list[Any], list[Any]]:
         all_paths = chain.from_iterable(((cassette_path,), self.extra_paths))
         # Pairs of 2 lists per cassettes:
         all_content = (load_cassette(path, serializer) for path in unique(all_paths))
@@ -66,7 +68,7 @@ def use_cassette(
     default_cassette: str,
     vcr_cassette_dir: str,
     record_mode: str,
-    markers: List[Mark],
+    markers: list[Mark],
     config: ConfigType,
     pytestconfig: Config,
 ) -> CassetteContextDecorator:
@@ -117,9 +119,7 @@ def use_cassette(
     return vcr.use_cassette(default_cassette, **merged_config)
 
 
-def get_path_transformer(config: ConfigType) -> Callable:
-    if "serializer" in config:
-        suffix = ".{}".format(config["serializer"])
-    else:
-        suffix = ".yaml"
-    return VCR.ensure_suffix(suffix)
+def get_path_transformer(config: ConfigType) -> Callable[[str], str]:
+    suffix = f".{config['serializer']}" if "serializer" in config else ".yaml"
+    transformer: Callable[[str], str] = VCR.ensure_suffix(suffix)
+    return transformer
