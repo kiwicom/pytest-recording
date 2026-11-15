@@ -170,15 +170,13 @@ def make_network_guard(
 
 
 def _select_transports(transports: Iterable[str]) -> Tuple[str, ...]:
-    if isinstance(transports, str):
-        raise ValueError("transports must be a non-empty iterable of transport names")
     selected = tuple(transports)
     if not selected:
         raise ValueError("transports must not be empty")
     for transport in selected:
         if transport not in TRANSPORTS:
             raise ValueError(f"Unknown transport: {transport!r}. Available transports: {TRANSPORTS!r}")
-    return tuple(dict.fromkeys(selected))
+    return selected
 
 
 def block(
@@ -218,21 +216,13 @@ def blocking_context(
         Local servers are not touched since it could interfere with live servers needed for tests (e.g. pytest-httpbin)
 
     """
-    global _disable_pycurl, _allowed_hosts, _allow_private_ips
     selected = _select_transports(transports)
-    if "socket" in selected:
-        socket_state = (socket.socket.connect, socket.socket.connect_ex, socket.socketpair)
-    if "pycurl" in selected:
-        pycurl_state = (_disable_pycurl, _allowed_hosts, _allow_private_ips)
+    block(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips, transports=selected)
     try:
-        block(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips, transports=selected)
         yield
     finally:
-        # Restore only selected state, including when setup raises.
-        if "pycurl" in selected:
-            _disable_pycurl, _allowed_hosts, _allow_private_ips = pycurl_state
-        if "socket" in selected:
-            socket.socket.connect, socket.socket.connect_ex, socket.socketpair = socket_state  # type: ignore
+        # an error could happen somewhere else when this ctx manager is on `yield`
+        unblock(transports=selected)
 
 
 def to_string(value: Union[str, bytes, bytearray]) -> str:

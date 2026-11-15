@@ -595,3 +595,61 @@ def test_socketpair_exemption_does_not_leak_to_other_threads(monkeypatch):
     left, right = made[0]
     left.close()
     right.close()
+
+
+def socket_connect(port):
+    with socket(AF_INET, SOCK_STREAM) as client:
+        client.connect(("127.0.0.1", port))
+
+
+def curl_get(url):
+    curl = pycurl.Curl()
+    curl.setopt(curl.URL, url)  # type: ignore[attr-defined]
+    curl.setopt(curl.WRITEDATA, BytesIO())  # type: ignore[attr-defined]
+    try:
+        curl.perform()
+    finally:
+        curl.close()
+
+
+@pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
+def test_socket_transport_only(httpbin):
+    with blocking_context(transports=("socket",)):
+        with pytest.raises(RuntimeError, match="Network is disabled"):
+            socket_connect(httpbin.port)
+        curl_get(httpbin.url + "/ip")
+    socket_connect(httpbin.port)
+
+
+@pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
+def test_pycurl_transport_only(httpbin):
+    with blocking_context(transports=("pycurl",)):
+        socket_connect(httpbin.port)
+        with pytest.raises(RuntimeError, match="Network is disabled"):
+            curl_get(httpbin.url + "/ip")
+    curl_get(httpbin.url + "/ip")
+
+
+@pytest.mark.skipif(pycurl is None, reason="Requires pycurl installed.")
+def test_unblock_leaves_other_transports_blocked(httpbin):
+    with blocking_context():
+        network.unblock(transports=("pycurl",))
+        curl_get(httpbin.url + "/ip")
+        with pytest.raises(RuntimeError, match="Network is disabled"):
+            socket_connect(httpbin.port)
+    with blocking_context():
+        network.unblock(transports=("socket",))
+        socket_connect(httpbin.port)
+        with pytest.raises(RuntimeError, match="Network is disabled"):
+            curl_get(httpbin.url + "/ip")
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [network.block, network.unblock, lambda transports: blocking_context(transports=transports).__enter__()],
+)
+@pytest.mark.parametrize("transports", [(), ("unknown",), ("socket", "unknown"), "socket"])
+def test_invalid_transports(httpbin, operation, transports):
+    with pytest.raises(ValueError):
+        operation(transports=transports)
+    socket_connect(httpbin.port)
