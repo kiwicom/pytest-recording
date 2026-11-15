@@ -11,7 +11,7 @@ authors = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]
 maintainers = [{ name = "Dmitry Dygalo", email = "dmitry@dygalo.dev" }]
 requires-python = ">=3.10"
 license = "MIT"
-readme = "README.rst"
+readme = "README.md"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: Pytest",
@@ -47,7 +47,7 @@ dev = ["pytest_recording[tests]"]
 
 [project.urls]
 Documentation = "https://github.com/kiwicom/pytest-recording"
-Changelog = "https://github.com/kiwicom/pytest-recording/blob/master/docs/changelog.rst"
+Changelog = "https://github.com/kiwicom/pytest-recording/blob/master/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/kiwicom/pytest-recording/issues"
 "Source Code" = "https://github.com/kiwicom/pytest-recording"
 

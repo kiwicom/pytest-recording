@@ -1,5 +1,5 @@
 🚨Please review the
-[guidelines for contributing](https://github.com/kiwicom/pytest-recording/blob/master/CONTRIBUTING.rst)
+[guidelines for contributing](https://github.com/kiwicom/pytest-recording/blob/master/CONTRIBUTING.md)
 to this repository.
 
 ### Description

@@ -1,0 +1,341 @@
+# pytest-recording
+
+[![codecov](https://codecov.io/gh/kiwicom/pytest-recording/branch/master/graph/badge.svg)](https://codecov.io/gh/kiwicom/pytest-recording) [![Build](https://github.com/kiwicom/pytest-recording/actions/workflows/build.yml/badge.svg)](https://github.com/kiwicom/pytest-recording/actions?query=workflow%3Abuild) [![Version](https://img.shields.io/pypi/v/pytest-recording.svg)](https://pypi.org/project/pytest-recording/) [![Python versions](https://img.shields.io/pypi/pyversions/pytest-recording.svg)](https://pypi.org/project/pytest-recording/) [![License](https://img.shields.io/pypi/l/pytest-recording.svg)](https://opensource.org/licenses/MIT)
+
+A pytest plugin powered by VCR.py to record and replay HTTP traffic.
+
+## Features
+
+- Straightforward `pytest.mark.vcr`, that reflects `VCR.use_cassettes` API;
+- Combining multiple VCR cassettes;
+- Network access blocking;
+- The `rewrite` recording mode that rewrites cassettes from scratch.
+
+## Installation
+
+This project can be installed via pip:
+
+```bash
+pip install pytest-recording
+```
+
+> [!WARNING]
+> If you have `pytest-vcr` installed, please uninstall it before using `pytest-recording`, as the two plugins are incompatible.
+
+## Usage
+
+```python
+import pytest
+import requests
+
+
+# cassettes/{module_name}/test_single.yaml will be used
+@pytest.mark.vcr
+def test_single():
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+
+
+# cassettes/{module_name}/example.yaml will be used
+@pytest.mark.default_cassette("example.yaml")
+@pytest.mark.vcr
+def test_default():
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+
+
+# these cassettes will be used in addition to the default one
+@pytest.mark.vcr("/path/to/ip.yaml", "/path/to/get.yaml")
+def test_multiple():
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+    assert requests.get("http://httpbin.org/ip").text == '{"ip": true}'
+
+
+# Make assertions based on the cassette calls/responses:
+@pytest.mark.vcr
+def test_call_count(vcr):
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+    assert requests.get("http://httpbin.org/ip").text == '{"ip": true}'
+    # See https://vcrpy.readthedocs.io/en/latest/advanced.html for more info
+    # about the Cassette object:
+    assert vcr.play_count == 2
+```
+
+Run your tests:
+
+```bash
+pytest --record-mode=once test_network.py
+```
+
+### Default recording mode
+
+`pytest-recording` uses the `none` VCR recording mode by default to prevent unintentional network requests.
+To allow them you need to pass a different recording mode (e.g. `once`) via the `--record-mode` CLI option to your test command.
+See more information about available recording modes in the [official VCR documentation](https://vcrpy.readthedocs.io/en/latest/usage.html#record-modes)
+
+### Configuration
+
+You can provide the recording configuration with the `vcr_config` fixture, which could be any scope - `session`,
+`package`, `module`, or `function`. It should return a dictionary that will be passed directly to `VCR.use_cassettes`
+under the hood.
+
+```python
+import pytest
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {"filter_headers": ["authorization"]}
+```
+
+For more granular control you need to pass these keyword arguments to individual `pytest.mark.vcr` marks, and in this case
+all arguments will be merged into a single dictionary with the following priority (low -> high):
+
+- `vcr_config` fixture
+- all marks from the most broad scope ("session") to the most narrow one ("function")
+
+Example:
+
+```python
+import pytest
+
+pytestmark = [pytest.mark.vcr(ignore_localhost=True)]
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {"filter_headers": ["authorization"]}
+
+
+@pytest.mark.vcr(filter_headers=[])
+def test_one(): ...
+
+
+@pytest.mark.vcr(filter_query_parameters=["api_key"])
+def test_two(): ...
+```
+
+Resulting VCR configs for each test:
+
+- `test_one` - `{"ignore_localhost": True, "filter_headers": []}`
+- `test_two` - `{"ignore_localhost": True, "filter_headers": ["authorization"], "filter_query_parameters": ["api_key"]}`
+
+The `vcr_config` fixture forwards any keyword argument to vcrpy, so `ignore_hosts`
+and other VCR.py options work directly:
+
+```python
+import pytest
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {
+        "filter_headers": ["authorization"],
+        "ignore_hosts": ["169.254.169.254", "metadata.google.internal"],
+    }
+```
+
+You can get access to the used `VCR` instance via `pytest_recording_configure` hook. It might be useful for registering
+custom matchers, persisters, etc.:
+
+```python
+# conftest.py
+
+
+def jurassic_matcher(r1, r2):
+    assert r1.uri == r2.uri and "JURASSIC PARK" in r1.body, "required string (JURASSIC PARK) not found in request body"
+
+
+def pytest_recording_configure(config, vcr):
+    vcr.register_matcher("jurassic", jurassic_matcher)
+```
+
+You can disable the VCR.py integration entirely by passing the `--disable-recording` CLI option.
+
+### Cassettes directory
+
+Each test module stores its cassettes in `cassettes/{module_name}/` next to the module.
+To use a different directory, override the `vcr_cassette_dir` fixture:
+
+```python
+# conftest.py
+import os
+import pytest
+
+
+@pytest.fixture
+def vcr_cassette_dir():
+    return os.path.join(os.path.dirname(__file__), "shared_cassettes")
+```
+
+Relative paths in `pytest.mark.vcr("shared.yaml")` resolve against this directory.
+The `cassette_library_dir` key in `vcr_config` does not affect extra cassettes.
+
+### Rewrite record mode
+
+It is possible to rewrite a cassette from scratch and not extend it with new entries as it works now with the `all` record mode from VCR.py.
+
+However, it will rewrite only the default cassette and won't touch extra cassettes.
+
+```python
+import pytest
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {"record_mode": "rewrite"}
+```
+
+Or via command-line option:
+
+```bash
+pytest --record-mode=rewrite tests/
+```
+
+### Blocking network access
+
+To have more confidence that your tests will not go over the wire, you can block it with `pytest.mark.block_network` mark:
+
+```python
+import pytest
+import requests
+
+@pytest.mark.block_network
+def test_multiple():
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+
+...
+# in case of access
+RuntimeError: Network is disabled for host '...'
+```
+
+Besides marks, the network access could be blocked globally with `--block-network` command-line option.
+
+However, if VCR.py recording is enabled, the network is not blocked for tests with `pytest.mark.vcr`.
+
+Example:
+
+```python
+import pytest
+import requests
+
+
+@pytest.mark.vcr
+def test_multiple():
+    assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+```
+
+Run `pytest`:
+
+```bash
+pytest --record-mode=once --block-network tests/
+```
+
+The network blocking feature supports `socket`-based transports and `pycurl`.
+
+It is possible to allow access to specified hosts during network blocking:
+
+```python
+import pytest
+import requests
+
+
+@pytest.mark.block_network(allowed_hosts=["127.0.0.1"])
+def test_access():
+    assert requests.get("http://127.0.0.1:8000/").status_code == 200
+    with pytest.raises(RuntimeError, match=r"^Network is disabled for host '192.0.2.1'"):
+        requests.get("http://192.0.2.1")
+```
+
+Entries in `allowed_hosts` are regular expressions matched against the host the client connects to.
+Socket-based clients like `requests` resolve hostnames before connecting, so list IP addresses for them
+(`127.0.0.1`, `10.0.0.*`). `pycurl` exposes the hostname, so hostname patterns like `httpbin.*` work there.
+
+Or via command-line option:
+
+```bash
+pytest --record-mode=once --block-network --allowed-hosts=127.0.0.1,::1 tests/
+```
+
+Or via `vcr_config` fixture:
+
+```python
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def vcr_config():
+    return {"allowed_hosts": ["127.0.0.1"]}
+```
+
+To allow every private IP address (loopback, LAN, Docker networks), use `allow_private_ips`.
+It helps when services run in Docker Compose and their IPs are not known in advance:
+
+```python
+import pytest
+
+
+@pytest.mark.block_network(allow_private_ips=True)
+def test_service(): ...
+```
+
+The same works with `--allow-private-ips` on the command line or `{"allow_private_ips": True}` in `vcr_config`.
+"Private" follows Python's `ipaddress` module, so it includes the `169.254.169.254` cloud metadata endpoint.
+`pycurl` passes hostnames to the guard, so only URLs with IP addresses match there.
+
+`pytest_recording.network.blocking_context` blocks both `socket` and `pycurl`. To block only one of them, pass `transports`:
+
+```python
+from pytest_recording.network import blocking_context
+
+with blocking_context(transports=("socket",)):
+    # Socket connections are blocked; pycurl is unchanged.
+    ...
+```
+
+`network.block` and `network.unblock` accept the same argument. The `block_network` mark and `--block-network` always block both.
+
+## Additional resources
+
+Looking for more examples? Check out [this article](https://code.kiwi.com/pytest-cassettes-forget-about-mocks-or-live-requests-a9336e1caee6) about `pytest-recording`.
+
+## Contributing
+
+To run the tests:
+
+```bash
+tox -p all
+```
+
+For more information, take a look at [our contributing guide](https://github.com/kiwicom/pytest-recording/blob/master/CONTRIBUTING.md).
+
+## Test Isolation for Package Maintainers
+
+When running pytest-based tests in a packaging environment, globally installed plugins can break test suites by
+injecting unexpected hooks or fixtures (e.g. `pytest-pretty`) that your code isn’t designed for.
+
+To guarantee a clean, reproducible test run:
+
+```
+export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+export PYTEST_PLUGINS=pytest_httpbin.plugin,pytest_mock,pytest_recording.plugin
+```
+
+- **PYTEST_DISABLE_PLUGIN_AUTOLOAD**
+  Disables loading of any plugins via setuptools entry-points; only those you explicitly list
+  will be activated.
+- **PYTEST_PLUGINS**
+  Comma-separated list of plugin modules pytest should load (the core plugin manager still
+  discovers builtin plugins and `conftest.py`).
+
+Include these exports in your package’s build or CI script so that system-wide pytest plugins
+(e.g. linting, formatting, or unrelated test helpers) cannot interfere with your tests.
+
+## Python support
+
+Pytest-recording supports:
+
+- CPython 3.10, 3.11, 3.12, 3.13, 3.14 and 3.15
+- PyPy 7.3 (3.11)
+
+## License
+
+The code in this project is licensed under [MIT license](https://opensource.org/licenses/MIT). By contributing to `pytest-recording`, you agree that your contributions will be licensed under its MIT license.

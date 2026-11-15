@@ -1,5 +1,6 @@
 MD041: false
-MD013:
-  line_length: 120
+MD013: false  # prose and changelog entries are not hard-wrapped
+MD024:
+  siblings_only: true  # changelog repeats section names per release
 MD034: false  # allow bare urls
 MD040: false  # text in ``` is not always code
