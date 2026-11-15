@@ -45,7 +45,7 @@ Submitting Pull Requests
 ------------------------
 
 #. Fork the repository.
-#. Enable and install `pre-commit <https://pre-commit.com>`_ to ensure style-guides and code checks are followed.
+#. Install `prek <https://prek.j178.dev>`_ hooks with ``uvx prek install`` to ensure style-guides and code checks are followed.
 #. Target the ``master`` branch.
 #. Follow **PEP 8** for naming and `ruff <https://github.com/astral-sh/ruff>`_ for formatting.
 #. Tests are run using ``tox``::
