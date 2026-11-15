@@ -33,8 +33,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "vcrpy>=2.0.1",
-    "pytest>=3.5.0"
+    "vcrpy>=4.0.2",
+    "pytest>=6.2.5"
 ]
 [project.optional-dependencies]
 tests = [
@@ -50,9 +50,13 @@ Documentation = "https://github.com/kiwicom/pytest-recording"
 Changelog = "https://github.com/kiwicom/pytest-recording/blob/master/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/kiwicom/pytest-recording/issues"
 "Source Code" = "https://github.com/kiwicom/pytest-recording"
+Funding = "https://github.com/sponsors/Stranger6667"
 
 [project.entry-points.pytest11]
 recording = "pytest_recording.plugin"
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests"]
 
 [tool.coverage.run]
 parallel = true

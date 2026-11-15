@@ -11,6 +11,7 @@
 ### Changed
 
 - A failure to remove an existing cassette in the `rewrite` record mode emits a warning instead of being silently ignored. [#198]
+- Minimum supported versions are `vcrpy` 4.0.2 and `pytest` 6.2.5.
 
 ### Documentation
 
