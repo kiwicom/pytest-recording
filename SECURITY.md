@@ -19,6 +19,6 @@ Expect a first reply within a few days.
 
 ## Disclosure
 
-Security fixes ship in regular patch releases, and the [changelog](docs/changelog.rst) lists them.
+Security fixes ship in regular patch releases, and the [changelog](CHANGELOG.md) lists them.
 After the fix is released, you may publish your findings.
 I publish a GitHub security advisory and request a CVE when the issue warrants one.
