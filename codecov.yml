@@ -1,0 +1,7 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        # Each job uploads a partial report, so allow a small drop to avoid spurious failures
+        threshold: 0.25%

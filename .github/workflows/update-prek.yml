@@ -1,0 +1,35 @@
+name: Update prek
+
+on:
+  schedule:
+    - cron: 0 0 * * 0
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    permissions:
+      # Opens the autoupdate pull request.
+      contents: write
+      pull-requests: write
+    name: Update prek
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - run: uvx prek autoupdate
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          delete-branch: true
+          title: "chore: update prek hooks"
+          body: Automatically update prek hooks
+          commit-message: "chore: update prek hooks"
+          branch: "create-pull-request/update-prek"

@@ -54,6 +54,19 @@ Changelog = "https://github.com/kiwicom/pytest-recording/blob/master/docs/change
 [project.entry-points.pytest11]
 recording = "pytest_recording.plugin"
 
+[tool.coverage.run]
+parallel = true
+branch = true
+source = ["pytest_recording"]
+
+[tool.coverage.paths]
+source = ["src/pytest_recording", ".tox/*/lib/python*/site-packages/pytest_recording"]
+
+[tool.coverage.report]
+show_missing = true
+precision = 2
+exclude_also = ["if TYPE_CHECKING:"]
+
 [tool.ruff]
 line-length = 120
 target-version = "py310"
