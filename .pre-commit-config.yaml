@@ -46,7 +46,7 @@ repos:
         args: [--force-exclude]
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.50.0
+    rev: v0.50.1
     hooks:
       - id: markdownlint
         language_version: system
@@ -67,7 +67,7 @@ repos:
         require_serial: true
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.5
+    rev: v0.17.6
     hooks:
       - id: ruff-format
       - id: ruff-check
