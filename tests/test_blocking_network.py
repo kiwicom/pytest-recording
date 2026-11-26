@@ -648,3 +648,65 @@ def test_invalid_transports(httpbin, operation, transports):
     with pytest.raises(ValueError):
         operation(transports=transports)
     socket_connect(httpbin.port)
+
+
+def test_multiple_block_calls_disallowed(httpbin):
+    with blocking_context(allowed_hosts=["127.0.0.1"]):
+        with pytest.raises(RuntimeError, match="Network is already blocked for socket, pycurl"):
+            network.block(allowed_hosts=["192.0.2.1"])
+        # Failed second block call must not overwrite the existing allowed_hosts configuration
+        socket_connect(httpbin.port)
+
+        with pytest.raises(RuntimeError, match="Network is already blocked for socket, pycurl"), blocking_context():
+            pass  # pragma: no cover
+
+    assert socket_module.socket.connect is network._original_connect
+    assert not network._disable_pycurl
+
+
+def test_multiple_block_calls_with_cli_option(testdir):
+    testdir.makepyfile(
+        """
+import pytest
+from pytest_recording import network
+
+def test_block_again():
+    with pytest.raises(RuntimeError, match="Network is already blocked for socket, pycurl"):
+        network.block()
+"""
+    )
+    result = testdir.runpytest("--block-network")
+    result.assert_outcomes(passed=1)
+
+
+def test_multiple_block_calls_per_transport_atomic():
+    with blocking_context(transports=("socket",)):
+        with pytest.raises(RuntimeError, match="Network is already blocked for socket"):
+            network.block(transports=("socket",))
+        with pytest.raises(RuntimeError, match="Network is already blocked for socket"):
+            network.block()
+        assert not network._disable_pycurl
+
+    with blocking_context(transports=("pycurl",)):
+        with pytest.raises(RuntimeError, match="Network is already blocked for pycurl"):
+            network.block(transports=("pycurl",))
+        with pytest.raises(RuntimeError, match="Network is already blocked for pycurl"):
+            network.block()
+        assert socket_module.socket.connect is network._original_connect
+
+
+def test_block_disjoint_transports():
+    with blocking_context(transports=("socket",)):
+        with blocking_context(transports=("pycurl",)):
+            assert socket_module.socket.connect is not network._original_connect
+            with pytest.raises(RuntimeError, match="Network is already blocked for pycurl"):
+                network.block(transports=("pycurl",))
+        assert socket_module.socket.connect is not network._original_connect
+        # pycurl was unblocked on inner exit while socket remained blocked
+        network.block(transports=("pycurl",))
+        network.unblock(transports=("pycurl",))
+        with pytest.raises(RuntimeError, match="Network is already blocked for socket"):
+            network.block(transports=("socket",))
+    assert socket_module.socket.connect is network._original_connect
+    network.block()
+    network.unblock()
