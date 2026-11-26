@@ -23,7 +23,26 @@ def test_record_mode(testdir, args, expected):
 
 def test_help_message(testdir):
     result = testdir.runpytest("--help")
-    result.stdout.fnmatch_lines(["recording:", "*--record-mode=*", "*VCR.py record mode.*"])
+    result.stdout.fnmatch_lines(
+        [
+            "recording:",
+            "*--record-mode=*",
+            "*VCR.py record mode.*",
+            "*--vcr*Enable VCR.py for every test.*",
+        ]
+    )
+
+
+def test_vcr_flag_conflicts_with_disable_recording(testdir):
+    testdir.makepyfile(
+        """
+        def test_nothing():
+            pass
+        """
+    )
+    result = testdir.runpytest("--vcr", "--disable-recording")
+    assert result.ret != 0
+    assert "`--vcr` and `--disable-recording` cannot be used together." in result.stderr.str()
 
 
 def test_pytest_vcr_incompatibility(testdir):

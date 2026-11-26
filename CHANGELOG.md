@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `--vcr` CLI option that enables VCR.py for every test without `pytest.mark.vcr`. [#109]
+
 ## [0.15.0] - 2026-11-15
 
 ### Added
@@ -272,6 +276,7 @@
 [#151]: https://github.com/kiwicom/pytest-recording/issues/151
 [#145]: https://github.com/kiwicom/pytest-recording/issues/145
 [#118]: https://github.com/kiwicom/pytest-recording/pull/118
+[#109]: https://github.com/kiwicom/pytest-recording/issues/109
 [#99]: https://github.com/kiwicom/pytest-recording/pull/99
 [#97]: https://github.com/kiwicom/pytest-recording/issues/97
 [#82]: https://github.com/kiwicom/pytest-recording/pull/82

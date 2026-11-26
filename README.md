@@ -7,6 +7,7 @@ A pytest plugin powered by VCR.py to record and replay HTTP traffic.
 ## Features
 
 - Straightforward `pytest.mark.vcr`, that reflects `VCR.use_cassettes` API;
+- `--vcr` to enable VCR.py for every test from the command line;
 - Combining multiple VCR cassettes;
 - Network access blocking;
 - The `rewrite` recording mode that rewrites cassettes from scratch.
@@ -70,6 +71,16 @@ pytest --record-mode=once test_network.py
 `pytest-recording` uses the `none` VCR recording mode by default to prevent unintentional network requests.
 To allow them you need to pass a different recording mode (e.g. `once`) via the `--record-mode` CLI option to your test command.
 See more information about available recording modes in the [official VCR documentation](https://vcrpy.readthedocs.io/en/latest/usage.html#record-modes)
+
+### Recording without marks
+
+Pass `--vcr` to use VCR.py for every test. Tests do not need `pytest.mark.vcr`:
+
+```bash
+pytest --vcr --record-mode=once tests/
+```
+
+The default record mode is still `none`. A `vcr_config` fixture, `pytest.mark.default_cassette`, and any `pytest.mark.vcr` marks are still applied, including extra cassette paths and keyword arguments on the mark. `--vcr` cannot be combined with `--disable-recording`.
 
 ### Configuration
 
@@ -148,7 +159,7 @@ def pytest_recording_configure(config, vcr):
     vcr.register_matcher("jurassic", jurassic_matcher)
 ```
 
-You can disable the VCR.py integration entirely by passing the `--disable-recording` CLI option.
+You can disable the VCR.py integration entirely by passing the `--disable-recording` CLI option. It cannot be combined with `--vcr`.
 
 ### Cassettes directory
 
@@ -209,7 +220,7 @@ RuntimeError: Network is disabled for host '...'
 
 Besides marks, the network access could be blocked globally with `--block-network` command-line option.
 
-However, if VCR.py recording is enabled, the network is not blocked for tests with `pytest.mark.vcr`.
+However, if VCR.py recording is enabled, the network is not blocked for tests that use `pytest.mark.vcr` or `--vcr`.
 
 Example:
 

@@ -559,3 +559,200 @@ def test_with_parametrize(httpbin,data):
         "cassettes/test_long_cassette_name/test_with_parametrize[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefg...e6273968ceb1173c9b9ca1a67463cdd4.yaml"
     )
     assert cassette_path.size()
+
+
+def test_vcr_fixture_is_none_without_flag(testdir):
+    testdir.makepyfile(
+        """
+        def test_cassette(vcr):
+            assert vcr is None
+        """
+    )
+    result = testdir.runpytest()
+    result.assert_outcomes(passed=1)
+
+
+def test_vcr_fixture_with_flag(testdir):
+    testdir.makepyfile(
+        """
+        def test_cassette(vcr):
+            assert vcr is not None
+        """
+    )
+    result = testdir.runpytest("--vcr")
+    result.assert_outcomes(passed=1)
+
+
+def test_record_mode_without_vcr_flag(testdir):
+    # `--record-mode` on its own still only affects tests marked with `vcr`.
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.vcr
+        def test_marked(httpbin):
+            assert requests.get(httpbin.url + "/ip").status_code == 200
+
+        def test_unmarked(httpbin):
+            assert requests.get(httpbin.url + "/ip").status_code == 200
+        """
+    )
+    result = testdir.runpytest("--record-mode=all")
+    result.assert_outcomes(passed=2)
+    cassette_dir = "cassettes/test_record_mode_without_vcr_flag"
+    assert testdir.tmpdir.join(f"{cassette_dir}/test_marked.yaml").size()
+    assert not testdir.tmpdir.join(f"{cassette_dir}/test_unmarked.yaml").exists()
+
+
+@pytest.mark.parametrize("mode", ("once", "rewrite"))
+def test_vcr_flag_records(testdir, mode):
+    testdir.makepyfile(
+        """
+        import requests
+
+        def test_single(httpbin):
+            assert requests.get(httpbin.url + "/ip").status_code == 200
+
+        class TestGroup:
+            def test_method(self, httpbin):
+                assert requests.get(httpbin.url + "/ip").status_code == 200
+
+        def test_offline():
+            pass
+        """
+    )
+    result = testdir.runpytest("--vcr", f"--record-mode={mode}")
+    result.assert_outcomes(passed=3)
+    cassette_dir = "cassettes/test_vcr_flag_records"
+    assert testdir.tmpdir.join(f"{cassette_dir}/test_single.yaml").size()
+    assert testdir.tmpdir.join(f"{cassette_dir}/TestGroup.test_method.yaml").size()
+    assert not testdir.tmpdir.join(f"{cassette_dir}/test_offline.yaml").exists()
+
+
+def test_vcr_flag_record_mode_none(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+        import vcr
+
+        def test_single(httpbin):
+            with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
+                requests.get(httpbin.url + "/ip")
+        """
+    )
+    result = testdir.runpytest("--vcr", "--record-mode=none")
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join("cassettes/test_vcr_flag_record_mode_none/test_single.yaml")
+    assert not cassette_path.exists()
+
+
+def test_vcr_flag_replays_existing_cassette(testdir, create_file, get_cassette):
+    create_file("cassettes/test_vcr_flag_replays_existing_cassette/test_replay.yaml", get_cassette)
+    testdir.makepyfile(
+        """
+        import requests
+
+        def test_replay():
+            assert requests.get("http://httpbin.org/get").text == '{"get": true}'
+        """
+    )
+    # Network stays blocked in the default `none` mode, so this only passes on replay.
+    result = testdir.runpytest("--vcr", "--block-network")
+    result.assert_outcomes(passed=1)
+
+
+def test_vcr_flag_keeps_marker_cassettes(testdir, get_response_cassette):
+    testdir.makepyfile(
+        f"""
+        import pytest
+        import requests
+        import vcr
+
+        @pytest.mark.vcr(r"{get_response_cassette}")
+        def test_marked():
+            assert requests.get("http://httpbin.org/get").text == '{{"get": true}}'
+
+        def test_unmarked():
+            with pytest.raises(vcr.errors.CannotOverwriteExistingCassetteException):
+                requests.get("http://httpbin.org/get")
+        """
+    )
+    result = testdir.runpytest("--vcr")
+    result.assert_outcomes(passed=2)
+    cassette_dir = "cassettes/test_vcr_flag_keeps_marker_cassettes"
+    assert not testdir.tmpdir.join(f"{cassette_dir}/test_unmarked.yaml").exists()
+
+
+def test_vcr_flag_honors_mark_record_mode(testdir):
+    # A mark's `record_mode` still applies when the CLI flag is on and `--record-mode` is omitted.
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.vcr(record_mode="once")
+        def test_marked(httpbin):
+            assert requests.get(httpbin.url + "/ip").status_code == 200
+        """
+    )
+    result = testdir.runpytest("--vcr")
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join("cassettes/test_vcr_flag_honors_mark_record_mode/test_marked.yaml")
+    assert cassette_path.size()
+
+
+def test_vcr_flag_honors_config_record_mode_while_network_is_blocked(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.fixture(scope="module")
+        def vcr_config():
+            return {"record_mode": "once"}
+
+        def test_single(httpbin):
+            assert requests.get(httpbin.url + "/ip").status_code == 200
+        """
+    )
+    result = testdir.runpytest("--vcr", "--block-network")
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join(
+        "cassettes/test_vcr_flag_honors_config_record_mode_while_network_is_blocked/test_single.yaml"
+    )
+    assert cassette_path.size()
+
+
+def test_vcr_flag_records_while_network_is_blocked(testdir):
+    testdir.makepyfile(
+        """
+        import requests
+
+        def test_single(httpbin):
+            assert requests.get(httpbin.url + "/ip").status_code == 200
+        """
+    )
+    result = testdir.runpytest("--vcr", "--block-network", "--record-mode=all")
+    result.assert_outcomes(passed=1)
+    cassette_path = testdir.tmpdir.join("cassettes/test_vcr_flag_records_while_network_is_blocked/test_single.yaml")
+    assert cassette_path.size()
+
+
+def test_vcr_flag_honors_default_cassette_marker(testdir):
+    testdir.makepyfile(
+        """
+        import pytest
+        import requests
+
+        @pytest.mark.default_cassette("custom.yaml")
+        def test_named(httpbin):
+            assert requests.get(httpbin.url + "/ip").status_code == 200
+        """
+    )
+    result = testdir.runpytest("--vcr", "--record-mode=once")
+    result.assert_outcomes(passed=1)
+    cassette_dir = "cassettes/test_vcr_flag_honors_default_cassette_marker"
+    assert testdir.tmpdir.join(f"{cassette_dir}/custom.yaml").size()
+    assert not testdir.tmpdir.join(f"{cassette_dir}/test_named.yaml").exists()
