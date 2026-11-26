@@ -23,7 +23,18 @@ def test_record_mode(testdir, args, expected):
 
 def test_help_message(testdir):
     result = testdir.runpytest("--help")
-    result.stdout.fnmatch_lines(["recording:", "*--record-mode=*", "*VCR.py record mode.*"])
+    result.stdout.fnmatch_lines(
+        [
+            "recording:",
+            "*--record-mode=*",
+            "*VCR.py record mode.*",
+            "*record_mode (string)*",
+            "*block_network (bool)*",
+            "*allowed_hosts (linelist)*",
+            "*allow_private_ips (bool)*",
+            "*ignore_localhost (bool)*",
+        ]
+    )
 
 
 def test_pytest_vcr_incompatibility(testdir):

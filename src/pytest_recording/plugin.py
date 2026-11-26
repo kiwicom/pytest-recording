@@ -18,12 +18,24 @@ from .validation import validate_block_network_mark
 RECORD_MODES = ("once", "new_episodes", "none", "all", "rewrite")
 
 
+def _ini_record_mode(config: Config) -> str:
+    return (config.getini("record_mode") or "").strip()
+
+
+def _block_network_enabled(config: Config) -> bool:
+    return bool(config.getoption("--block-network") or config.getini("block_network"))
+
+
 def pytest_configure(config: Config) -> None:
     if config.pluginmanager.has_plugin("vcr"):
         raise RuntimeError(
             "`pytest-recording` is incompatible with `pytest-vcr`. "
             "Please, uninstall `pytest-vcr` in order to use `pytest-recording`."
         )
+    ini_mode = _ini_record_mode(config)
+    if ini_mode and ini_mode not in RECORD_MODES:
+        choices = ", ".join(RECORD_MODES)
+        raise pytest.UsageError(f"Invalid record_mode {ini_mode!r}. Expected one of: {choices}.")
     config.addinivalue_line("markers", "vcr: Mark the test as using VCR.py.")
     config.addinivalue_line("markers", "block_network: Block network access except for VCR recording.")
     config.addinivalue_line("markers", "default_cassette: Override the default cassette name.")
@@ -71,6 +83,36 @@ def pytest_addoption(parser: Parser) -> None:
         default=False,
         help="Disable VCR.py integration.",
     )
+    parser.addini(
+        "record_mode",
+        help='VCR.py record mode. Defaults to "none".',
+        type="string",
+        default="",
+    )
+    parser.addini(
+        "block_network",
+        help="Block network access except for VCR recording.",
+        type="bool",
+        default=False,
+    )
+    parser.addini(
+        "allowed_hosts",
+        help="Regexes of hosts that stay reachable while the network is blocked. One pattern per line.",
+        type="linelist",
+        default=[],
+    )
+    parser.addini(
+        "allow_private_ips",
+        help="Allow connections to private IP addresses (loopback, LAN, Docker networks) while network is blocked.",
+        type="bool",
+        default=False,
+    )
+    parser.addini(
+        "ignore_localhost",
+        help="Do not record requests to localhost. Passed through to VCR.py.",
+        type="bool",
+        default=False,
+    )
 
 
 def pytest_addhooks(pluginmanager: PytestPluginManager) -> None:
@@ -80,7 +122,7 @@ def pytest_addhooks(pluginmanager: PytestPluginManager) -> None:
 @pytest.fixture(scope="session")
 def record_mode(request: SubRequest) -> str:
     """When recording is disabled the VCR recording mode should be "none" to prevent network access."""
-    return request.config.getoption("--record-mode") or "none"
+    return request.config.getoption("--record-mode") or _ini_record_mode(request.config) or "none"
 
 
 @pytest.fixture(scope="session")
@@ -100,14 +142,17 @@ def allowed_hosts(request: SubRequest) -> list[str] | None:
     """List of regexes to match hosts to where connection must be allowed."""
     block_network = request.node.get_closest_marker(name="block_network")
     config = request.getfixturevalue("vcr_config")
-    # Take `--allowed-hosts` with the most priority:
+    # Take the first value that is set, from highest priority to lowest:
     #  - `block_network` mark
     #  - CLI option
     #  - `vcr_config` fixture
+    #  - config file
     allowed_hosts: list[str] | str | None = (
         getattr(block_network, "kwargs", {}).get("allowed_hosts")
         or request.config.getoption("--allowed-hosts")
         or config.get("allowed_hosts")
+        or request.config.getini("allowed_hosts")
+        or None
     )
     if isinstance(allowed_hosts, str):
         allowed_hosts = allowed_hosts.split(",")
@@ -119,10 +164,12 @@ def allow_private_ips(request: SubRequest) -> bool:
     """Whether connections to private IP addresses are allowed while network is blocked."""
     block_network = request.node.get_closest_marker(name="block_network")
     config = request.getfixturevalue("vcr_config")
+    # Same priority as `allowed_hosts`: mark, CLI, `vcr_config`, config file.
     return bool(
         getattr(block_network, "kwargs", {}).get("allow_private_ips")
         or request.config.getoption("--allow-private-ips")
         or config.get("allow_private_ips")
+        or request.config.getini("allow_private_ips")
     )
 
 
@@ -141,15 +188,15 @@ def block_network(request: SubRequest, record_mode: str, vcr_markers: list[Mark]
     if vcr_markers:
         # Take `record_mode` with the most priority:
         #  - Explicit CLI option
-        #  - The `vcr_config` fixture
-        #  - The `vcr` mark
+        #  - The `vcr_config` fixture and `vcr` marks
+        #  - The config file
         config = request.getfixturevalue("vcr_config")
         merged_config = merge_kwargs(config, vcr_markers)
-        # If `--record-mode` was not explicitly passed in CLI, then take one from the merged config
+        # If `--record-mode` was not explicitly passed, take the merged config or the config file.
         if request.config.getoption("--record-mode") is None:
-            record_mode = merged_config.get("record_mode", "none")
+            record_mode = merged_config.get("record_mode", record_mode)
     # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
-    if (block_network or request.config.getoption("--block-network")) and (not vcr_markers or record_mode == "none"):
+    if (block_network or _block_network_enabled(request.config)) and (not vcr_markers or record_mode == "none"):
         allowed_hosts = request.getfixturevalue("allowed_hosts")
         allow_private_ips = request.getfixturevalue("allow_private_ips")
         with network.blocking_context(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips):
@@ -174,6 +221,8 @@ def vcr(
         from ._vcr import use_cassette
 
         config = request.getfixturevalue("vcr_config")
+        if pytestconfig.getini("ignore_localhost") and "ignore_localhost" not in config:
+            config = {"ignore_localhost": True, **config}
         default_cassette = request.getfixturevalue("default_cassette_name")
         with use_cassette(
             default_cassette,

@@ -68,7 +68,7 @@ pytest --record-mode=once test_network.py
 ### Default recording mode
 
 `pytest-recording` uses the `none` VCR recording mode by default to prevent unintentional network requests.
-To allow them you need to pass a different recording mode (e.g. `once`) via the `--record-mode` CLI option to your test command.
+To allow them you need to pass a different recording mode (e.g. `once`) via the `--record-mode` CLI option or the `record_mode` [configuration option](#configuration-file).
 See more information about available recording modes in the [official VCR documentation](https://vcrpy.readthedocs.io/en/latest/usage.html#record-modes)
 
 ### Configuration
@@ -150,6 +150,42 @@ def pytest_recording_configure(config, vcr):
 
 You can disable the VCR.py integration entirely by passing the `--disable-recording` CLI option.
 
+### Configuration file
+
+`record_mode`, `block_network`, `allowed_hosts`, `allow_private_ips` and `ignore_localhost` can be set in `pytest.ini`, `tox.ini`, `setup.cfg` or `pyproject.toml`.
+When the same option is also passed on the command line, the command line wins.
+
+`pytest.ini` and `tox.ini`:
+
+```ini
+[pytest]
+record_mode = once
+block_network = true
+allow_private_ips = true
+ignore_localhost = true
+allowed_hosts =
+    127.0.0.1
+    ::1
+```
+
+`setup.cfg` uses the same keys under `[tool:pytest]`. In `pyproject.toml`:
+
+```toml
+[tool.pytest.ini_options]
+record_mode = "once"
+block_network = true
+allow_private_ips = true
+ignore_localhost = true
+allowed_hosts = ["127.0.0.1", "::1"]
+```
+
+`record_mode` is one of `once`, `new_episodes`, `none`, `all`, `rewrite`.
+`allowed_hosts` is a list of regular expressions, one pattern per line in ini files, or a list in `pyproject.toml`.
+`--allowed-hosts` takes the same patterns separated by commas.
+`ignore_localhost` is forwarded to VCR.py, which then does not record requests to localhost.
+There is no `--ignore-localhost` flag; set it for one test with the `vcr` mark or the `vcr_config` fixture.
+A `block_network` mark or a `vcr_config` fixture overrides `allowed_hosts` and `allow_private_ips` from the file, just as they override the command-line flags.
+
 ### Cassettes directory
 
 Each test module stores its cassettes in `cassettes/{module_name}/` next to the module.
@@ -207,7 +243,7 @@ def test_multiple():
 RuntimeError: Network is disabled for host '...'
 ```
 
-Besides marks, the network access could be blocked globally with `--block-network` command-line option.
+Besides marks, the network access could be blocked globally with the `--block-network` command-line option or the `block_network` option in a [configuration file](#configuration-file).
 
 However, if VCR.py recording is enabled, the network is not blocked for tests with `pytest.mark.vcr`.
 
