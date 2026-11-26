@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `record_mode`, `block_network`, `allowed_hosts`, `allow_private_ips` and `ignore_localhost` options in pytest configuration files (`pytest.ini`, `pyproject.toml`, `tox.ini`, `setup.cfg`). Command-line options take precedence. [#80]
+
 ## [0.15.0] - 2026-11-15
 
 ### Added
@@ -275,6 +279,7 @@
 [#99]: https://github.com/kiwicom/pytest-recording/pull/99
 [#97]: https://github.com/kiwicom/pytest-recording/issues/97
 [#82]: https://github.com/kiwicom/pytest-recording/pull/82
+[#80]: https://github.com/kiwicom/pytest-recording/issues/80
 [#74]: https://github.com/kiwicom/pytest-recording/issues/74
 [#69]: https://github.com/kiwicom/pytest-recording/issues/69
 [#68]: https://github.com/kiwicom/pytest-recording/issues/68
