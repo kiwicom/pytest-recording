@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Disallow multiple `network.block()` calls when a selected transport is already blocked. [#43]
+
 ## [0.15.0] - 2026-11-15
 
 ### Added
@@ -284,6 +288,7 @@
 [#53]: https://github.com/kiwicom/pytest-recording/issues/53
 [#47]: https://github.com/kiwicom/pytest-recording/issues/47
 [#45]: https://github.com/kiwicom/pytest-recording/issues/45
+[#43]: https://github.com/kiwicom/pytest-recording/issues/43
 [#40]: https://github.com/kiwicom/pytest-recording/issues/40
 [#37]: https://github.com/kiwicom/pytest-recording/issues/37
 [#34]: https://github.com/kiwicom/pytest-recording/issues/34

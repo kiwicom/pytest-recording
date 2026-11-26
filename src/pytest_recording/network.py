@@ -187,6 +187,16 @@ def block(
 ) -> None:
     """Block the selected transports, defaulting to socket and pycurl."""
     selected = _select_transports(transports)
+    already_blocked: list[str] = []
+    if "socket" in selected and socket.socket.connect is not _original_connect:
+        already_blocked.append("socket")
+    if "pycurl" in selected and _disable_pycurl:
+        already_blocked.append("pycurl")
+    if already_blocked:
+        raise RuntimeError(
+            f"Network is already blocked for {', '.join(already_blocked)}. "
+            "Calling `network.block()` multiple times is not allowed."
+        )
     if "socket" in selected:
         block_socket(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips)
     # NOTE: Applying socket blocking makes curl hangs - it should be carefully patched
