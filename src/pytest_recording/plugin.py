@@ -24,6 +24,8 @@ def pytest_configure(config: Config) -> None:
             "`pytest-recording` is incompatible with `pytest-vcr`. "
             "Please, uninstall `pytest-vcr` in order to use `pytest-recording`."
         )
+    if config.getoption("--vcr") and config.getoption("--disable-recording"):
+        raise pytest.UsageError("`--vcr` and `--disable-recording` cannot be used together.")
     config.addinivalue_line("markers", "vcr: Mark the test as using VCR.py.")
     config.addinivalue_line("markers", "block_network: Block network access except for VCR recording.")
     config.addinivalue_line("markers", "default_cassette: Override the default cassette name.")
@@ -46,6 +48,12 @@ def pytest_addoption(parser: Parser) -> None:
         default=None,
         choices=RECORD_MODES,
         help='VCR.py record mode. Default to "none".',
+    )
+    group.addoption(
+        "--vcr",
+        action="store_true",
+        default=False,
+        help="Enable VCR.py for every test.",
     )
     group.addoption(
         "--block-network",
@@ -87,6 +95,12 @@ def record_mode(request: SubRequest) -> str:
 def disable_recording(request: SubRequest) -> bool:
     """Disable VCR.py integration."""
     return bool(request.config.getoption("--disable-recording"))
+
+
+@pytest.fixture(scope="session")
+def enable_recording(request: SubRequest) -> bool:
+    """Enable VCR.py for every test via the `--vcr` option."""
+    return bool(request.config.getoption("--vcr"))
 
 
 @pytest.fixture
@@ -133,12 +147,16 @@ def vcr_markers(request: SubRequest) -> list[Mark]:
 
 
 @pytest.fixture(autouse=True)
-def block_network(request: SubRequest, record_mode: str, vcr_markers: list[Mark]) -> Iterator[None]:
+def block_network(
+    request: SubRequest, record_mode: str, vcr_markers: list[Mark], enable_recording: bool
+) -> Iterator[None]:
     """Block network access in tests except for "none" VCR recording mode."""
     block_network = request.node.get_closest_marker(name="block_network")
     if block_network is not None:
         validate_block_network_mark(block_network)
-    if vcr_markers:
+    # `--vcr` opts every test into VCR, same as a `vcr` mark.
+    use_vcr = bool(vcr_markers) or enable_recording
+    if use_vcr:
         # Take `record_mode` with the most priority:
         #  - Explicit CLI option
         #  - The `vcr_config` fixture
@@ -149,7 +167,7 @@ def block_network(request: SubRequest, record_mode: str, vcr_markers: list[Mark]
         if request.config.getoption("--record-mode") is None:
             record_mode = merged_config.get("record_mode", "none")
     # If network blocking is enabled there is one exception - if VCR is in recording mode (any mode except "none")
-    if (block_network or request.config.getoption("--block-network")) and (not vcr_markers or record_mode == "none"):
+    if (block_network or request.config.getoption("--block-network")) and (not use_vcr or record_mode == "none"):
         allowed_hosts = request.getfixturevalue("allowed_hosts")
         allow_private_ips = request.getfixturevalue("allow_private_ips")
         with network.blocking_context(allowed_hosts=allowed_hosts, allow_private_ips=allow_private_ips):
@@ -165,12 +183,13 @@ def vcr(
     vcr_cassette_dir: str,
     record_mode: str,
     disable_recording: bool,
+    enable_recording: bool,
     pytestconfig: Config,
 ) -> Iterator[Optional["Cassette"]]:
-    """Install a cassette if a test is marked with `pytest.mark.vcr`."""
+    """Install a cassette if a test is marked with `pytest.mark.vcr` or `--vcr` is set."""
     if disable_recording:
         yield None
-    elif vcr_markers:
+    elif vcr_markers or enable_recording:
         from ._vcr import use_cassette
 
         config = request.getfixturevalue("vcr_config")
